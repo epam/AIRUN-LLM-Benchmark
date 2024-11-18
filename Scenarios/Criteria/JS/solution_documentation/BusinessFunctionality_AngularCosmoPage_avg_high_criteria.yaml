@@ -1,0 +1,52 @@
+evaluation_steps:
+  accuracy:
+    - Ensure that the application uses `$resource` objects for RESTful API communication.
+    - Verify that the application saves page changes to local storage.
+    - Confirm that the application initializes the page type correctly.
+    - Validate that the application manages local storage for unsaved changes.
+    - Verify that the application handles errors during saving or updating pages.
+    - Confirm that the application broadcasts events to update page variables and settings when necessary.
+    - Validate that the application uses promises and callbacks for asynchronous operations.
+    - Validate that the application broadcasts notifications for various operations (e.g., page saving, updating, deleting).
+    - Verify that the application supports scalability and maintainability through modular design.
+    - Confirm that the application optimizes performance through efficient API usage and local storage management.
+  completeness:
+    - Verify that the code includes factories for managing REST API communication with various backend endpoints.
+    - Confirm that there is a factory for storing page-related variables globally.
+    - Check that the code includes a controller for handling the creation, editing, and deletion of pages.
+    - Validate that the code provides a factory for storing data about the current user.
+    - Ensure that there is a user interface template for editing page details.
+    - Confirm that the user can create new pages by filling out forms for title, description, tags, URL, and publication status.
+    - Verify that users can edit existing pages through the provided forms.
+    - Ensure that users can save changes made to pages.
+    - Check that users can duplicate pages using the provided interface.
+    - Validate that users can delete pages through the interface.
+    - Confirm that the application notifies users about unsaved versions from previous sessions.
+    - Ensure that users can revert to a local version of a page if there is an unsaved version.
+    - Verify that users can discard unsaved versions of pages.
+    - Confirm that the application provides tag suggestions based on user input.
+    - Validate that users can set publication status for pages (publish immediately, save as draft, or schedule for future publication).
+    - Confirm that the code manages page revisions and extras.
+    - Ensure that the application handles the retrieval of pages available to a theme.
+    - Ensure that the application notifies users of duplicate URLs when duplicating pages.
+    - Verify that the application checks for a selected page type before saving.
+    - Confirm that the application uses the header as a title if no custom title is provided.
+    - Validate that the application throws an error if there is no custom URL.
+    - Ensure that the application sets the scheduled date for publication correctly.
+    - Verify that the application saves new tags when creating or updating pages.
+    - Confirm that the application saves pages as revisions.
+    - Validate that the application saves additional data correctly.
+    - Ensure that the application updates existing pages correctly.
+    - Verify that the application deletes old tags before saving new ones.
+    - Confirm that the application deletes old extras before saving new ones.
+    - Validate that the application provides success messages after saving or updating pages.
+    - Ensure that the application redirects to the new page after successful operations.
+    - Ensure that the application manages the featured image URL correctly.
+    - Verify that the application saves additional data to revisions.
+    - Confirm that the application redirects to the new page after saving the last extra.
+    - Ensure that the application provides a comprehensive solution for managing content pages, addressing key business requirements and user interactions.
+metadata:
+  category: BusinessFunctionality_AngularCosmoPage_avg_high
+  experiment: solution_documentation
+  repository: angular_cosmo_page
+  scenario_id: 14

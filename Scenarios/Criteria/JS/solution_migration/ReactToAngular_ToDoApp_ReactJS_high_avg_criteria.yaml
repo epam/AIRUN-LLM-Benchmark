@@ -1,0 +1,34 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
+    - Ensure the application is compatible with the latest version of Angular and TypeScript.
+    - Verify the application works correctly across modern browsers.
+    - Ensure the application is free of console errors and warnings.
+    - The code is decomposed to the set of the components with using single responsibility
+    - Code should not contain any duplicates and follow DRY principles
+    - Ensure that the translated code is free of errors and warnings when compiled in an Angular environment.
+    - App does not directly manipulate the DOM outside of Angular framework.
+    - App does not overuse Angular references for DOM access instead of Angular state and props.
+    - App correctly uses Angular lifecycle hooks, avoiding infinite loops.
+    - Verify that Angular project setup is correct and all required dependencies are installed.
+    - Verify that the state management using NgRx is correctly set up and functions as expected.
+    - Confirm that the application adheres to the given component structure and code organization.
+    - Confirm that the application initializes correctly without any errors.
+  completeness:
+    - Check that the main component displays the header with input for new todos.
+    - Ensure that adding a new todo item works correctly.
+    - Verify that the todo list displays all added todo items.
+    - Confirm that toggle functionality works for marking todos as completed.
+    - Check that editing a todo item works and updates the todo item correctly.
+    - Ensure that deleting a todo item removes it from the list.
+    - Verify that the footer correctly displays the count of active items.
+    - Confirm that the footer's clear completed button works and removes completed items.
+    - Check that filtering todos by "all", "active", and "completed" works correctly.
+    - Ensure that the "Mark all as complete" functionality works correctly.
+    - Check that the application persists todos to local storage and reloads them correctly.
+metadata:
+  category: ReactToAngular_ToDoApp_ReactJS_high_avg
+  experiment: solution_migration
+  repository: todo_app_react
+  scenario_id: 08

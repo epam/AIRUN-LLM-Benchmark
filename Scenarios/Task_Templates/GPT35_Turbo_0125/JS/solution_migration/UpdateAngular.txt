@@ -1,0 +1,12 @@
+I have the following Angular app code:
+
+<place code here>
+
+Your task is to migrate this code to Angular 14.x.
+When performing the translation, ensure to adhere to the instructions below:
+- Use common libraries: @ngrx/store and @ngrx/effects.
+- Split the code into separate components.
+- Optimize the code where possible.
+- The converted code should not contain any TODOs.
+- Return the translated code as markdown code snippets.
+- Simply return the codebase without additional comments or explanations on how to convert it.

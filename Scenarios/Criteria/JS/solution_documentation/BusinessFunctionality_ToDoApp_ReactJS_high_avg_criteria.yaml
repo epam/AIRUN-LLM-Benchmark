@@ -1,0 +1,32 @@
+evaluation_steps:
+  accuracy:
+    - Confirm that constraints related to local storage limitations are noted.
+    - Verify that assumptions about the application being designed for a single user are mentioned.
+    - Ensure that browser compatibility assumptions are included.
+    - Check that performance-related constraints are noted.
+    - Confirm that performance optimizations, such as the use of `shouldComponentUpdate`, are identified.
+    - Verify that considerations for using immutable data structures for performance are mentioned.
+    - Ensure scalability considerations related to local storage limitations are discussed.
+    - Check that the potential need for a backend service for better scalability is mentioned.
+    - Confirm that the evaluation steps are unambiguous and concise.
+    - Ensure that each step allows the evaluator to assess the output based solely on the provided code.
+    - Verify that the steps are clearly articulated and cover all main points of the task.
+  completeness:
+    - Confirm that the main functionalities and features of the code are identified.
+    - Verify that the summary includes details on adding, editing, deleting, toggling, and filtering todos.
+    - Check that user interactions for adding todo items are described accurately.
+    - Ensure user interactions for editing todo items are thoroughly detailed.
+    - Verify user interactions for deleting todo items are clearly outlined.
+    - Confirm that user interactions for toggling todo items are specified.
+    - Ensure that user interactions for toggling all todo items are described.
+    - Check that user interactions for clearing completed todos are included.
+    - Verify that user interactions for filtering todos are listed.
+    - Confirm that the business objectives related to task management are identified.
+    - Verify that the business objectives related to user retention are mentioned.
+    - Ensure that business objectives related to productivity enhancement are included.
+    - Check that the business objectives related to user engagement are specified.
+metadata:
+  category: BusinessFunctionality_ToDoApp_ReactJS_high_avg
+  experiment: solution_documentation
+  repository: todo_app_react
+  scenario_id: 15

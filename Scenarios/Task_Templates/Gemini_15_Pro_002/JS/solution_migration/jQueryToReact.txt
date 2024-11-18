@@ -1,0 +1,13 @@
+I have the following jQuery app code:
+
+<place code here>
+
+Your task is to translate this code to React 18.x.
+When performing the translation, ensure to adhere to the instructions below:
+- Use the following libraries: Create React App, TypeScript, Redux Toolkit with createSlice, and nanoid.
+- Provide a package.json file and configure the store and provider.
+- Split the code into separate components.
+- Optimize the code where possible.
+- The converted code should not contain any TODOs.
+- Return the translated code as markdown code snippets.
+- Simply return the codebase without additional comments or explanations on how to convert it.

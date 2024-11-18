@@ -1,0 +1,11 @@
+I have the following HTML and JS app code:
+
+<place code here>
+
+Your task is to translate this code to React 18.x.
+When performing the translation, ensure to adhere to the instructions below:
+- Use the following libraries: Create React App, TypeScript.
+- Optimize the code where possible.
+- The converted code should not contain any TODOs.
+- Return the translated code as markdown code snippets.
+- Simply return the codebase without additional comments or explanations on how to convert it.

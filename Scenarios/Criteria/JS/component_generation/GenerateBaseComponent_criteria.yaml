@@ -1,0 +1,31 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows TypeScript and React best practices (state, hooks, effects).
+    - Ensure the application is free of memory leaks and unnecessary re-renders.
+    - Ensure the application is compatible with the latest version of React and TypeScript.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure app does not access DOM elements to retrieve the values of text fields.
+    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
+    - Ensure app does not overuse refs for DOM access instead of React state and props.
+    - Ensure app does not have too many re-renders due to state or prop changes.
+    - Ensure the code adheres to accessibility standards (e.g., ARIA roles).
+    - Ensure the component is written in TypeScript.
+    - Verify the component is created using React 18.x.
+    - Verify the presence of an index.css file.
+    - Check that the generated code does not contain any TODOs.
+    - App does correctly use useEffect, avoiding infinite loops.
+  completeness:
+    - Confirm the component includes a search feature in the dropdown.
+    - Check that the component is navigable via keyboard.
+    - Verify items in the dropdown can be selected by pressing the Enter key.
+    - Confirm the dropdown list opens when Enter is pressed.
+    - Ensure the focus returns to the select component after the dropdown is closed.
+    - Verify the dropdown closes upon selecting an item via keyboard.
+    - Verify the dropdown closes upon selecting an item via mouse.
+    - Confirm the dropdown closes when the Escape key is pressed.
+    - Ensure the dropdown closes when clicking outside the component.
+metadata:
+  category: GenerateBaseComponent
+  experiment: component_generation
+  scenario_id: 1

@@ -1,0 +1,29 @@
+evaluation_steps:
+  accuracy:
+    - Check that the tests are isolated and do not depend on each other.
+    - Validate that the tests adhere to best practices for unit testing.
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Verify that the testing environment is set up correctly.
+    - Check if a testing library for JavaScript (such as Jest) has been chosen.
+    - Validate that dependencies are mocked where necessary, such as API calls.
+    - Verify that the test coverage for the code is at least 80%.
+    - Confirm that the package.json file includes necessary dependencies and scripts for running tests.
+    - Confirm that the tests use the proper methods and assertions from the chosen testing library.
+  completeness:
+    - Confirm that unit tests are written for the signup.js file.
+    - Ensure that unit tests are written for the form.js file.
+    - Ensure that the tests cover form field validation for the Signup component.
+    - Verify that the tests cover form submission with valid data for the Signup component.
+    - Ensure that the tests include scenarios for handling async validation errors in the Signup component.
+    - Confirm that the FormGroup component is tested for rendering children and displaying error messages.
+    - Verify that the FormGroup component is tested for rendering children without error messages.
+    - Check that all PropTypes are validated in the tests.
+    - Ensure that the tests are passing without any errors.
+    - Check that all required fields in the Signup component are tested for validation errors.
+    - Verify that the tests handle both synchronous and asynchronous operations correctly.
+    - Ensure that the tests include edge cases for form input values (e.g., minimum and maximum length for name, invalid email format).
+metadata:
+  category: WriteTestsForLegacyCode_ReactSignUp_high_low
+  experiment: test_generation
+  repository: react_sign_up
+  scenario_id: 6

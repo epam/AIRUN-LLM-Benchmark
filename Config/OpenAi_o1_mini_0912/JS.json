@@ -1,0 +1,31 @@
+{
+  "solution_migration": {
+    "AngularToReact.txt": ["AngularCosmoPage"],
+    "ReactToAngular.txt": ["ToDoApp_ReactJS", "ReactSignUp"],
+    "jQueryToReact.txt": ["ToDoApp_jQuery"],
+    "UpdateAngular.txt": ["ToDoApp_AngularJS"],
+    "UpdateReact.txt": ["ToDoApp_ReactJS"],
+    "VanillaToReact.txt": ["Piano_NativeJS"]
+  },
+  "component_generation": {
+    "GenerateBaseComponent.txt": null,
+    "GenerateReactApp.txt": null,
+    "ModifyReactApp.txt": ["ReactFetchAPI"]
+  },
+  "solution_template_generation": {
+    "GenerateProjectConfiguration.txt": null
+  },
+  "test_generation": {
+    "WriteTestsForLegacyCode.txt": ["AngularCosmoPage", "ReactSignUp", "ToDoApp_ReactJS"],
+    "WriteTestsForActualCode.txt": ["ReactSelect"]
+  },
+  "code_explanation": {
+    "DescribeTechnicalImplementation.txt": ["AngularCosmoPage", "ReactSignUp", "ToDoApp_ReactJS"]
+  },
+  "code_analysis": {
+    "EvaluateCodeQuality.txt": ["AngularCosmoPage", "ReactSignUp", "ToDoApp_ReactJS"]
+  },
+  "solution_documentation": {
+    "BusinessFunctionality.txt": ["AngularCosmoPage", "ReactSignUp", "ToDoApp_ReactJS"]
+  }
+}

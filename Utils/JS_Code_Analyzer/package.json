@@ -1,0 +1,22 @@
+{
+  "name": "analyzer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "escomplex-js": "^1.2.0",
+    "eslint": "^8.57.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "madge": "^6.1.0"
+  }
+}

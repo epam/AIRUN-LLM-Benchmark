@@ -1,0 +1,36 @@
+evaluation_steps:
+  accuracy:
+    - Confirm the use of `string` instead of `String` for type annotations in TypeScript.
+    - Ensure the avoidance of the `any` type and use of more specific types.
+    - Check for consistent use of functional components where applicable.
+    - Verify that the code adheres to the principles of immutability.
+    - Ensure that unit tests are added for critical parts of the code.
+    - Verify that functions and methods are easily testable with clear inputs and outputs.
+    - Confirm the presence of test cases for different scenarios, including edge cases.
+    - Ensure the presence of comments explaining the purpose and functionality of complex code blocks.
+    - Verify that JSDoc comments are added to all functions and methods.
+    - Check for clear and concise inline comments where necessary.
+    - Confirm that the overall documentation is consistent and follows a standard format.
+    - Ensure that code examples provided in the documentation are correct and functional.
+    - Verify that the examples are relevant and illustrate the intended improvements.
+    - Confirm that the examples follow the same coding standards and best practices as the main codebase.
+  completeness:
+    - Ensure the use of `let` or `const` instead of `var`.
+    - Verify that `refs` are replaced with React state and props for DOM manipulation.
+    - Confirm that variable and function names are descriptive and meaningful.
+    - Look for consistent use of whitespace and indentation.
+    - Ensure large methods are broken down into smaller, more manageable methods.
+    - Verify that inline event handlers are moved to class methods.
+    - Check for modular code structure with reusable components and functions.
+    - Confirm the use of TypeScript interfaces and types for better type safety.
+    - Check for the elimination of inefficient DOM manipulation methods like `ReactDOM.findDOMNode`.
+    - Ensure that performance enhancements like `shouldComponentUpdate` are correctly implemented.
+    - Verify that unnecessary re-renders are minimized by using appropriate React lifecycle methods.
+    - Ensure the addition of ARIA attributes to improve accessibility.
+    - Verify that all interactive elements have accessible names and roles.
+    - Check for proper use of semantic HTML elements.
+metadata:
+  category: EvaluateCodeQuality_ToDoApp_ReactJS_high_avg
+  experiment: code_analysis
+  repository: todo_app_react
+  scenario_id: 21

@@ -1,0 +1,43 @@
+evaluation_steps:
+  accuracy:
+    - Identify any use of deprecated methods or features and suggest modern alternatives.
+    - Check for inline styles and suggest using CSS classes instead for better maintainability.
+    - Ensure that proper error handling is in place and suggest improvements if necessary.
+    - Check for consistent code formatting and suggest adhering to a style guide if inconsistencies are found.
+    - Ensure that dependency injection is used properly and suggest improvements if necessary.
+    - Check if unit tests are present and suggest adding them if they are missing.
+    - Identify parts of the code that are hard to test and suggest refactoring them to be more testable.
+    - Ensure that external dependencies are properly mocked in tests and suggest improvements if needed.
+    - Check if edge cases are covered in tests and suggest adding tests for them if they are missing.
+    - Ensure that appropriate testing libraries are used and suggest improvements if necessary.
+    - Check if detailed comments explaining the purpose and functionality of various parts are present and suggest adding them if they are missing.
+    - Identify inconsistent commenting styles and suggest adhering to a consistent style guide.
+    - Ensure that functions have proper documentation explaining their parameters, return values, and behavior.
+    - Identify outdated comments that no longer match the code and suggest updating or removing them.
+    - Check if a comprehensive README is present and suggest adding one if it is missing. The README should include setup instructions, usage examples, and any other relevant information.
+  completeness:
+    - Check if the code uses consistent naming conventions for variables and functions (e.g., camelCase for JavaScript).
+    - Identify functions that are too long and do multiple things. Suggest breaking them into smaller, single-responsibility functions.
+    - Look for complex conditional statements and suggest simplifying them or breaking them into smaller functions for clarity.
+    - Identify any unclear or ambiguous variable names and suggest more descriptive alternatives.
+    - Identify deeply nested code blocks and suggest ways to flatten them for improved readability.
+    - Identify hardcoded strings and suggest replacing them with constants or translation keys to improve maintainability.
+    - Look for repeated code patterns and suggest refactoring them into reusable functions.
+    - Identify large files that handle multiple responsibilities and suggest splitting them into smaller, more focused modules.
+    - Identify tightly coupled code and suggest ways to decouple it to improve maintainability.
+    - Check if the code follows the separation of concerns principle and suggest improvements if necessary.
+    - Identify inefficient DOM manipulation and suggest optimizations, such as using one-time bindings where possible.
+    - Look for unnecessary watchers in AngularJS and suggest removing them to improve performance.
+    - Identify any heavy initialization in controllers or services and suggest lazy loading or other performance improvements.
+    - Check for redundant API calls and suggest ways to minimize them, such as caching or debouncing.
+    - Identify large scope variables that are unnecessarily watched and suggest optimizations.
+    - Check for missing ARIA attributes on interactive elements and suggest adding them for better accessibility.
+    - Ensure that focus is managed properly after actions like saving or deleting a page, and suggest improvements if needed.
+    - Identify areas that lack keyboard navigation support and suggest adding it to improve accessibility.
+    - Check for poor color contrast in the UI and suggest improvements to make it more accessible.
+    - Identify missing alt text on images and suggest adding descriptive alt text for better accessibility.
+metadata:
+  category: EvaluateCodeQuality_AngularCosmoPage_avg_high
+  experiment: code_analysis
+  repository: angular_cosmo_page
+  scenario_id: 20

@@ -1,0 +1,31 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
+    - Ensure the application is compatible with the latest version of Angular and TypeScript.
+    - Verify the application works correctly across modern browsers.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure the code is decomposed to the set of the components with using single responsibility
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Ensure the application is handle API errors
+    - Validate that @ngrx/store is used for state management and that the state is properly defined in auth.reducer.ts and app.state.ts.
+    - Verify the UI and UX by running the Angular application and ensuring that the signup form behaves as expected, including form validation and error messages.
+    - Confirm that the signup action is correctly dispatched from the SignupComponent upon form submission.
+    - Verify app does not directly manipulate the DOM outside of Angular framework.
+    - Verify app does not overuse Angular references for DOM access instead of Angular state and props.
+    - Check that there are no TODOs or incomplete parts in the code.
+  completeness:
+    - Verify that all React components and their functionalities are correctly translated into Angular components.
+    - Ensure that the form validation logic is implemented using Angular reactive forms.
+    - Check that the application includes the necessary form controls and validation rules.
+    - Confirm that the application correctly binds the form controls and handles form submission.
+    - Ensure the application are correctly display form validation errors.
+    - Verify that the application contains actions for signup, signup success, and signup failure.
+    - Ensure that the auth.effects.ts file correctly handles side effects using @ngrx/effects, including calling the API and dispatching success or failure actions.
+    - Validate that the API call to signup is correctly integrated and that the response is handled properly.
+    - Confirm that the application navigates to the login page correctly when the link is clicked.
+metadata:
+  category: ReactToAngular_ReactSignUp_high_low
+  experiment: solution_migration
+  repository: react_sign_up
+  scenario_id: 09

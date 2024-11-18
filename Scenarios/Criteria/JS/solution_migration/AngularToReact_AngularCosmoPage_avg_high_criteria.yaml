@@ -1,0 +1,34 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
+    - Ensure the application is free of memory leaks and unnecessary re-renders.
+    - Ensure the application is compatible with the latest version of React and TypeScript.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure app does not access DOM elements to retrieve the values of text fields.
+    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
+    - Ensure app does not overuse refs for DOM access instead of React state and props.
+    - Ensure app does not have too many re-renders due to state or prop changes.
+    - Ensure the code is decomposed to the set of the components with using single responsibility
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - App does not access DOM elements to retrieve the values of text fields.
+    - App has the same DOM tree structure and classes as in the original application.
+    - Ensure that the store is properly configured and provided to the app.
+    - Verify that the code is migrated to React 18.x.
+    - Check that TypeScript is used in the translated code.
+    - Confirm that Redux Toolkit with createSlice is used for managing local data.
+    - Ensure that the code is split into separate components.
+    - Validate that the code does not contain any TODOs.
+    - Check that the code is optimized.
+  completeness:
+    - Confirm that the state slices for page and user are correctly defined and managed.
+    - Verify that API service functions are correctly defined and used.
+    - Ensure that the application correctly handles all the functionalities from the original Angular code.
+    - Verify that all functionalities like save, delete, update, and tag management are working correctly.
+    - Ensure that the application performs all CRUD operations correctly.
+    - Verify that the application handles local storage and state persistence correctly.
+metadata:
+  category: AngularToReact_AngularCosmoPage_avg_high
+  experiment: solution_migration
+  repository: angular_cosmo_page
+  scenario_id: 7

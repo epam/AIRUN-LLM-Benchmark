@@ -1,0 +1,6 @@
+requests
+python-dotenv
+notebook
+pandas
+langchain-openai
+langchain-core

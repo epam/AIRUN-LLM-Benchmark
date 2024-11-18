@@ -1,0 +1,34 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
+    - Check that a debounced function is used to optimize the search requests.
+    - Ensure the application is free of memory leaks and unnecessary re-renders.
+    - Ensure the application is compatible with the latest version of React and TypeScript.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure app does not access DOM elements to retrieve the values of text fields.
+    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
+    - Ensure app does not overuse refs for DOM access instead of React state and props.
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Ensure app does not have too many re-renders due to state or prop changes.
+    - Confirm that the useState is used to capture the search input value.
+    - Verify that the code does not contain any TODOs.
+    - Verify the inclusion of TypeScript in the React application.
+    - Ensure that `axios` is used for making API requests.
+    - Validate that the `useEffect` hooks are used correctly for data loading.
+  completeness:
+    - Check that a loading indicator is displayed while data is being fetched.
+    - Verify that the loader does not hide the search input when data is loading.
+    - Validate that a request with an empty search term is sent on the initial render.
+    - Verify that the search input field is present.
+    - Ensure that the character search functionality is implemented.
+    - Ensure that the API request includes the search term as a query parameter.
+    - Validate that the data is loading on initial app load with empty query and then when the search term changes.
+    - Ensure that the debounced fetch function prevents unnecessary API requests.
+    - Confirm that the character list is updated based on the search results.
+    - Validate that the application handles API request errors.
+    - Ensure that the user experience remains smooth without backend overloads.
+metadata:
+  category: ModifyReactApp_ReactFetchAPI_avg_low
+  experiment: component_generation
+  scenario_id: 3

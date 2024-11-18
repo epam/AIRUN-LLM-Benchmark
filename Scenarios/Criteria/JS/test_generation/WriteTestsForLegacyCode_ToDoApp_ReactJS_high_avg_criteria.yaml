@@ -1,0 +1,46 @@
+evaluation_steps:
+  accuracy:
+    - Check that the tests are isolated and do not depend on each other.
+    - Validate that the tests adhere to best practices for unit testing.
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Verify the test framework and libraries are chosen and listed appropriately.
+    - Confirm the testing environment setup is included.
+    - Ensure the testing environment configuration file is present.
+    - Validate the setup for the test environment is included.
+    - Ensure the tests cover at least 80% of the codebase.
+    - Confirm that mocking is used for dependencies where necessary.
+    - Verify that the generated code does not contain any TODOs.
+  completeness:
+    - Confirm the existence of the main application test file.
+    - Verify the test file for the main application includes tests for rendering.
+    - Ensure the test file for the main application includes tests for adding a new todo.
+    - Verify the test file for the main application includes tests for toggling all todos.
+    - Confirm the test file for the main application includes tests for clearing completed todos.
+    - Verify the test file for the todo item component is present.
+    - Ensure the test file for the todo item includes tests for rendering.
+    - Confirm the test file for the todo item includes tests for toggling a todo.
+    - Verify the test file for the todo item includes tests for destroying a todo.
+    - Ensure the test file for the todo item includes tests for editing a todo.
+    - Confirm the test file for the todo item includes tests for saving a todo.
+    - Verify the test file for the todo item includes tests for canceling an edit.
+    - Check the test file for the footer component is present.
+    - Ensure the test file for the footer includes tests for rendering.
+    - Confirm the test file for the footer includes tests for clearing completed todos.
+    - Verify the test file for the footer includes tests for filtering todos.
+    - Check the test file for utility functions is present.
+    - Ensure the test file for utility functions includes tests for generating a unique ID.
+    - Confirm the test file for utility functions includes tests for pluralizing words.
+    - Verify the test file for utility functions includes tests for storing data.
+    - Ensure the test file for utility functions includes tests for extending objects.
+    - Check the test file for the todo model is present.
+    - Ensure the test file for the todo model includes tests for adding a new todo.
+    - Confirm the test file for the todo model includes tests for toggling all todos.
+    - Verify the test file for the todo model includes tests for toggling a single todo.
+    - Ensure the test file for the todo model includes tests for destroying a todo.
+    - Confirm the test file for the todo model includes tests for saving a todo.
+    - Verify the test file for the todo model includes tests for clearing completed todos.
+metadata:
+  category: WriteTestsForLegacyCode_ToDoApp_ReactJS_high_avg
+  experiment: test_generation
+  repository: todo_app_react
+  scenario_id: 5

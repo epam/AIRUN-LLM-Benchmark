@@ -1,0 +1,41 @@
+evaluation_steps:
+  accuracy:
+    - Check that the tests are isolated and do not depend on each other.
+    - Validate that the tests adhere to best practices for unit testing.
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Ensure that the test suite achieves at least 80% code coverage for the Select component.
+    - Confirm that there are no TODO comments in the generated test code.
+    - Check that mocking is used for dependencies where necessary using jest.fn().
+    - Verify that the testing environment setup code is included.
+    - Confirm that the testing environment setup code uses Jest and React Testing Library.
+    - Ensure that the test file imports necessary modules such as React, Jest, React Testing Library, and the Select component.
+    - Verify that default props for the Select component are defined in the test file.
+    - Check that the default props include all necessary properties for the Select component.
+    - Verify that the testing libraries are chosen appropriately.
+    - Ensure the testing environment is set up correctly.
+  completeness:
+    - Verify that the test suite includes a test to render the component without crashing.
+    - Confirm that the test suite includes a test to open the menu when the control is clicked.
+    - Ensure the test suite includes a test to display options when the menu is open.
+    - Verify that the test suite includes a test to call the onChange callback when an option is selected.
+    - Confirm that the test suite includes a test to display the selected option.
+    - Ensure that the test suite includes a test to clear the selected option when the clear indicator is clicked.
+    - Verify that the test suite includes a test to filter options based on the input value.
+    - Confirm that the test suite includes a test to display a loading message when the component is in a loading state.
+    - Ensure that the test suite includes a test to display a "no options" message when there are no options available.
+    - Verify that all tests are written using React Testing Library's render, screen, and fireEvent methods.
+    - Ensure that all tests use the expect function from Jest to assert outcomes.
+    - Verify that the test for rendering the component checks for the presence of the placeholder text.
+    - Ensure that the test for opening the menu checks for the presence of the role listbox.
+    - Confirm that the test for displaying options checks for the presence of option texts.
+    - Ensure that the test for calling onChange verifies the correct arguments are passed to the callback.
+    - Verify that the test for displaying the selected option checks for the presence of the option text.
+    - Ensure that the test for clearing the selected option verifies the correct arguments are passed to the onChange callback.
+    - Confirm that the test for filtering options verifies that only matching options are displayed.
+    - Ensure that the test for displaying the loading message checks for the presence of the loading text.
+    - Verify that the test for displaying the "no options" message checks for the presence of the no options text.
+metadata:
+  category: WriteTestsForActualCode_ReactSelect_extra_high_high
+  experiment: test_generation
+  repository: react_select
+  scenario_id: 23

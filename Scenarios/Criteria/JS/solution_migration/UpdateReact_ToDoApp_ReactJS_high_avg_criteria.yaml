@@ -1,0 +1,41 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
+    - Ensure the application is free of memory leaks and unnecessary re-renders.
+    - Ensure the application is compatible with the latest version of React and TypeScript.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure app does not access DOM elements to retrieve the values of text fields.
+    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
+    - Ensure app does not overuse refs for DOM access instead of React state and props.
+    - Ensure app does not have too many re-renders due to state or prop changes.
+    - Ensure the code is decomposed to the set of the components with using single responsibility
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Verify app does not make API calls.
+    - Verify that the codebase does not contain any TODOs.
+    - Verify app does clean up timers, subscriptions, or event listeners in `useEffect`.
+    - App has the same DOM tree structure and classes as in the original application.
+    - Ensure that the code is split into separate components.
+    - Verify that the codebase is written in TypeScript.
+    - Ensure that TypeScript types are correctly defined and used throughout the code.
+    - Confirm that the codebase does not contain any syntax errors.
+    - Ensure that the `package.json` file is present.
+    - Verify the presence of a store configuration file.
+    - Confirm that the store configuration file uses Redux Toolkit.
+    - Verify that the application uses `createSlice` from Redux Toolkit to define actions and reducers for adding, toggling one and all, editing, deleting, clearing completed, and filtering TODO items.
+    - Confirm the use of `nanoid` for generating unique IDs.
+    - Check that the code includes a `Provider` wrapping the entire application.
+    - Confirm that the `Provider` is supplied with the store.
+  completeness:
+    - Verify that there is an input field for creating a new todo. The creation should occur when the Enter key is pressed, and the value should be taken from the state and dispatched to the store.
+    - Ensure that todo items are displayed in a list according to the current filter.
+    - Ensure there is functionality that allows toggling the completion status of all todos.
+    - Verify that each todo item can be toggled, edited, or deleted.
+    - Ensure that editing a todo starts with a double click, submitting a todo occurs by pressing Enter, and clicking the Esc button resets the current editing to the initial value.
+    - Ensure that the footer of the application displays the count of active items, has filter functionality, and allows clearing completed items.
+    - Ensure that the footer includes a button to clear completed TODO items, which dispatches the corresponding action.
+metadata:
+  category: UpdateReact_ToDoApp_ReactJS_high_avg
+  experiment: solution_migration
+  repository: todo_app_react
+  scenario_id: 11

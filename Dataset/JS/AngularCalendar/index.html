@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="calendarDemoApp" id="top">
+<head>
+    <title>AngularUI Calendar for AngularJS</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="/../bower_components/bootstrap-css/css/bootstrap.css" />
+    <link rel="stylesheet" href="/../bower_components/fullcalendar/dist/fullcalendar.css">
+    <link rel="stylesheet" href="calendarDemo.css" />
+
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.0.js"></script>
+    <script src="../bower_components/moment/moment.js"></script>
+    <script src="../bower_components/fullcalendar/dist/fullcalendar.js"></script>
+    <script src="../bower_components/fullcalendar/dist/gcal.js"></script>
+    <script src="../src/calendar.js"></script>
+    <script src="calendarDemo.js"></script>
+</head>
+<body data-spy="scroll">
+<header class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <div class="dropdown pull-left">
+                <a class="brand dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+                    AngularUI
+                    <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                    <li><a href="https://github.com/angular-ui/"><strong>Related Projects:</strong></a></li>
+                    <li class="divider"></li>
+                    <li><a href="http://angular-ui.github.com/bootstrap/">Bootstrap</a></li>
+                    <li><a href="http://angular-ui.github.com/ng-grid/">Grid</a></li>
+                    <li><a href="https://github.com/angular-ui/AngularJs.tmbundle">AngularJS.tmbundle</a></li>
+                    <li><a href="http://angular-ui.github.io/ui-router/sample/">Router <span
+                            class="label label-success">New!</span></a></li>
+                    <li><a href="http://angular-ui.github.com/Tips-n-Tricks/">Tips-n-Tricks <span
+                            class="label">WIP</span></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="hero-unit">
+            <div class="container">
+                <h1>UI Calendar</h1>
+                <p>A complete AngularJS directive for the <a href="http://arshaw.com/fullcalendar/">Arshaw FullCalendar</a>.</p>
+                <p class="btn-group">
+                    <a href="https://github.com/angular-ui/ui-calendar" class='btn'><i class='icon-github'></i> Code on Github</a>
+                    <a href="https://github.com/angular-ui/ui-calendar/archive/master.zip" class='btn btn-primary'><i class="icon-download-alt icon-white"></i> Download <small>(0.8.1)</small></a>
+                </p>
+            </div>
+            <div class="bs-docs-social">
+                <div class="container">
+                    <ul class="bs-docs-social-buttons">
+                        <li>
+                            <iframe src="http://ghbtns.com/github-btn.html?user=angular-ui&amp;repo=ui-calendar&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+                        </li>
+                        <li>
+                            <iframe src="http://ghbtns.com/github-btn.html?user=angular-ui&amp;repo=ui-calendar&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>
+                        </li>
+                        <li>
+                            <div class="g-plusone" data-size="medium"></div>        
+                            <!-- Place this tag after the last +1 button tag. -->
+                            <script type="text/javascript">
+                                (function () {
+                                    var po = document.createElement('script');
+                                    po.type = 'text/javascript';
+                                    po.async = true;
+                                    po.src = 'https://apis.google.com/js/plusone.js';
+                                    var s = document.getElementsByTagName('script')[0];
+                                    s.parentNode.insertBefore(po, s);
+                                })();
+                            </script>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+<div role="main">
+    <div class="container">
+        <section id="directives-calendar" ng-controller="CalendarCtrl">
+            <div class="page-header">
+                <h1>UI-Calendar</h1>
+            </div>
+            <div class="well">
+                <div class="row-fluid">
+                    <div class="span4">
+                        <h3>What?</h3>
+
+                        <p>Attach Angular objects to a calendar.</p>
+                        <p>Show the data binding between two different calendars using the same event sources.</p>
+
+                        <h3>Why?</h3>
+
+                        <p>Why Not?</p>
+                        
+                        <div class="btn-group calTools">
+                          <button class="btn" ng-click="changeLang()">
+                            {{changeTo}}
+                          </button>              
+                          <button class="btn" ng-click="addRemoveEventSource(eventSources,eventSource)">
+                            Toggle Source
+                          </button>
+                          <button type="button" class="btn btn-primary" ng-click="addEvent()">
+                            Add Event
+                          </button>
+                        </div>
+
+                        <ul class="unstyled">
+                            <li ng-repeat="e in events">
+                                <div class="alert alert-info">
+                                    <a class="close" ng-click="remove($index)"><i class="icon-remove"></i></a>
+                                    <b> <input ng-model="e.title"></b> 
+                                    {{e.start | date:"MMM dd"}} - {{e.end | date:"MMM dd"}}
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                    <div class="span8">
+                        <tabset>
+                            <tab select="renderCalendar('myCalendar1');">
+                              <tab-heading>
+                               <i class="glyphicon glyphicon-bell"></i> Calendar One
+                              </tab-heading>
+                              <div class="alert-success calAlert" ng-show="alertMessage != undefined && alertMessage != ''">
+                                <h4>{{alertMessage}}</h4>
+                              </div>
+                              <div class="btn-toolbar">
+                                <p class="pull-right lead">Calendar One View Options</p>
+                                <div class="btn-group">
+                                    <button class="btn btn-success" ng-click="changeView('agendaDay', 'myCalendar1')">AgendaDay</button>
+                                    <button class="btn btn-success" ng-click="changeView('agendaWeek', 'myCalendar1')">AgendaWeek</button>
+                                    <button class="btn btn-success" ng-click="changeView('month', 'myCalendar1')">Month</button>
+                                </div>
+                              </div>
+                            <div class="calendar" ng-model="eventSources" calendar="myCalendar1" ui-calendar="uiConfig.calendar"></div>
+                           </tab>
+                           <tab select="renderCalendar('myCalendar2');">
+                            <tab-heading>
+                              <i class="glyphicon glyphicon-bell"></i> Calendar Two
+                            </tab-heading>
+                              <div class="alert-success calAlert" ng-show="alertMessage != undefined && alertMessage != ''">
+                                <h4>{{alertMessage}}</h4>
+                              </div>
+                              <div class="btn-toolbar">
+                                <p class="pull-right lead">Calendar Two View Options</p>
+                                <div class="btn-group">
+                                    <button class="btn btn-success" ng-click="changeView('agendaDay', 'myCalendar2')">AgendaDay</button>
+                                    <button class="btn btn-success" ng-click="changeView('agendaWeek', 'myCalendar2')">AgendaWeek</button>
+                                    <button class="btn btn-success" ng-click="changeView('month', 'myCalendar2')">Month</button>
+                                </div>
+                              </div>
+                            <div class="calendar" ng-model="eventSources" calendar="myCalendar2" ui-calendar="uiConfig.calendar"></div>
+                           </tab>
+                           <tab select="renderCalendar('myCalendar3');">
+                            <tab-heading>
+                              <i class="glyphicon glyphicon-bell"></i> Calendar Three
+                            </tab-heading>
+                              <div class="alert-success calAlert">
+                                <h4>This calendar uses the extended form</h4>
+                              </div>
+                              <div class="btn-toolbar">
+                                <p class="pull-right lead">Calendar Three View Options</p>
+                                <div class="btn-group">
+                                    <button class="btn btn-success" ng-click="changeView('agendaDay', 'myCalendar3')">AgendaDay</button>
+                                    <button class="btn btn-success" ng-click="changeView('agendaWeek', 'myCalendar3')">AgendaWeek</button>
+                                    <button class="btn btn-success" ng-click="changeView('month', 'myCalendar3')">Month</button>
+                                </div>
+                              </div>
+                            <div class="calendar" ng-model="eventSources2" calendar="myCalendar3" ui-calendar="uiConfig.calendar"></div>
+                           </tab>
+                        </tabset>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-17352735-3']);
+            _gaq.push(['_trackPageview']);
+            (function () {
+                var ga = document.createElement('script');
+                ga.type = 'text/javascript';
+                ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+    </body>
+</html>

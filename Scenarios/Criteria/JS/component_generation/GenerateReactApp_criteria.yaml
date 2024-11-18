@@ -1,0 +1,31 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows TypeScript and React best practices (state, hooks, effects).
+    - Ensure the application is free of memory leaks and unnecessary re-renders.
+    - Ensure the application is compatible with the latest version of React and TypeScript.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure app does not access DOM elements to retrieve the values of text fields.
+    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
+    - Ensure app does not overuse refs for DOM access instead of React state and props.
+    - Ensure app does not have too many re-renders due to state or prop changes.
+    - Ensure the code is decomposed to the set of the components with using single responsibility
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - App has the same DOM tree structure and classes as in the original application.
+    - App does correctly use useEffect, avoiding infinite loops.
+    - Confirm that axios is installed and listed as a dependency in package.json.
+    - Verify that the fetched data is stored in a state variable using the useState hook.
+    - Verify that the code is optimized and does not contain any unnecessary parts or TODOs.
+    - Ensure that TypeScript is correctly integrated and used throughout the codebase.
+    - Verify that React.StrictMode is used in index.tsx.
+  completeness:
+    - Ensure that the API call to https://swapi.dev/api/people is made using axios.
+    - Make sure the data is fetched initially without any input fields.
+    - Ensure a loader or loading indicator is displayed while data is being fetched.
+    - Verify that errors are logged to the console if the API call fails.
+    - Ensure that the fetched characters are displayed in a list format.
+    - Make sure each list item has a unique key derived from the character URL.
+metadata:
+  category: GenerateReactApp
+  experiment: component_generation
+  scenario_id: 2

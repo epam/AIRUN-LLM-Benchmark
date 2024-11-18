@@ -1,0 +1,37 @@
+evaluation_steps:
+  accuracy:
+    - Check that the tests are isolated and do not depend on each other.
+    - Validate that the tests adhere to best practices for unit testing.
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Verify that the testing libraries are chosen appropriately.
+    - Ensure the testing environment is set up correctly.
+    - Confirm that the dependencies and devDependencies are listed in the package.json file.
+    - Check that the Karma configuration file (karma.conf.js) is correctly set up for the project.
+    - Check that mocking is used for dependencies where necessary.
+    - Confirm that the code coverage is at least 80%.
+    - Validate that the generated code does not contain any TODOs.
+    - Ensure that the testing scripts are included in the package.json file.
+    - Ensure that the HTML template files are correctly preprocessed for testing.
+    - Ensure that the setup and teardown processes for the tests are correctly implemented.
+  completeness:
+    - Validate that the unit tests for the REST factory (rest.spec.js) are correctly written.
+    - Validate that the unit tests for the Page factory (page.spec.js) are correctly written.
+    - Validate that the unit tests for the Users factory (users.spec.js) are correctly written.
+    - Validate that the unit tests for the page controller (pageCtrl.spec.js) are correctly written.
+    - Ensure that the REST factory tests cover all defined resources.
+    - Ensure that the REST factory tests include a check for correct GET request URLs.
+    - Ensure that the Page factory tests initialize all properties correctly.
+    - Ensure that the Users factory tests initialize all properties correctly.
+    - Ensure that the pageCtrl tests initialize all scope variables correctly.
+    - Ensure that the pageCtrl tests update page variables on the contentGet event.
+    - Ensure that the pageCtrl tests save page data locally.
+    - Ensure that the pageCtrl tests autocomplete tags correctly.
+    - Ensure that the pageCtrl tests select tags from suggestions correctly.
+    - Ensure that the pageCtrl tests save pages correctly.
+    - Ensure that the tests cover both positive and negative scenarios.
+    - Verify that the tests for the savePage function in pageCtrl handle both new and duplicate pages.
+metadata:
+  category: WriteTestsForLegacyCode_AngularCosmoPage_avg_high
+  experiment: test_generation
+  repository: angular_cosmo_page
+  scenario_id: 4

@@ -1,0 +1,37 @@
+evaluation_steps:
+  accuracy:
+    - Confirm that all provided code snippets are accurate and formatted correctly.
+    - Ensure they align with the code provided in the task description.
+    - Verify that the documentation is consistent in terminology and formatting.
+    - Ensure that the language used is clear and unambiguous.
+    - Verify that the documentation provides sufficient technical depth to understand the components' functionalities and interactions.
+    - Ensure that all information provided in the documentation is correct and aligns with the functionality of the code.
+    - Check that the examples provided work as described when implemented in a React application.
+    - Ensure that the documentation references the correct file names and component names used in the code.
+    - Check that the documentation is well-formatted and easy to read, with appropriate use of headings, tables, and lists.
+  completeness:
+    - Confirm that all features mentioned in the code are listed in the documentation. - Ensure that no required sections (Overview, Features, Props, Usage, Accessibility, Conclusion) are missing.
+    - Check that the overview provides a brief introduction to the application.
+    - Ensure the overview includes the purpose of the application.
+    - Confirm the key features are mentioned in the overview.
+    - Verify that a detailed list of features is provided.
+    - Ensure each feature is clearly described.
+    - Confirm that the list includes all functionalities indicated by the code (e.g., adding todos, editing todos, etc.).
+    - Ensure each main component (`TodoApp`, `TodoItem`, `TodoFooter`, `TodoModel`) is described.
+    - Verify that the purpose of each component is explained.
+    - Check that there is a section detailing the props for each component.
+    - Ensure each prop has a name, type, description, and whether it is optional or required.
+    - Confirm that all props from the code are documented.
+    - Verify that there is a usage example for each component.
+    - Ensure that the example includes a sample code snippet.
+    - Confirm that the example is relevant and demonstrates how to integrate the component into a frontend application.
+    - Check that the documentation includes a section on accessibility.
+    - Ensure the section explains accessibility features, such as ARIA roles and attributes.
+    - Confirm that the explanation addresses how these features make the component accessible to users with assistive technologies.
+    - Verify that the conclusion summarizes the component's benefits.
+    - Ensure the conclusion highlights the component's contribution to creating a user-friendly, accessible UI.
+metadata:
+  category: DescribeTechnicalImplementation_ToDoApp_ReactJS_high_avg
+  experiment: code_explanation
+  repository: todo_app_react
+  scenario_id: 18

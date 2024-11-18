@@ -1,0 +1,38 @@
+evaluation_steps:
+  accuracy:
+    - Ensure the application does not contain unused imports or code.
+    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
+    - Ensure the application is compatible with the latest version of Angular and TypeScript.
+    - Verify the application works correctly across modern browsers.
+    - Ensure the application is free of console errors and warnings.
+    - Ensure the code is decomposed to the set of the components with using single responsibility
+    - Ensure the code does not contain any duplicates and follow DRY principles
+    - Check that @ngrx/store is used for state management.
+    - Check that @ngrx/effects is used for handling side effects.
+    - Confirm that the code is split into separate components.
+    - Ensure that localStorage is used for persisting todos via a service.
+    - Check that state management actions and reducers are correctly implemented.
+    - Verify that effects are correctly implemented to handle side effects.
+    - Ensure that the converted code does not contain any TODOs.
+    - Verify that all AngularJS-specific elements and syntax are removed.
+    - Confirm that the application structure adheres to Angular style guidelines.
+    - Verify App does not access DOM elements to retrieve the values of text fields.
+    - Verify App does not make API calls.
+    - Verify App has the same DOM tree structure and classes as in the original application.
+    - Verify that the code is migrated to Angular 14.x.
+  completeness:
+    - Confirm that the application initializes correctly and loads persisted todos.
+    - Ensure that the todo list displays correctly and is interactive.
+    - Verify that adding a new todo works correctly.
+    - Check that editing a todo works correctly.
+    - Confirm that toggling a todo item completion status works correctly.
+    - Ensure that removing a todo works correctly.
+    - Verify that the "Mark all as complete" functionality works.
+    - Check that the filter functionality (All, Active, Completed) works.
+    - Confirm that the "Clear completed" button works correctly.
+    - Ensure that the application is responsive and functions correctly on different screen sizes.
+metadata:
+  category: UpdateAngular_ToDoApp_AngularJS_avg_avg_2
+  experiment: solution_migration
+  repository: todo_app_angular
+  scenario_id: 10

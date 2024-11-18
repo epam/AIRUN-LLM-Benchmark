@@ -1,0 +1,44 @@
+evaluation_steps:
+  accuracy:
+    - Assess whether the documentation is clear and coherent.
+    - Ensure that the language is professional and technical terms are used appropriately.
+    - Verify that the formatting is consistent throughout the documentation.
+    - Ensure that headings, lists, tables, and code snippets follow a consistent style.
+    - Ensure that all aspects of the task description are covered.
+    - Verify that no important information is missing or overlooked.
+    - Ensure that the technical details provided are accurate.
+    - Verify that there are no errors or inconsistencies in the documentation.
+    - Check if the provided code snippets are correct and functional.
+    - Ensure that the code examples are relevant and demonstrate the intended usage.
+    - Assess whether the documentation is easy to read and understand.
+    - Verify that complex concepts are explained in a straightforward manner.
+    - Ensure that the examples provided are practical and applicable to real-world scenarios.
+    - Verify that the examples help in understanding how to use the component effectively.
+  completeness:
+    - Verify that the overview provides a brief introduction to the component.
+    - Ensure the purpose and key features of the component are clearly explained.
+    - Confirm that there is a detailed list of the component's features.
+    - Verify that each feature is described clearly, including its purpose and key functionalities.
+    - Ensure that `rest.js` is documented with its purpose and key features.
+    - Verify that CRUD operations and resource interactions are explained.
+    - Ensure that `page.js` is documented with its purpose and key features.
+    - Verify that the stored attributes and their importance are explained.
+    - Ensure that `users.js` is documented with its purpose and key features.
+    - Verify that user attributes and their significance are documented.
+    - Ensure that `pageCtrl.js` is documented with its purpose and key features.
+    - Verify that page creation, duplication, deletion, autosave, version control, dynamic URL generation, and tagging system are explained.
+    - Verify that the documentation includes a section detailing the props (or equivalent) the component accepts.
+    - Ensure that each props name, type, description, and whether it is optional or required are listed.
+    - Ensure that key `$scope` variables in `pageCtrl.js` are listed with their name, type, description, and whether they are required.
+    - Verify that there is an example of how to use the component in a frontend application.
+    - Ensure the example includes a sample code snippet that integrates the component properly.
+    - Verify that the documentation includes a detailed explanation of the components accessibility features.
+    - Ensure that ARIA roles, attributes, and other accessibility considerations are explained.
+    - Confirm the explanation of how these features make the component accessible to users with assistive technologies.
+    - Ensure that the conclusion provides a brief summary of the components benefits.
+    - Verify that it highlights the components contribution to creating a user-friendly and accessible UI.
+metadata:
+  category: DescribeTechnicalImplementation_AngularCosmoPage_avg_high
+  experiment: code_explanation
+  repository: angular_cosmo_page
+  scenario_id: 17
