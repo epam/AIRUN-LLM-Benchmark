@@ -2,6 +2,7 @@ import time
 import requests
 from datetime import datetime
 from Utils.llm.config import API, Model, temperature
+from Utils.llm.bedrock import request_bedrock_data
 
 
 class APIException(Exception):
@@ -183,6 +184,8 @@ def ask_model(messages, system_prompt, model, attempt=1):
                 data = request_google_ai_studio_data(system_prompt, messages, model)
             case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35:
                 data = request_claude_data(system_prompt, messages, model)
+            case Model.AmazonNovaPro:
+                data = request_bedrock_data(system_prompt, messages, model)
             case _:
                 data = request_openai_format_data(system_prompt, messages, model)
 
