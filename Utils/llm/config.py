@@ -46,6 +46,7 @@ class Model:
     Llama31_405B = "Llama31_405B"
     GrokBeta = "GrokBeta"
     Qwen25Coder32B = "Qwen25Coder32B"
+    AmazonNovaPro = "AmazonNovaPro"
 
 
 def get_azure_config(model):
@@ -175,6 +176,14 @@ def get_haiku_35_config():
     }
 
 
+def get_amazon_nova_pro_config():
+    MODEL_ID = "us.amazon.nova-pro-v1:0"
+
+    return {
+        "model_id": MODEL_ID
+    }
+
+
 API = {
     Model.Gemini: get_azure_config('gemini-pro'),
     Model.GeminiPro: get_gemini_pro_config,
@@ -200,4 +209,5 @@ API = {
     Model.Llama31_405B: get_fireworks_config("accounts/fireworks/models/llama-v3p1-405b-instruct", 16384),
     Model.GrokBeta: get_xai_config('grok-beta'),
     Model.Qwen25Coder32B: get_fireworks_config("accounts/fireworks/models/qwen2p5-coder-32b-instruct", 4096),
+    Model.AmazonNovaPro: get_amazon_nova_pro_config,
 }

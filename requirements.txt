@@ -4,3 +4,4 @@ notebook
 pandas
 langchain-openai
 langchain-core
+boto3
