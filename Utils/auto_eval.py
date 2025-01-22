@@ -4,7 +4,7 @@ import re
 import pandas as pd
 from pathlib import Path
 from dotenv import load_dotenv
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
@@ -17,22 +17,11 @@ criteria_path = Path(__file__).resolve().parent.parent / 'Scenarios' / 'Criteria
 
 def get_model():
     """Get the evaluator model."""
-    # Specify configuration for the AI Dial endpoint
-    openai_endpoint = "https://ai-proxy.lab.epam.com"
-    openai_deployment_name = "gpt-4o-2024-05-13"
-    openai_api_version = "2024-05-01-preview"
-
-    # Read API key from the environment variables
-    # Putting the key inside the notebook is not secure
-    openai_api_key = os.environ["API_KEY"]
 
     # Define GPT-4-omni model
-    model = AzureChatOpenAI(
+    model = ChatOpenAI(
+        model="gpt-4o-2024-05-13",
         temperature=0,  # request deterministic behavior
-        azure_endpoint=openai_endpoint,
-        azure_deployment=openai_deployment_name,
-        api_version=openai_api_version,
-        api_key=openai_api_key,
     )
 
     return model
