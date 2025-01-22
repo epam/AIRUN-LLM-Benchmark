@@ -1,0 +1,11 @@
+Your task is to write unit-tests for a legacy part of frontend application.
+
+<place code here>
+
+When performing this task, please adhere to the following instructions:
+- Choose libraries for testing.
+- Set up the testing environment.
+- Aim to cover at least 80% of the code.
+- Use mocking for dependencies if necessary.
+- Ensure that the generated code does not contain any TODOs.
+- Simply return the codebase without additional comments.
