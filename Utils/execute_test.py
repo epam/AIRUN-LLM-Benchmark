@@ -45,7 +45,10 @@ def get_answer_from_model(prompt, system_prompt, model, attempt=1):
     if "error" in data:
         return data["error"]
 
-    return (f'### Answer:\n{data["content"]}\n\n'
+    thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ''
+
+    return (f'{thoughts}'
+            f'### Answer:\n{data["content"]}\n\n'
             f'### Tokens: {str(data["tokens"])}\n'
             f'### Execution time: {data["execute_time"]}\n')
 

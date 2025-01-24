@@ -16,6 +16,7 @@ def request_openai_format_data(system_prompt, messages, model):
     config = API[model]()
 
     skip_system = config.get("skip_system", False)
+    system_role_name = config.get("system_role_name", "system")
 
     headers = {
         'Content-Type': 'application/json',
@@ -25,7 +26,7 @@ def request_openai_format_data(system_prompt, messages, model):
 
     payload = {
         'model': config["model_id"],
-        'messages': ([] if skip_system else [{'role': 'system', 'content': f'{system_prompt}'}]) + messages,
+        'messages': ([] if skip_system else [{'role': system_role_name, 'content': f'{system_prompt}'}]) + messages,
         'temperature': temperature,
     }
     max_tokens = config.get("max_tokens")
@@ -132,6 +133,21 @@ def request_google_ai_studio_data(system_prompt, messages, model):
         raise APIException(response.status_code, response.content)
 
     data = response.json()
+
+    if Model.GeminiFlash_Think_1219 == model:
+        parts = data["candidates"][0]["content"]["parts"]
+        thoughts = parts[0]["text"] if len(parts) > 1 else None
+        content = parts[1]["text"] if thoughts else parts[0]["text"]
+
+        return {
+            'thoughts': thoughts,
+            'content': content,
+            'tokens': {
+                "input_tokens": data["usageMetadata"]["promptTokenCount"],
+                "output_tokens": data["usageMetadata"]["candidatesTokenCount"],
+            }
+        }
+
     return {
         'content': data["candidates"][0]["content"]["parts"][0]["text"],
         'tokens': {
@@ -180,7 +196,7 @@ def ask_model(messages, system_prompt, model, attempt=1):
         match model:
             case Model.GeminiPro:
                 data = request_gemini_pro_data(system_prompt, messages)
-            case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.GeminiPro_1114 | Model.GeminiPro_1121:
+            case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.Gemini_1206 | Model.GeminiFlash_Think_1219:
                 data = request_google_ai_studio_data(system_prompt, messages, model)
             case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35:
                 data = request_claude_data(system_prompt, messages, model)
@@ -191,6 +207,7 @@ def ask_model(messages, system_prompt, model, attempt=1):
 
         execute_time = time.time() - start_time
         return {
+            "thoughts": data.get("thoughts", None),
             "content": data["content"],
             "tokens": data["tokens"],
             "execute_time": execute_time
