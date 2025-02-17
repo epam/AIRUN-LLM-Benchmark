@@ -28,7 +28,8 @@ class Model:
     GeminiPro_0801 = "GeminiPro_0801"
     Gemini_15_Pro_002 = "Gemini_15_Pro_002"
     Gemini_1206 = "Gemini_1206"
-    GeminiFlash_Think_1219 = "GeminiFlash_Think_1219"
+    Gemini_20_Flash_Think_1219 = "Gemini_20_Flash_Think_1219"
+    Gemini_20_Pro_0205 = "Gemini_20_Pro_0205"
     Opus_3 = "Claude_Opus_3"
     Sonnet_35 = "Claude_Sonnet_35"
     Sonnet_35v2 = "Claude_Sonnet_35v2"
@@ -43,17 +44,20 @@ class Model:
     OpenAi_o1_0912 = "OpenAi_o1_0912"
     OpenAi_o1_1217 = "OpenAi_o1_1217"
     OpenAi_o1_mini_0912 = "OpenAi_o1_mini_0912"
+    OpenAi_o3_mini_0131 = "OpenAi_o3_mini_0131"
     Llama3_70B = "Llama3_70B"
     Llama31_405B = "Llama31_405B"
     GrokBeta = "GrokBeta"
     Grok2_1212 = "Grok2_1212"
     Qwen25Coder32B = "Qwen25Coder32B"
+    DeepSeekR1 = "DeepSeekR1"
     AmazonNovaPro = "AmazonNovaPro"
 
 
-def get_azure_config(model):
+def get_azure_config(model, max_tokens=None):
     def config():
         return {
+            "max_tokens": max_tokens,
             "model_id": model,
             "api_key": deployed_llm_key,
             "url": f'{deployed_llm_base_url}/openai/deployments/{model}/chat/completions?api-version=2023-12-01-preview'
@@ -193,7 +197,8 @@ API = {
     Model.GeminiPro_0801: get_gemini_ai_studio_config('gemini-1.5-pro-exp-0801'),
     Model.Gemini_15_Pro_002: get_gemini_ai_studio_config("gemini-1.5-pro-002"),
     Model.Gemini_1206: get_gemini_ai_studio_config("gemini-exp-1206"),
-    Model.GeminiFlash_Think_1219: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-1219"),
+    Model.Gemini_20_Flash_Think_1219: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-1219"),
+    Model.Gemini_20_Pro_0205: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"),
     Model.GPT4: get_azure_config('gpt-4-0125-preview'),
     Model.GPT35_Turbo_0125: get_azure_config('gpt-35-turbo-0125'),
     Model.GPT4_Turbo_0409: get_open_ai_config('gpt-4-turbo-2024-04-09'),
@@ -205,6 +210,7 @@ API = {
     Model.OpenAi_o1_0912: get_open_ai_config('o1-preview-2024-09-12', skip_system=True),
     Model.OpenAi_o1_1217: get_open_ai_config('o1-2024-12-17', system_role_name="developer"),
     Model.OpenAi_o1_mini_0912: get_open_ai_config('o1-mini-2024-09-12', skip_system=True),
+    Model.OpenAi_o3_mini_0131: get_open_ai_config('o3-mini-2025-01-31', system_role_name="developer"),
     Model.Opus_3: get_opus_3_config,
     Model.Sonnet_35: get_sonnet_35_config,
     Model.Sonnet_35v2: get_sonnet_35_v2_config,
@@ -214,5 +220,6 @@ API = {
     Model.GrokBeta: get_xai_config('grok-beta'),
     Model.Grok2_1212: get_xai_config('grok-2-1212'),
     Model.Qwen25Coder32B: get_fireworks_config("accounts/fireworks/models/qwen2p5-coder-32b-instruct", 4096),
+    Model.DeepSeekR1: get_fireworks_config("accounts/fireworks/models/deepseek-r1", 16000),
     Model.AmazonNovaPro: get_amazon_nova_pro_config,
 }

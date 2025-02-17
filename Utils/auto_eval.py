@@ -102,8 +102,8 @@ def main(model_name, language="JS"):
                 grading_report.append(completeness_data)
 
                 # add the normalized results to the summary
-                df.at[index, 'Accuracy'] = float(accuracy_data['weighted_score'] - 1)
-                df.at[index, 'Completeness'] = float(completeness_data['weighted_score'] - 1)
+                df.at[index, 'Accuracy'] = round(accuracy_data['weighted_score'] - 1, 2)
+                df.at[index, 'Completeness'] = round(completeness_data['weighted_score'] - 1, 2)
 
     df.to_csv(summary_path, index=False)
     save_grading_report(report_path, grading_report)
