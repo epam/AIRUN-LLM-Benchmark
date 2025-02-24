@@ -28,7 +28,7 @@ class Model:
     GeminiPro_0801 = "GeminiPro_0801"
     Gemini_15_Pro_002 = "Gemini_15_Pro_002"
     Gemini_1206 = "Gemini_1206"
-    Gemini_20_Flash_Think_1219 = "Gemini_20_Flash_Think_1219"
+    Gemini_20_Flash_Think_0121 = "Gemini_20_Flash_Think_0121"
     Gemini_20_Pro_0205 = "Gemini_20_Pro_0205"
     Opus_3 = "Claude_Opus_3"
     Sonnet_35 = "Claude_Sonnet_35"
@@ -197,7 +197,7 @@ API = {
     Model.GeminiPro_0801: get_gemini_ai_studio_config('gemini-1.5-pro-exp-0801'),
     Model.Gemini_15_Pro_002: get_gemini_ai_studio_config("gemini-1.5-pro-002"),
     Model.Gemini_1206: get_gemini_ai_studio_config("gemini-exp-1206"),
-    Model.Gemini_20_Flash_Think_1219: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-1219"),
+    Model.Gemini_20_Flash_Think_0121: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-01-21"),
     Model.Gemini_20_Pro_0205: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"),
     Model.GPT4: get_azure_config('gpt-4-0125-preview'),
     Model.GPT35_Turbo_0125: get_azure_config('gpt-35-turbo-0125'),

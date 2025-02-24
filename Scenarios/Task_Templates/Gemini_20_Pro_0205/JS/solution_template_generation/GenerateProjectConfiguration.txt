@@ -1,0 +1,7 @@
+Your task is to create a project configuration based on the Vite builder with support for React, Redux, React-Router, TypeScript, and testing library.
+
+When generating the code, ensure to adhere to the instructions below:
+- Describe the provided commands.
+- Provide a package.json file.
+- The generated code should not contain any TODOs.
+- Simply return the codebase without additional comments within the code.

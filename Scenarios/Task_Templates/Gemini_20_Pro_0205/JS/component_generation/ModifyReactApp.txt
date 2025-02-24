@@ -1,0 +1,12 @@
+Your task is to modify the application on React 18.x, which utilizes the SWAPI open API.
+You should add a character search functionality and optimize it efficiently (avoid overloading the Backend with requests).
+
+When performing the task, ensure to follow the instructions below:
+- Utilize the following libraries: TypeScript, axios.
+- Display a loader while loading.
+- Send a request with an empty search on the initial render.
+- Optimize the code where possible.
+- The generated code should not contain any TODOs.
+- Return the codebase without additional comments.
+
+<place code here>

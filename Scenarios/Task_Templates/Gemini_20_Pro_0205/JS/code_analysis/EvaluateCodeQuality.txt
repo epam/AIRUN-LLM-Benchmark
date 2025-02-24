@@ -1,0 +1,21 @@
+I have the following application code that needs review and improvement:
+
+<place code here>
+
+Your task is to analyze the code and suggest enhancements focusing on the following aspects:
+- Readability: Identify unclear parts and suggest clearer alternatives with code examples.
+- Maintainability: Point out non-modular or hard-to-maintain structures and provide modular, maintainable code examples.
+- Performance: Highlight performance issues and offer optimized code snippets.
+- Accessibility: Suggest improvements for better accessibility with example code.
+- Best Practices: Indicate deviations from best practices in the used tech stack (e.g., React, TypeScript) and correct them with code examples.
+- Testing: Comment on testability and suggest testable code structures with example tests.
+- Documentation: If documentation/comments are lacking or unclear, suggest better documentation with examples.
+
+Provide answer in the next format:
+## {Aspect 1}
+### 1. {Name of the Issue}
+{description}
+Example
+```<Code snippet or part of code with issue>```
+Example of fixed issue - if applicable
+```<Code snippet with fixed issue>``` - if applicable
