@@ -134,7 +134,7 @@ def request_google_ai_studio_data(system_prompt, messages, model):
 
     data = response.json()
 
-    if Model.Gemini_20_Flash_Think_1219 == model:
+    if Model.Gemini_20_Flash_Think_0121 == model:
         parts = data["candidates"][0]["content"]["parts"]
         thoughts = parts[0]["text"] if len(parts) > 1 else None
         content = parts[1]["text"] if thoughts else parts[0]["text"]
@@ -196,7 +196,7 @@ def ask_model(messages, system_prompt, model, attempt=1):
         match model:
             case Model.GeminiPro:
                 data = request_gemini_pro_data(system_prompt, messages)
-            case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.Gemini_1206 | Model.Gemini_20_Pro_0205 | Model.Gemini_20_Flash_Think_1219:
+            case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.Gemini_1206 | Model.Gemini_20_Pro_0205 | Model.Gemini_20_Flash_Think_0121:
                 data = request_google_ai_studio_data(system_prompt, messages, model)
             case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35:
                 data = request_claude_data(system_prompt, messages, model)
@@ -235,3 +235,13 @@ def ask_model(messages, system_prompt, model, attempt=1):
             }
         print("\tRequest timed out. Trying again...")
         return ask_model(messages, system_prompt, model, attempt + 1)
+    except Exception as e:
+        print(f"\tError: {str(e)}")
+        if attempt > 2:
+            return {
+                "error": f'### Error: can not get the content\n'
+            }
+        else:
+            print("\tTrying again...")
+            time.sleep(5)
+            return ask_model(messages, system_prompt, model, attempt + 1)
