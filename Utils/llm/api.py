@@ -1,6 +1,8 @@
 import time
 import requests
 from datetime import datetime
+from typing import List, Dict, Literal
+from pydantic import BaseModel
 from Utils.llm.config import API, Model, temperature
 from Utils.llm.bedrock import request_bedrock_data
 
@@ -12,11 +14,16 @@ class APIException(Exception):
         super().__init__(self.content)
 
 
-def request_openai_format_data(system_prompt, messages, model):
+class Message(BaseModel):
+    role: Literal["user", "assistant", "system", "developer"]
+    content: str
+
+
+def request_openai_format_data(system_prompt: str, messages: List[Message], model: Model):
     config = API[model]()
 
     skip_system = config.get("skip_system", False)
-    system_role_name = config.get("system_role_name", "system")
+    system_role_name: Literal["system", "developer"] = config.get("system_role_name", "system")
 
     headers = {
         'Content-Type': 'application/json',
@@ -26,7 +33,7 @@ def request_openai_format_data(system_prompt, messages, model):
 
     payload = {
         'model': config["model_id"],
-        'messages': ([] if skip_system else [{'role': system_role_name, 'content': f'{system_prompt}'}]) + messages,
+        'messages': ([] if skip_system else [{'role': system_role_name, 'content': system_prompt}]) + messages,
         'temperature': temperature,
     }
     max_tokens = config.get("max_tokens")
@@ -53,7 +60,7 @@ def request_openai_format_data(system_prompt, messages, model):
     return result
 
 
-def request_gemini_pro_data(system_prompt, messages):
+def request_gemini_pro_data(system_prompt: str, messages: List[Message]):
     config = API[Model.GeminiPro]()
 
     headers = {
@@ -105,7 +112,7 @@ def request_gemini_pro_data(system_prompt, messages):
     }
 
 
-def request_google_ai_studio_data(system_prompt, messages, model):
+def request_google_ai_studio_data(system_prompt: str, messages: List[Message], model: Model):
     config = API[model]()
 
     headers = {
@@ -157,8 +164,8 @@ def request_google_ai_studio_data(system_prompt, messages, model):
     }
 
 
-def request_claude_data(system_prompt, messages, model):
-    config = API[model]()  # Claude Opus or Sonnet
+def request_claude_data(system_prompt: str, messages: List[Message], model: Model):
+    config = API[model]()
 
     headers = {
         'Content-Type': 'application/json; charset=utf-8',
@@ -170,7 +177,8 @@ def request_claude_data(system_prompt, messages, model):
         "stream": False,
         "temperature": temperature,
         "system": system_prompt,
-        "messages": messages  # [{"role": "user", "content": prompt}]
+        "messages": messages,  # [{"role": "user", "content": prompt}]
+        **config.get("extra_params", {})
     }
     response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
 
@@ -178,16 +186,27 @@ def request_claude_data(system_prompt, messages, model):
         raise APIException(response.status_code, response.content)
 
     data = response.json()
+
+    text_content = None
+    thinking_content = None
+
+    for item in data["content"]:
+        if item["type"] == "text":
+            text_content = item["text"]
+        elif item["type"] == "thinking":
+            thinking_content = item["thinking"]
+
     return {
-        'content': data["content"][0]["text"],
-        'tokens': {
+        "content": text_content,
+        "thoughts": thinking_content,
+        "tokens": {
             "input_tokens": data["usage"]["input_tokens"],
             "output_tokens": data["usage"]["output_tokens"],
         }
     }
 
 
-def ask_model(messages, system_prompt, model, attempt=1):
+def ask_model(messages: List[Message], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
     print(f'\tAttempt {attempt} at {datetime.now()}')
     try:
@@ -198,7 +217,7 @@ def ask_model(messages, system_prompt, model, attempt=1):
                 data = request_gemini_pro_data(system_prompt, messages)
             case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.Gemini_1206 | Model.Gemini_20_Pro_0205 | Model.Gemini_20_Flash_Think_0121:
                 data = request_google_ai_studio_data(system_prompt, messages, model)
-            case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35:
+            case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35 | Model.Sonnet_37 | Model.Sonnet_37_Thinking:
                 data = request_claude_data(system_prompt, messages, model)
             case Model.AmazonNovaPro:
                 data = request_bedrock_data(system_prompt, messages, model)
