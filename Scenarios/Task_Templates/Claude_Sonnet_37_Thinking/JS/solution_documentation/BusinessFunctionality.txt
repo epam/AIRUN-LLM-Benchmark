@@ -1,0 +1,10 @@
+I have the following application code:
+
+<place code here>
+
+Analyze the provided code and outline the business requirements it addresses by following these instructions:
+- Functionality: Summarize the main functionality and features of the code.
+- User Interaction: Describe expected user interactions with these features.
+- Business Objectives: Infer the business objectives met by this code.
+- Constraints & Assumptions: Note any constraints or assumptions evident in the code.
+- Performance & Scalability: Mention any performance optimizations or scalability considerations.

@@ -33,12 +33,15 @@ class Model:
     Opus_3 = "Claude_Opus_3"
     Sonnet_35 = "Claude_Sonnet_35"
     Sonnet_35v2 = "Claude_Sonnet_35v2"
+    Sonnet_37 = "Claude_Sonnet_37"
+    Sonnet_37_Thinking = "Claude_Sonnet_37_Thinking"
     Haiku_35 = "Claude_Haiku_35"
     GPT35_Turbo_0125 = "GPT35_Turbo_0125"
     GPT4_Turbo_0409 = "GPT4_Turbo_0409"
     GPT4o_0513 = "GPT4o_0513"
     GPT4o_0806 = "GPT4o_0806"
     GPT4o_1120 = "GPT4o_1120"
+    GPT45_0227 = "GPT45_0227"
     ChatGPT4o = "ChatGPT4o"
     GPT4o_mini = "GPT4o_mini_0718"
     OpenAi_o1_0912 = "OpenAi_o1_0912"
@@ -191,6 +194,38 @@ def get_amazon_nova_pro_config():
     }
 
 
+def get_sonnet_37_vertex_config(enabled_thinking=False):
+    LOCATION_ID = "us-east5"
+    PROJECT_ID = gcloud_project_id
+    MODEL_ID = "claude-3-7-sonnet@20250219"
+
+    thinking = {
+        "type": "disabled"
+    }
+
+    if enabled_thinking:
+        thinking = {
+            "type": "enabled",
+            "budget_tokens": 4096,
+        }
+
+    def config():
+        gcp_access_token = get_gcp_access_token()
+        return {
+            "version": "vertex-2023-10-16",
+            "model_id": MODEL_ID,
+            "api_key": gcp_access_token,
+            "extra_params": {
+                "thinking": thinking,
+                "max_tokens": 20000 if enabled_thinking else 8192,
+                "temperature": 1 if enabled_thinking else temperature
+            },
+            "url": f"https://{LOCATION_ID}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION_ID}/publishers/anthropic/models/{MODEL_ID}:streamRawPredict"
+        }
+
+    return config
+
+
 API = {
     Model.Gemini: get_azure_config('gemini-pro'),
     Model.GeminiPro: get_gemini_pro_config,
@@ -205,6 +240,7 @@ API = {
     Model.GPT4o_0513: get_open_ai_config('gpt-4o-2024-05-13'),
     Model.GPT4o_0806: get_open_ai_config('gpt-4o-2024-08-06', 16384),
     Model.GPT4o_1120: get_open_ai_config('gpt-4o-2024-11-20'),
+    Model.GPT45_0227: get_open_ai_config('gpt-4.5-preview-2025-02-27', 16384),
     Model.ChatGPT4o: get_open_ai_config('chatgpt-4o-latest', 16384),
     Model.GPT4o_mini: get_open_ai_config('gpt-4o-mini-2024-07-18'),
     Model.OpenAi_o1_0912: get_open_ai_config('o1-preview-2024-09-12', skip_system=True),
@@ -215,6 +251,8 @@ API = {
     Model.Sonnet_35: get_sonnet_35_config,
     Model.Sonnet_35v2: get_sonnet_35_v2_config,
     Model.Haiku_35: get_haiku_35_config,
+    Model.Sonnet_37: get_sonnet_37_vertex_config(),
+    Model.Sonnet_37_Thinking: get_sonnet_37_vertex_config(True),
     Model.Llama3_70B: get_azure_config('llama-3-70b-instruct-awq'),
     Model.Llama31_405B: get_fireworks_config("accounts/fireworks/models/llama-v3p1-405b-instruct", 16384),
     Model.GrokBeta: get_xai_config('grok-beta'),
