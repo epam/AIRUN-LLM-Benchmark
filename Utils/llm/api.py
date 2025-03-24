@@ -1,9 +1,9 @@
 import time
+import re
 import requests
 from datetime import datetime
 from typing import List, Dict, Literal
-from pydantic import BaseModel
-from Utils.llm.config import API, Model, temperature
+from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.bedrock import request_bedrock_data
 
 
@@ -14,13 +14,8 @@ class APIException(Exception):
         super().__init__(self.content)
 
 
-class Message(BaseModel):
-    role: Literal["user", "assistant", "system", "developer"]
-    content: str
-
-
-def request_openai_format_data(system_prompt: str, messages: List[Message], model: Model):
-    config = API[model]()
+def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+    config = model()
 
     skip_system = config.get("skip_system", False)
     system_role_name: Literal["system", "developer"] = config.get("system_role_name", "system")
@@ -34,7 +29,7 @@ def request_openai_format_data(system_prompt: str, messages: List[Message], mode
     payload = {
         'model': config["model_id"],
         'messages': ([] if skip_system else [{'role': system_role_name, 'content': system_prompt}]) + messages,
-        'temperature': temperature,
+        'temperature': config.get("temperature", default_temperature),
     }
     max_tokens = config.get("max_tokens")
     if max_tokens is not None:
@@ -57,63 +52,17 @@ def request_openai_format_data(system_prompt: str, messages: List[Message], mode
     if "reasoning_tokens" in data["usage"].get("completion_tokens_details", {}):
         result["tokens"]["reasoning_tokens"] = data["usage"]["completion_tokens_details"]["reasoning_tokens"]
 
+    if model == Model.DeepSeekR1:
+        # For DeepSeekR1, we need to extract the reasoning and content separately
+        think_match = re.search(r'<think>([\s\S]*?)</think>', result["content"], re.DOTALL)
+        result["thoughts"] = think_match.group(1).strip() if think_match else None
+        result["content"] = re.sub(r'<think>[\s\S]*?</think>', '', result["content"]).strip()
+
     return result
 
 
-def request_gemini_pro_data(system_prompt: str, messages: List[Message]):
-    config = API[Model.GeminiPro]()
-
-    headers = {
-        'Content-Type': 'application/json',
-        "Authorization": f"Bearer {config['api_key']}",
-    }
-    contents = [
-        {"role": message['role'], "parts": [{"text": message['content']}]}
-        for message in messages
-    ]
-    payload = {
-        "contents": contents,
-        "system_instruction": {"parts": [{"text": system_prompt}]},
-        "generation_config": {
-            "maxOutputTokens": 8192,
-            "temperature": temperature,
-        },
-        "safetySettings": [
-            {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_ONLY_HIGH",
-            },
-            {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_ONLY_HIGH",
-            },
-            {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_ONLY_HIGH",
-            },
-            {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_ONLY_HIGH",
-            }
-        ],
-    }
-    response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
-
-    if not response.ok:
-        raise APIException(response.status_code, response.content)
-
-    data = response.json()
-    return {
-        'content': data["candidates"][0]["content"]["parts"][0]["text"],
-        'tokens': {
-            "input_tokens": data["usageMetadata"]["promptTokenCount"],
-            "output_tokens": data["usageMetadata"]["candidatesTokenCount"],
-        }
-    }
-
-
-def request_google_ai_studio_data(system_prompt: str, messages: List[Message], model: Model):
-    config = API[model]()
+def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+    config = model()
 
     headers = {
         'Content-Type': 'application/json',
@@ -124,12 +73,14 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[Message], m
         for message in messages
     ]
 
+    system_instruction = {"role": "user", "parts": [{"text": system_prompt}]} if not config.get("skip_system", False) else None
+
     payload = {
         "contents": contents,
-        "system_instruction": {"role": "user", "parts": [{"text": system_prompt}]},
+        "system_instruction": system_instruction,
         "generation_config": {
             "maxOutputTokens": 8192,
-            "temperature": temperature,
+            "temperature": default_temperature,
             "responseMimeType": "text/plain"
         },
     }
@@ -164,8 +115,8 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[Message], m
     }
 
 
-def request_claude_data(system_prompt: str, messages: List[Message], model: Model):
-    config = API[model]()
+def request_claude_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+    config = model()
 
     headers = {
         'Content-Type': 'application/json; charset=utf-8',
@@ -175,7 +126,7 @@ def request_claude_data(system_prompt: str, messages: List[Message], model: Mode
         "anthropic_version": config['version'],
         "max_tokens": 4096,
         "stream": False,
-        "temperature": temperature,
+        "temperature": default_temperature,
         "system": system_prompt,
         "messages": messages,  # [{"role": "user", "content": prompt}]
         **config.get("extra_params", {})
@@ -206,23 +157,23 @@ def request_claude_data(system_prompt: str, messages: List[Message], model: Mode
     }
 
 
-def ask_model(messages: List[Message], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
+def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
     print(f'\tAttempt {attempt} at {datetime.now()}')
     try:
         data = None
 
-        match model:
-            case Model.GeminiPro:
-                data = request_gemini_pro_data(system_prompt, messages)
-            case Model.GeminiPro_0801 | Model.Gemini_15_Pro_002 | Model.Gemini_1206 | Model.Gemini_20_Pro_0205 | Model.Gemini_20_Flash_Think_0121:
+        match model.provider:
+            case ModelProvider.AISTUDIO:
                 data = request_google_ai_studio_data(system_prompt, messages, model)
-            case Model.Opus_3 | Model.Sonnet_35 | Model.Sonnet_35v2 | Model.Haiku_35 | Model.Sonnet_37 | Model.Sonnet_37_Thinking:
+            case ModelProvider.VERTEXAI_ANTHROPIC:
                 data = request_claude_data(system_prompt, messages, model)
-            case Model.AmazonNovaPro:
+            case ModelProvider.AMAZON:
                 data = request_bedrock_data(system_prompt, messages, model)
-            case _:
+            case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
                 data = request_openai_format_data(system_prompt, messages, model)
+            case _:
+                raise Exception(f"Unknown model provider: {model.provider}")
 
         execute_time = time.time() - start_time
         return {
