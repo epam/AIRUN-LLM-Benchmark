@@ -1,30 +1,30 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows TypeScript and React best practices (state, hooks, effects).
-    - Ensure the application is free of memory leaks and unnecessary re-renders.
-    - Ensure the application is compatible with the latest version of React and TypeScript.
-    - Ensure the application is free of console errors and warnings.
-    - Ensure app does not access DOM elements to retrieve the values of text fields.
-    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
-    - Ensure app does not overuse refs for DOM access instead of React state and props.
-    - Ensure app does not have too many re-renders due to state or prop changes.
-    - Ensure the code adheres to accessibility standards (e.g., ARIA roles).
-    - Ensure the component is written in TypeScript.
-    - Verify the component is created using React 18.x.
-    - Verify the presence of an index.css file.
-    - Check that the generated code does not contain any TODOs.
-    - App does correctly use useEffect, avoiding infinite loops.
+  - Verify the component is implemented using React 18.x
+  - Confirm all component code is written in TypeScript with proper type definitions
+  - Ensure the component includes an index.css file for styling
+  - Validate the component has clean, production-ready code without any TODO comments
+  - Check that the component uses proper React state management for selected items and dropdown visibility
+  - Verify the component is reusable by accepting customizable props
+  - Ensure the component implements proper keyboard event handlers for navigation and selection
+  - Confirm the component follows React best practices for refs and DOM interactions
+  - Verify the component implements proper focus management techniques
+  - Check that the component uses appropriate ARIA attributes for accessibility
+  - Ensure the code is free of console errors and warnings
+  - Verify there are no unnecessary re-renders in the component
   completeness:
-    - Confirm the component includes a search feature in the dropdown.
-    - Check that the component is navigable via keyboard.
-    - Verify items in the dropdown can be selected by pressing the Enter key.
-    - Confirm the dropdown list opens when Enter is pressed.
-    - Ensure the focus returns to the select component after the dropdown is closed.
-    - Verify the dropdown closes upon selecting an item via keyboard.
-    - Verify the dropdown closes upon selecting an item via mouse.
-    - Confirm the dropdown closes when the Escape key is pressed.
-    - Ensure the dropdown closes when clicking outside the component.
+  - Verify the component renders a dropdown select UI element
+  - Confirm the component includes a search input within the dropdown
+  - Verify the component supports selecting a single item from the dropdown
+  - Ensure the dropdown can be navigated using keyboard arrow keys
+  - Verify items can be selected using the Enter key
+  - Confirm the dropdown visibility can be toggled using the Enter key when the component is focused
+  - Verify focus returns to the select component when the dropdown closes
+  - Ensure the dropdown closes when an item is selected via mouse click
+  - Confirm the dropdown closes when an item is selected via keyboard
+  - Verify the dropdown closes when the Escape key is pressed
+  - Ensure the dropdown closes when clicking outside the component
+  - Confirm the dropdown opens on Enter key press when the component is focused
 metadata:
   category: GenerateBaseComponent
   experiment: component_generation

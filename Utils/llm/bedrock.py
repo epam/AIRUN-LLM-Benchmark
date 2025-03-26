@@ -1,11 +1,11 @@
 # Before use - authorize via amazon aws cli https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#cli-configure-sso-configure
 import boto3
-from Utils.llm.config import API, Model, temperature
+from Utils.llm.config import Model, default_temperature
 
 client = boto3.client("bedrock-runtime")
 
 def request_bedrock_data(system_prompt, messages, model: Model):
-    config = API[model]()
+    config = model()
 
     system = [{"text": system_prompt}]
     formatted_messages = [
@@ -13,7 +13,7 @@ def request_bedrock_data(system_prompt, messages, model: Model):
         for message in messages
     ]
 
-    inf_params = {"temperature": temperature}
+    inf_params = {"temperature": default_temperature}
 
     response = client.converse(
         modelId=config["model_id"],

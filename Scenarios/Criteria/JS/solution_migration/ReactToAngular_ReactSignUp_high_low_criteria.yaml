@@ -1,29 +1,31 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
-    - Ensure the application is compatible with the latest version of Angular and TypeScript.
-    - Verify the application works correctly across modern browsers.
-    - Ensure the application is free of console errors and warnings.
-    - Ensure the code is decomposed to the set of the components with using single responsibility
-    - Ensure the code does not contain any duplicates and follow DRY principles
-    - Ensure the application is handle API errors
-    - Validate that @ngrx/store is used for state management and that the state is properly defined in auth.reducer.ts and app.state.ts.
-    - Verify the UI and UX by running the Angular application and ensuring that the signup form behaves as expected, including form validation and error messages.
-    - Confirm that the signup action is correctly dispatched from the SignupComponent upon form submission.
-    - Verify app does not directly manipulate the DOM outside of Angular framework.
-    - Verify app does not overuse Angular references for DOM access instead of Angular state and props.
-    - Check that there are no TODOs or incomplete parts in the code.
+  - Verify the signup component uses Angular's Reactive Forms for form handling
+  - Confirm form validation includes synchronous validation for name length (3-60 characters), email format, and password length (minimum 6 characters)
+  - Verify asynchronous validation checks if name and email are already in use
+  - Ensure form fields show appropriate validation feedback (success/error styling) when touched
+  - Confirm the signup form submission correctly calls the API service and dispatches appropriate actions
+  - Verify error messages are displayed below form fields when validation fails
+  - Ensure the page title is set correctly using Angular's Title service
+  - Verify the signup component uses @ngrx/store and @ngrx/effects for state management
+  - Confirm the form disables the submit button while submission is in progress
+  - Verify the signup API call properly handles both success and error responses
+  - Ensure the component follows Angular best practices for component structure and lifecycle management
+  - Verify proper use of Angular's HttpClient for API calls instead of direct promises
+  - Confirm the form validation displays the same error messages as specified in the requirements
   completeness:
-    - Verify that all React components and their functionalities are correctly translated into Angular components.
-    - Ensure that the form validation logic is implemented using Angular reactive forms.
-    - Check that the application includes the necessary form controls and validation rules.
-    - Confirm that the application correctly binds the form controls and handles form submission.
-    - Ensure the application are correctly display form validation errors.
-    - Verify that the application contains actions for signup, signup success, and signup failure.
-    - Ensure that the auth.effects.ts file correctly handles side effects using @ngrx/effects, including calling the API and dispatching success or failure actions.
-    - Validate that the API call to signup is correctly integrated and that the response is handled properly.
-    - Confirm that the application navigates to the login page correctly when the link is clicked.
+  - 'Verify the signup component includes all three required form fields: name, email, and password'
+  - Ensure the page includes a heading 'Join PodBaby today.'
+  - Verify the page includes a lead paragraph about membership benefits
+  - Confirm the form includes a submit button with appropriate styling and icon
+  - Verify the page includes a link to the login page with appropriate text
+  - Ensure the FormGroup component or equivalent is implemented to handle form field styling and error display
+  - Verify the Icon component or equivalent is implemented for the signup button
+  - Confirm all validation rules are implemented (name length, email format, password length)
+  - Ensure asynchronous validation for both name and email uniqueness is implemented
+  - Verify the signup API integration is complete with proper error handling
+  - Confirm the form layout matches the horizontal form structure specified
+  - Ensure the page has proper document title setting functionality
 metadata:
   category: ReactToAngular_ReactSignUp_high_low
   experiment: solution_migration

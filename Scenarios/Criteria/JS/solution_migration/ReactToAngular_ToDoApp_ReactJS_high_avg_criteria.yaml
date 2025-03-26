@@ -1,32 +1,38 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
-    - Ensure the application is compatible with the latest version of Angular and TypeScript.
-    - Verify the application works correctly across modern browsers.
-    - Ensure the application is free of console errors and warnings.
-    - The code is decomposed to the set of the components with using single responsibility
-    - Code should not contain any duplicates and follow DRY principles
-    - Ensure that the translated code is free of errors and warnings when compiled in an Angular environment.
-    - App does not directly manipulate the DOM outside of Angular framework.
-    - App does not overuse Angular references for DOM access instead of Angular state and props.
-    - App correctly uses Angular lifecycle hooks, avoiding infinite loops.
-    - Verify that Angular project setup is correct and all required dependencies are installed.
-    - Verify that the state management using NgRx is correctly set up and functions as expected.
-    - Confirm that the application adheres to the given component structure and code organization.
-    - Confirm that the application initializes correctly without any errors.
+  - Verify that the application uses Angular 14.x framework
+  - Confirm that @ngrx/store is used for state management
+  - Verify that @ngrx/effects is implemented for handling side effects
+  - Ensure proper actions, reducers, and selectors are implemented in the NgRx store
+  - Confirm that components use appropriate Angular decorators (@Component, @Input, @Output)
+  - Verify that React refs are replaced with Angular @ViewChild decorators
+  - Ensure that component communication uses @Input() for property binding and @Output() EventEmitter for event handling
+  - Verify that Angular services are used for data handling and business logic
+  - Confirm that dependency injection is properly implemented
+  - Ensure that Angular change detection strategies are applied where appropriate
+  - Verify that Angular Router is used for navigation
+  - Confirm that the application follows Angular style guide conventions
+  - Ensure that TypeScript interfaces and types are properly maintained throughout the application
+  - Verify that JSX templates are converted to Angular HTML templates
+  - Ensure that React event handlers are replaced with Angular event bindings
+  - Verify that the code does not contain any TODOs
+  - Confirm that lazy loading is implemented for feature modules
   completeness:
-    - Check that the main component displays the header with input for new todos.
-    - Ensure that adding a new todo item works correctly.
-    - Verify that the todo list displays all added todo items.
-    - Confirm that toggle functionality works for marking todos as completed.
-    - Check that editing a todo item works and updates the todo item correctly.
-    - Ensure that deleting a todo item removes it from the list.
-    - Verify that the footer correctly displays the count of active items.
-    - Confirm that the footer's clear completed button works and removes completed items.
-    - Check that filtering todos by "all", "active", and "completed" works correctly.
-    - Ensure that the "Mark all as complete" functionality works correctly.
-    - Check that the application persists todos to local storage and reloads them correctly.
+  - Verify that the todo list application displays all todo items
+  - Ensure that adding new todo items functionality is implemented
+  - Confirm that toggling todo items as complete/incomplete works
+  - Verify that editing todo items functionality is implemented
+  - Ensure that deleting todo items functionality is implemented
+  - Verify that the 'Mark all as complete' functionality is implemented
+  - Confirm that filtering todos by 'all', 'active', and 'completed' works
+  - Ensure that the footer displays the count of active items
+  - Verify that the 'Clear completed' button removes completed items
+  - Ensure that todo items are persisted to local storage
+  - Verify that the application maintains the same URL structure for navigation
+  - Confirm that the application displays appropriate UI for empty states
+  - Ensure that the application handles form submissions correctly
+  - Verify that the application maintains proper component relationships
+  - Ensure that all business logic from the original application is preserved
 metadata:
   category: ReactToAngular_ToDoApp_ReactJS_high_avg
   experiment: solution_migration

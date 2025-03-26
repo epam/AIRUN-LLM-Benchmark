@@ -1,31 +1,30 @@
 evaluation_steps:
   accuracy:
-    - Verify that all form inputs have associated labels for better accessibility.
-    - Ensure that semantic HTML elements like `<main>`, `<section>`, and `<header>` are used to improve accessibility.
-    - Check that ARIA attributes are used appropriately to enhance accessibility for screen readers.
-    - Confirm that functional components with hooks are used instead of class components where possible.
-    - Verify that the code follows React and Redux best practices, such as proper state management and component lifecycle methods.
-    - Ensure that prop types are defined and documented using `PropTypes` or TypeScript interfaces.
-    - Confirm adherence to React and JavaScript best practices, such as avoiding direct state mutations.
-    - Check if the code is refactored to separate concerns and use dependency injection for better testability.
-    - Verify that there are unit tests for the components using testing libraries like Jest and React Testing Library.
-    - Ensure that the tests cover different scenarios and edge cases, including form validation and submission.
-    - Verify that comments are added to explain the purpose of complex code blocks.
-    - Check that the PropTypes are documented for better understanding of the expected props.
-    - Ensure that the code has sufficient documentation, including function and component descriptions.
-    - Confirm that the documentation is clear, concise, and follows a consistent format.
+  - Verify legacy React API usage is correctly identified (PropTypes, React.createClass, etc.)
+  - Confirm outdated Redux Form implementation issues are accurately highlighted
+  - Ensure performance issues in form validation and submission are correctly identified
+  - Verify component lifecycle and state management issues are properly assessed
+  - Check that accessibility concerns in form elements are accurately identified
+  - Ensure code examples for each improvement suggestion are technically correct
+  - Validate that all identified issues have appropriate solutions proposed
+  - Confirm suggestions follow modern React best practices (hooks, functional components, etc.)
+  - Verify API integration improvement suggestions are practical and effective
+  - Check that all suggestions maintain or enhance the original functionality
+  - Ensure architectural recommendations improve separation of concerns
+  - Verify prop validation improvements are correctly proposed
   completeness:
-    - Check if the `PropTypes` import from `react` is updated to import from the `prop-types` package.
-    - Verify that props are destructured in the `render` method to improve readability.
-    - Confirm that the code uses clear and concise variable names.
-    - Ensure that complex code blocks have explanatory comments for better understanding.
-    - Check if functions are defined outside of the `render` method to prevent unnecessary re-renders.
-    - Verify that validation logic is moved to a separate file to keep the component clean and maintainable.
-    - Ensure that repetitive code is refactored into reusable functions or components.
-    - Confirm that the code adheres to a consistent coding style and conventions.
-    - Ensure that functions are bound in the constructor instead of inline in the `render` method to avoid unnecessary re-renders.
-    - Verify that any potential performance bottlenecks, such as unnecessary re-renders or heavy computations in the render method, are optimized.
-    - Check for the use of memoization techniques where applicable to improve performance.
+  - Verify analysis covers all requested aspects (readability, maintainability, performance, accessibility, best practices, documentation)
+  - Confirm form validation approach is thoroughly evaluated
+  - Ensure error handling mechanisms are comprehensively assessed
+  - Verify state management for form data is properly analyzed
+  - Confirm component structure and responsibilities are evaluated
+  - Ensure prop usage and component interfaces are reviewed
+  - Verify component lifecycle management is analyzed
+  - Confirm API call patterns and error handling are evaluated
+  - Ensure promise handling and asynchronous operations are assessed
+  - Verify specific code examples are provided for suggested improvements
+  - Confirm issues are properly categorized by technical aspect
+  - Ensure before/after code examples demonstrate clear improvements
 metadata:
   category: EvaluateCodeQuality_ReactSignUp_high_low
   experiment: code_analysis
