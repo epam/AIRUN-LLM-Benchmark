@@ -50,6 +50,19 @@ def get_open_ai_config(model, max_tokens=None, skip_system=False, system_role_na
 
     return config
 
+def get_open_ai_responses_config(model):
+    config = {
+        "model_id": model,
+        "api_key": open_api_key,
+        "url": 'https://api.openai.com/v1/responses'
+    }
+
+    if model.startswith("o1") or model.startswith("o3"):
+        config["temperature"] = 1
+        config["reasoning_effort"] = "medium"
+
+    return config
+
 
 def get_xai_config(model):
     return {
@@ -131,6 +144,7 @@ class ModelProvider(Enum):
     VERTEXAI = "vertexai"
     VERTEXAI_ANTHROPIC = "vertexai_anthropic"
     OPENAI = "openai"
+    OPENAI_RESPONSES = "OPENAI_RESPONSES"
     AZURE = "azure"
     FIREWORKS = "fireworks"
     XAI = "xai"
@@ -157,6 +171,7 @@ class Model(Enum):
     OpenAi_o1_mini_0912 = ("OpenAi_o1_mini_0912", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-mini-2024-09-12', skip_system=True))
     OpenAi_o3_mini_0131 = ("OpenAi_o3_mini_0131", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-mini-2025-01-31', system_role_name="developer"))
 
+    OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
     # Claude models
     Haiku_35 = ("Claude_Haiku_35", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-3-5-haiku@20241022', 'us-east5'))
     Sonnet_35 = ("Claude_Sonnet_35", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-3-5-sonnet@20240620'))

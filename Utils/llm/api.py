@@ -61,6 +61,74 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     return result
 
 
+def request_openai_response_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+    config = model()
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {config["api_key"]}",
+    }
+
+    developer_message = [{
+        "role": "developer",
+        "content": [{
+            "type": "input_text", "text": system_prompt
+        }]
+    }]
+
+    input_messages = [{
+        "role": "user",
+        "content": [{"type": "input_text", "text": message["content"]}]
+    } for message in messages]
+
+    payload = {
+        "model": config["model_id"],
+        "input": developer_message + input_messages,
+        "temperature": config.get("temperature", default_temperature),
+        "text": {
+            "format": {
+                "type": "text"
+            }
+        },
+        "store": False
+    }
+
+    if "max_tokens" in config:
+        payload["max_tokens"] = config["max_tokens"]
+
+    if "reasoning_effort" in config:
+        payload["reasoning"] = {
+            "effort": config["reasoning_effort"]
+        }
+
+    response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
+
+    if not response.ok:
+        raise APIException(response.status_code, response.content)
+
+    data = response.json()
+
+    content = next(item["content"][0]["text"] for item in data["output"] if item["type"] == "message")
+    reasoning = next((item["summary"][0].get("text", None)
+                      for item in data["output"]
+                      if item["type"] == "reasoning" and len(item["summary"]) > 0),
+                     None)
+
+    result = {
+        "content": content,
+        "thoughts": reasoning,
+        "tokens": {
+            "input_tokens": data["usage"]["input_tokens"],
+            "output_tokens": data["usage"]["output_tokens"],
+        }
+    }
+
+    if "reasoning_tokens" in data["usage"].get("output_tokens_details", {}):
+        result["tokens"]["reasoning_tokens"] = data["usage"]["output_tokens_details"]["reasoning_tokens"]
+
+    return result
+
+
 def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
     config = model()
 
@@ -172,6 +240,8 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
                 data = request_bedrock_data(system_prompt, messages, model)
             case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
                 data = request_openai_format_data(system_prompt, messages, model)
+            case ModelProvider.OPENAI_RESPONSES:
+                data = request_openai_response_format_data(system_prompt, messages, model)
             case _:
                 raise Exception(f"Unknown model provider: {model.provider}")
 
