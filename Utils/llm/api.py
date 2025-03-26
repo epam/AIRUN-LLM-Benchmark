@@ -147,7 +147,7 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, s
         "contents": contents,
         "system_instruction": system_instruction,
         "generation_config": {
-            "maxOutputTokens": 8192,
+            "maxOutputTokens": config.get("max_tokens", 8192),
             "temperature": default_temperature,
             "responseMimeType": "text/plain"
         },
@@ -160,7 +160,7 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, s
 
     data = response.json()
 
-    if Model.Gemini_20_Flash_Think_0121 == model:
+    if model in [Model.Gemini_20_Flash_Think_0121, Model.Gemini_25_Pro_0325]:
         parts = data["candidates"][0]["content"]["parts"]
         thoughts = parts[0]["text"] if len(parts) > 1 else None
         content = parts[1]["text"] if thoughts else parts[0]["text"]
