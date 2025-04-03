@@ -1,35 +1,42 @@
-import sys
 import os
 import re
+import yaml
 import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
-
-import yaml
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI, AzureChatOpenAI
+
+from epam.auto_llm_eval.evaluator import read_file, write_file, evaluate_metric, grade_metric, EvaluationResult
+from langchain_core.language_models.base import BaseLanguageModel
+from langchain_openai import ChatOpenAI
 from langchain_google_vertexai.model_garden import ChatAnthropicVertex
 
 from Utils.llm.config import Model
 
 load_dotenv()
 
-sys.path.append(os.getenv('AUTO_LLM_EVAL_PATH'))
-from evaluator import read_file, write_file, evaluate_metric, grade_metric, EvaluationResult
+results_repo_path = os.getenv('RESULTS_REPO_PATH')
+if not results_repo_path:
+    raise ValueError("RESULTS_REPO_PATH environment variable is not set. Please set it before running the script.")
 
-results_path = Path(os.getenv('RESULTS_REPO_PATH')).resolve()
+gcloud_project_id = os.getenv('GCLOUD_PROJECT_ID')
+if not gcloud_project_id:
+    raise ValueError("GCLOUD_PROJECT_ID environment variable is not set. Please set it before running the script.")
+
+results_path = Path(results_repo_path).resolve()
 criteria_path = Path(__file__).resolve().parent.parent / 'Scenarios' / 'Criteria' / 'JS'
 
 
-def get_evaluation_models() -> tuple[ChatAnthropicVertex, ChatOpenAI]:
+def get_evaluation_models() -> List[BaseLanguageModel]:
     """Get the evaluator model."""
 
     # Define Claude 3.7 with enabled thinking mode
     sonnet = ChatAnthropicVertex(
         model_name="claude-3-7-sonnet@20250219",
-        project=os.getenv('GCLOUD_PROJECT_ID'),
+        project=gcloud_project_id,
         location="us-east5",
         max_token=8192,
+        max_retries=6,
         model_kwargs={  # Enable Thinking Mode
             "thinking": {
                 "type": "enabled",
@@ -40,24 +47,13 @@ def get_evaluation_models() -> tuple[ChatAnthropicVertex, ChatOpenAI]:
 
     # Define OpenAI o3-mini model
     o3mini = ChatOpenAI(
-        model="o3-mini",
-        temperature=1
+        model="o3-mini"
     )
 
-    # deepseek_r1 = AzureChatOpenAI(
-    #     temperature=1,
-    #     azure_deployment="deepseek-r1",
-    #     model="deepseek-r1",
-    #     azure_endpoint=os.getenv('AZURE_DEPLOYMENT_BASE_URL'),
-    #     api_version="2024-05-01-preview",
-    #     max_tokens=8096,
-    #     api_key=os.getenv('AZURE_DEPLOYMENT_KEY')
-    # )
-
-    return sonnet, o3mini
+    return [sonnet, o3mini]
 
 
-def get_grading_model() -> ChatOpenAI:
+def get_grading_model() -> BaseLanguageModel:
     """Get the grading model."""
 
     # Define GPT-4-omni model
@@ -94,6 +90,7 @@ def save_grading_report(grading_path: Path, report: List[dict[str, Any]]):
 
 def construct_category_name(category, dataset, complexity, size):
     """Construct the category name."""
+    # Example: AngularToReact, AngularCosmoPage, avg, high => AngularToReact_AngularCosmoPage_avg_high
     parts = [category]
     if dataset:
         parts.append(dataset)
@@ -123,8 +120,8 @@ def evaluate_scenario(
         base_path: Path,
         output: str,
         category_criteria_path: Path,
-        evaluation_model: ChatOpenAI | AzureChatOpenAI,
-        grading_model: ChatOpenAI
+        evaluation_model: BaseLanguageModel,
+        grading_model: BaseLanguageModel
 ) -> Tuple[EvaluationResult, EvaluationResult]:
     """
     Evaluate a single scenario from a dataset.
@@ -136,8 +133,8 @@ def evaluate_scenario(
         base_path (Path): The base path to the scenario file.
         output (str): The output of the scenario to evaluate.
         category_criteria_path (Path): The path to the criteria file.
-        evaluation_model (ChatAnthropicVertex, ChatOpenAI): The AI model used for evaluation.
-        grading_model (ChatOpenAI): The AI model used for grading.
+        evaluation_model (BaseLanguageModel): The AI model used for evaluation.
+        grading_model (BaseLanguageModel): The AI model used for grading.
 
     Returns:
         Tuple[EvaluationResult, EvaluationResult]: A tuple containing the
@@ -199,7 +196,7 @@ def evaluate_scenario(
     return accuracy, completeness
 
 
-def main(model_name: Model, language: str = "JS"):
+def main(model: Model, language: str = "JS"):
     """
     Main function to evaluate the scenarios.
 
@@ -208,7 +205,7 @@ def main(model_name: Model, language: str = "JS"):
     and evaluates the scenarios based on the criteria.
 
     Args:
-        model_name (Model): The name of the model.
+        model (Model): Model to evaluate.
         language (str): The programming language of scenarios.
 
     Returns:
@@ -220,7 +217,7 @@ def main(model_name: Model, language: str = "JS"):
 
     grading_report = []
 
-    base_path = results_path / "Output" / f"{model_name}" / language
+    base_path = results_path / "Output" / model.model_id / language
     grading_path = base_path / "grading.csv"
     summary_path = base_path / "summary.csv"
 
@@ -239,7 +236,7 @@ def main(model_name: Model, language: str = "JS"):
 
         acc, comp = row.get("Accuracy", None), row.get("Completeness", None)
 
-        if not (pd.isna(acc) or pd.isna(comp)):
+        if pd.notna(acc) and pd.notna(comp):
             print(f"Skipping {category_name} as it already has results.")
             continue
 
@@ -264,7 +261,7 @@ def main(model_name: Model, language: str = "JS"):
 
                     acc_model, comp_model = row.get(accuracy_cell_model_name, None), row.get(completeness_cell_model_name, None)
 
-                    if not (pd.isna(acc_model) or pd.isna(comp_model)):
+                    if pd.notna(acc) and pd.notna(comp):
                         print(f"Skipping evaluation for {category_name} by {evaluation_model.model_name} as it already has results.")
                         continue
 

@@ -93,7 +93,7 @@ def main(models:List[Model] =None, langs=None, experiments=None):
     for model in models:
         for lang in langs:
             data = header
-            target_dir = results_path / 'Output' / f"{model}" / lang
+            target_dir = results_path / 'Output' / model.model_id / lang
             for experiment in experiments:
                 current_path = target_dir / experiment
                 if not os.path.isdir(current_path): continue
