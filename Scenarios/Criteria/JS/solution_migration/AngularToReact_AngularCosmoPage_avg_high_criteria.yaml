@@ -1,32 +1,36 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
-    - Ensure the application is free of memory leaks and unnecessary re-renders.
-    - Ensure the application is compatible with the latest version of React and TypeScript.
-    - Ensure the application is free of console errors and warnings.
-    - Ensure app does not access DOM elements to retrieve the values of text fields.
-    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
-    - Ensure app does not overuse refs for DOM access instead of React state and props.
-    - Ensure app does not have too many re-renders due to state or prop changes.
-    - Ensure the code is decomposed to the set of the components with using single responsibility
-    - Ensure the code does not contain any duplicates and follow DRY principles
-    - App does not access DOM elements to retrieve the values of text fields.
-    - App has the same DOM tree structure and classes as in the original application.
-    - Ensure that the store is properly configured and provided to the app.
-    - Verify that the code is migrated to React 18.x.
-    - Check that TypeScript is used in the translated code.
-    - Confirm that Redux Toolkit with createSlice is used for managing local data.
-    - Ensure that the code is split into separate components.
-    - Validate that the code does not contain any TODOs.
-    - Check that the code is optimized.
+  - Verify that all components are implemented using TypeScript with strict typing for variables, functions, and props
+  - Confirm that Redux Toolkit with createSlice is used for global state management
+  - Verify that React functional components are used instead of class components
+  - Ensure that React hooks (useState, useEffect, useCallback, useMemo) are used appropriately
+  - Validate that API communication is implemented using fetch or axios instead of $resource
+  - Confirm that form handling uses React controlled components
+  - Verify that React Router is implemented for navigation
+  - Ensure that an appropriate React i18n library is used for internationalization
+  - Validate that code splitting is implemented for performance optimization
+  - Confirm that React.memo is used for expensive render operations
+  - Verify that proper dependency arrays are used in useEffect and other hooks
+  - Ensure that TypeScript interfaces are defined for all data models
+  - Validate that Redux selectors are used for accessing state
+  - Confirm that proper action creators are implemented for state mutations
+  - Verify that local storage functionality is implemented using appropriate hooks
   completeness:
-    - Confirm that the state slices for page and user are correctly defined and managed.
-    - Verify that API service functions are correctly defined and used.
-    - Ensure that the application correctly handles all the functionalities from the original Angular code.
-    - Verify that all functionalities like save, delete, update, and tag management are working correctly.
-    - Ensure that the application performs all CRUD operations correctly.
-    - Verify that the application handles local storage and state persistence correctly.
+  - Ensure that all page management functionality (create, update, delete, duplicate) is implemented
+  - Verify that page type selection functionality is present
+  - Confirm that URL auto-generation from title functionality exists
+  - Validate that tag management with autocomplete suggestions is implemented
+  - Ensure that publish status options (publish, draft, schedule) are available
+  - Verify that scheduled publishing date functionality is implemented
+  - Confirm that local storage version comparison and restoration features are present
+  - Validate that notification system for success/error messages is implemented
+  - Ensure that form validation for required fields (URL, page type) is present
+  - Verify that all API endpoints from the original code are properly handled
+  - Confirm that extras management functionality is implemented
+  - Validate that revision history functionality is maintained
+  - Ensure that the code is organized into feature folders with separation of business logic from UI components
+  - Verify that all translation functionality is preserved
+  - Confirm that the application maintains the same URL structure and parameters
 metadata:
   category: AngularToReact_AngularCosmoPage_avg_high
   experiment: solution_migration

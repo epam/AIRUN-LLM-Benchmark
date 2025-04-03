@@ -1,26 +1,30 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
-    - Ensure the application is free of memory leaks and unnecessary re-renders.
-    - Ensure the application is compatible with the latest version of React and TypeScript.
-    - Verify the application works correctly across modern browsers.
-    - Ensure the application is free of console errors and warnings.
-    - Verify that the new React app initializes successfully without errors.
-    - Verify that the codebase does not contain any TODOs.
-    - Ensure the application has the same DOM tree structure and classes as in the original application.
-    - Verify the application UI matches the original HTML structure visually.
-    - Verify the application handles rapid sequential key presses without audio overlap issues.
+  - Verify the application is built with React 18 and Create React App with TypeScript configuration
+  - Confirm the application uses TypeScript interfaces for audio mapping structure
+  - Verify all components are implemented as functional components with React hooks
+  - Ensure proper state management is used for UI interactions (useState, useEffect)
+  - Verify keyboard event handlers are implemented at appropriate component levels
+  - Confirm mouse interactions (mousedown, mouseup, mouseout, mousemove) are implemented using React synthetic events
+  - Verify audio resources are properly handled in the React environment
+  - Ensure the fullscreen functionality uses React patterns and handles browser compatibility
+  - Verify conditional class application is implemented using React patterns
+  - Confirm the code implements performance optimizations like React.memo where appropriate
+  - Ensure the application handles audio playback with proper React lifecycle considerations
+  - Verify the code follows TypeScript strict typing throughout the application
   completeness:
-    - Verify the application contains a button container with "Notes" and "Letters" buttons.
-    - Verify the application renders piano keys for both natural and sharp notes.
-    - Verify clicking on a piano key plays the correct sound and highlights the key.
-    - Verify releasing the mouse button or moving the cursor out of the key stops the sound and removes the highlight.
-    - Verify pressing and releasing keyboard keys play and stop the corresponding piano notes.
-    - Verify clicking the "Notes" button displays note names on the keys.
-    - Verify clicking the "Letters" button displays letter names on the keys.
-    - Verify the fullscreen button toggles fullscreen mode for the application.
-    - Verify the application correctly handles simultaneous multiple key presses.
+  - Verify the application renders a header with the title 'Virtual Piano'
+  - Confirm the application includes a button container with 'Notes' and 'Letters' toggle buttons
+  - Verify the piano component renders all piano keys (natural and sharp keys)
+  - Ensure each piano key has appropriate data attributes for letters and notes
+  - Verify the application plays the correct audio when piano keys are clicked
+  - Confirm the application highlights keys when they are active (pressed)
+  - Verify the application responds to keyboard input to play corresponding piano notes
+  - Ensure the application toggles between displaying notes and letters when corresponding buttons are clicked
+  - Verify the fullscreen button toggles the application between normal and fullscreen modes
+  - Confirm the application handles multiple simultaneous key presses correctly
+  - Verify the application handles mouse drag functionality across piano keys
+  - Ensure the application includes a footer with the year information
 metadata:
   category: VanillaToReact_Piano_NativeJS_high_low
   experiment: solution_migration

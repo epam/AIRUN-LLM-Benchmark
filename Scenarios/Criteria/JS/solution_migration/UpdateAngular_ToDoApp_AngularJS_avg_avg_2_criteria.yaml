@@ -1,36 +1,46 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows Angular style guidelines and best practices.
-    - Ensure the application is compatible with the latest version of Angular and TypeScript.
-    - Verify the application works correctly across modern browsers.
-    - Ensure the application is free of console errors and warnings.
-    - Ensure the code is decomposed to the set of the components with using single responsibility
-    - Ensure the code does not contain any duplicates and follow DRY principles
-    - Check that @ngrx/store is used for state management.
-    - Check that @ngrx/effects is used for handling side effects.
-    - Confirm that the code is split into separate components.
-    - Ensure that localStorage is used for persisting todos via a service.
-    - Check that state management actions and reducers are correctly implemented.
-    - Verify that effects are correctly implemented to handle side effects.
-    - Ensure that the converted code does not contain any TODOs.
-    - Verify that all AngularJS-specific elements and syntax are removed.
-    - Confirm that the application structure adheres to Angular style guidelines.
-    - Verify App does not access DOM elements to retrieve the values of text fields.
-    - Verify App does not make API calls.
-    - Verify App has the same DOM tree structure and classes as in the original application.
-    - Verify that the code is migrated to Angular 14.x.
+  - Verify that the application uses Angular 14.x framework
+  - Confirm that the application uses ES modules instead of RequireJS
+  - Verify that @ngrx/store is implemented for state management
+  - Verify that @ngrx/effects is implemented for side effects
+  - Confirm that appropriate actions, reducers, selectors, and effects are defined for todo management
+  - Verify that Angular services are properly injectable with @Injectable decorator
+  - Confirm that localStorage is used for data persistence in a service
+  - Verify that Angular components use proper @Component decorators
+  - Confirm that Angular directives use proper @Directive decorators
+  - Verify that component templates use Angular template syntax (e.g., *ngFor, *ngIf)
+  - Confirm that event binding uses proper Angular syntax (e.g., (click))
+  - Verify that property binding uses proper Angular syntax (e.g., [class.completed])
+  - Confirm that Angular lifecycle hooks are properly implemented where needed
+  - Verify that TypeScript interfaces or classes are used for data models
+  - Confirm that dependency injection is properly implemented in components and services
+  - Verify that the code follows Angular style guide conventions
+  - Confirm that the application has no console errors or warnings
+  - Verify that the code uses TypeScript features appropriately (types, interfaces, etc.)
+  - Confirm that the code does not contain any TODOs or commented-out code
+  - Verify that the application follows single responsibility principle in component design
   completeness:
-    - Confirm that the application initializes correctly and loads persisted todos.
-    - Ensure that the todo list displays correctly and is interactive.
-    - Verify that adding a new todo works correctly.
-    - Check that editing a todo works correctly.
-    - Confirm that toggling a todo item completion status works correctly.
-    - Ensure that removing a todo works correctly.
-    - Verify that the "Mark all as complete" functionality works.
-    - Check that the filter functionality (All, Active, Completed) works.
-    - Confirm that the "Clear completed" button works correctly.
-    - Ensure that the application is responsive and functions correctly on different screen sizes.
+  - Verify that the application has a component for displaying the todo list
+  - Confirm that the application has a component for adding new todos
+  - Verify that the application has a component for editing existing todos
+  - Confirm that the application has a component for filtering todos
+  - Verify that the application has a component for displaying todo count statistics
+  - Confirm that the application implements functionality to add new todos
+  - Verify that the application implements functionality to edit existing todos
+  - Confirm that the application implements functionality to delete todos
+  - Verify that the application implements functionality to mark todos as completed
+  - Confirm that the application implements functionality to filter todos (All, Active, Completed)
+  - Verify that the application implements functionality to mark all todos as complete/incomplete
+  - Confirm that the application implements functionality to clear completed todos
+  - Verify that the application implements functionality to display the count of remaining todos
+  - Confirm that the application persists todos in localStorage
+  - Verify that the application loads persisted todos on initialization
+  - Confirm that the application handles escape key press to cancel editing
+  - Verify that the application automatically focuses on the input field when editing a todo
+  - Confirm that the application maintains the same visual appearance as the original
+  - Verify that the application handles empty todo titles appropriately
+  - Confirm that the application updates the URL based on the selected filter
 metadata:
   category: UpdateAngular_ToDoApp_AngularJS_avg_avg_2
   experiment: solution_migration

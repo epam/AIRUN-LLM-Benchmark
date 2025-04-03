@@ -1,33 +1,28 @@
 evaluation_steps:
   accuracy:
-    - Ensure the application does not contain unused imports or code.
-    - Ensure the codebase is structured and follows React best practices (state, hooks, effects).
-    - Check that a debounced function is used to optimize the search requests.
-    - Ensure the application is free of memory leaks and unnecessary re-renders.
-    - Ensure the application is compatible with the latest version of React and TypeScript.
-    - Ensure the application is free of console errors and warnings.
-    - Ensure app does not access DOM elements to retrieve the values of text fields.
-    - Ensure app does not directly manipulate the DOM outside of React virtual DOM.
-    - Ensure app does not overuse refs for DOM access instead of React state and props.
-    - Ensure the code does not contain any duplicates and follow DRY principles
-    - Ensure app does not have too many re-renders due to state or prop changes.
-    - Confirm that the useState is used to capture the search input value.
-    - Verify that the code does not contain any TODOs.
-    - Verify the inclusion of TypeScript in the React application.
-    - Ensure that `axios` is used for making API requests.
-    - Validate that the `useEffect` hooks are used correctly for data loading.
+  - Verify that the search input field properly updates state when users type
+  - Confirm implementation of debouncing pattern with 300-500ms delay for search API calls
+  - Verify that axios is used for API requests and properly configured
+  - Ensure proper TypeScript typing for all components, functions, and API responses
+  - Validate that the API endpoint is correctly constructed to include search parameters
+  - Verify implementation of useMemo and/or useCallback for performance optimization where appropriate
+  - Confirm that error handling is implemented for API requests with appropriate user feedback
+  - Verify that API calls are triggered only after the user stops typing
+  - Ensure that state management for search queries and results follows React best practices
+  - Validate that the code is free of console errors, unused imports, and commented-out code
+  - Verify that loading state is properly managed during API requests
+  - Confirm that the component is implemented following React 18.x patterns
   completeness:
-    - Check that a loading indicator is displayed while data is being fetched.
-    - Verify that the loader does not hide the search input when data is loading.
-    - Validate that a request with an empty search term is sent on the initial render.
-    - Verify that the search input field is present.
-    - Ensure that the character search functionality is implemented.
-    - Ensure that the API request includes the search term as a query parameter.
-    - Validate that the data is loading on initial app load with empty query and then when the search term changes.
-    - Ensure that the debounced fetch function prevents unnecessary API requests.
-    - Confirm that the character list is updated based on the search results.
-    - Validate that the application handles API request errors.
-    - Ensure that the user experience remains smooth without backend overloads.
+  - Verify presence of a search input field that filters characters by name
+  - Confirm that the application shows a loading indicator during API requests
+  - Ensure initial data loading occurs on component mount with an empty search query
+  - Verify that search results update dynamically as users type
+  - Validate that visual feedback is provided when no results are found
+  - Confirm that the search component is implemented with responsive design
+  - Verify that the character list displays search results after API response
+  - Ensure appropriate error boundaries are implemented where needed
+  - Confirm that all required TypeScript interfaces/types are defined for API data and component props
+  - Verify that the application maintains all original functionality while adding search capabilities
 metadata:
   category: ModifyReactApp_ReactFetchAPI_avg_low
   experiment: component_generation

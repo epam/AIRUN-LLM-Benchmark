@@ -1,1 +1,0 @@
-As an AI proficient in software engineering, code analysis and evaluation, particularly in Frontend development, React and Angular.
