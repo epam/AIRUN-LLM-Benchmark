@@ -187,6 +187,7 @@ class Model(Enum):
     Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/qwen2p5-coder-32b-instruct', 4096))
     DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1', 16000))
     DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-v3-0324', 16000))
+    Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/llama4-maverick-instruct-basic', 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_pro_config())
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):
