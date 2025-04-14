@@ -18,6 +18,7 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     config = model()
 
     skip_system = config.get("skip_system", False)
+    extra_params = config.get("extra_params", {})
     system_role_name: Literal["system", "developer"] = config.get("system_role_name", "system")
 
     headers = {
@@ -30,7 +31,9 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
         'model': config["model_id"],
         'messages': ([] if skip_system else [{'role': system_role_name, 'content': system_prompt}]) + messages,
         'temperature': config.get("temperature", default_temperature),
+        **extra_params
     }
+
     max_tokens = config.get("max_tokens")
     if max_tokens is not None:
         payload['max_tokens'] = max_tokens
@@ -51,6 +54,9 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
 
     if "reasoning_tokens" in data["usage"].get("completion_tokens_details", {}):
         result["tokens"]["reasoning_tokens"] = data["usage"]["completion_tokens_details"]["reasoning_tokens"]
+
+    if data["choices"][0]["message"]["reasoning_content"]:
+        result["thoughts"] = data["choices"][0]["message"]["reasoning_content"]
 
     if model == Model.DeepSeekR1:
         # For DeepSeekR1, we need to extract the reasoning and content separately

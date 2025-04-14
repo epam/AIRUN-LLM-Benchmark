@@ -50,6 +50,7 @@ def get_open_ai_config(model, max_tokens=None, skip_system=False, system_role_na
 
     return config
 
+
 def get_open_ai_responses_config(model):
     config = {
         "model_id": model,
@@ -64,11 +65,12 @@ def get_open_ai_responses_config(model):
     return config
 
 
-def get_xai_config(model):
+def get_xai_config(model, **kwargs):
     return {
         "model_id": model,
         "api_key": xai_api_key,
-        "url": 'https://api.x.ai/v1/chat/completions'
+        "url": 'https://api.x.ai/v1/chat/completions',
+        "extra_params": kwargs
     }
 
 
@@ -184,6 +186,8 @@ class Model(Enum):
     # Other models
     GrokBeta = ("GrokBeta", ModelProvider.XAI, lambda: get_xai_config('grok-beta'))
     Grok2_1212 = ("Grok2_1212", ModelProvider.XAI, lambda: get_xai_config('grok-2-1212'))
+    Grok3_beta = ("Grok3_beta", ModelProvider.XAI, lambda: get_xai_config('grok-3'))
+    Grok3mini_beta = ("Grok3mini_beta", ModelProvider.XAI, lambda: get_xai_config('grok-3-mini', reasoning_effort='high'))
     Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/qwen2p5-coder-32b-instruct', 4096))
     DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1', 16000))
     DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-v3-0324', 16000))
