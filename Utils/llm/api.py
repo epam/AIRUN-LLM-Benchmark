@@ -55,7 +55,7 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     if "reasoning_tokens" in data["usage"].get("completion_tokens_details", {}):
         result["tokens"]["reasoning_tokens"] = data["usage"]["completion_tokens_details"]["reasoning_tokens"]
 
-    if data["choices"][0]["message"]["reasoning_content"]:
+    if data["choices"][0]["message"].get("reasoning_content"):
         result["thoughts"] = data["choices"][0]["message"]["reasoning_content"]
 
     if model == Model.DeepSeekR1:

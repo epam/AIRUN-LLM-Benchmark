@@ -1,3 +1,4 @@
+# RepoName: complexity_size
 repo_to_complexity = {
     # JS
     'ReactNavbar': 'low_low',
@@ -38,6 +39,7 @@ repo_to_complexity = {
     'LibrarySensitiveLogs': 'avg_avg'
 }
 
+# RepoName: technology
 repo_to_technology = {
     'ReactSelect': 'React',
     'AngularCalendar': 'Angular',
