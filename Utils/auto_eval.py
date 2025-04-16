@@ -30,19 +30,19 @@ criteria_path = Path(__file__).resolve().parent.parent / 'Scenarios' / 'Criteria
 def get_evaluation_models() -> List[BaseLanguageModel]:
     """Get the evaluator model."""
 
-    # Define Claude 3.7 with enabled thinking mode
+    # Define Claude 3.7
     sonnet = ChatAnthropicVertex(
         model_name="claude-3-7-sonnet@20250219",
         project=gcloud_project_id,
         location="us-east5",
-        max_token=8192,
+        max_tokens=8192,
         max_retries=6,
-        model_kwargs={  # Enable Thinking Mode
-            "thinking": {
-                "type": "enabled",
-                "budget_tokens": 4096
-            }
-        }
+        # model_kwargs={  # Enable Thinking Mode when langchain will support it
+        #     "thinking": {
+        #         "type": "enabled",
+        #         "budget_tokens": 4096
+        #     }
+        # }
     )
 
     # Define OpenAI o3-mini model
@@ -261,7 +261,7 @@ def main(model: Model, language: str = "JS"):
 
                     acc_model, comp_model = row.get(accuracy_cell_model_name, None), row.get(completeness_cell_model_name, None)
 
-                    if pd.notna(acc) and pd.notna(comp):
+                    if pd.notna(acc_model) and pd.notna(comp_model):
                         print(f"Skipping evaluation for {category_name} by {evaluation_model.model_name} as it already has results.")
                         continue
 
