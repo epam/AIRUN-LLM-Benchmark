@@ -160,7 +160,7 @@ class Model(Enum):
     Gemini_20_Flash_Think_0121 = ("Gemini_20_Flash_Think_0121", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-01-21"))
     Gemini_20_Pro_0205 = ("Gemini_20_Pro_0205", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"))
     Gemma_3_27B = ("Gemma_3_27B", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemma-3-27b-it", True))
-    Gemini_25_Pro_0325 = ("Gemini_25_Pro_0325", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-exp-03-25", max_tokens=65000))
+    Gemini_25_Pro_0325 = ("Gemini_25_Pro_0325", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-03-25", max_tokens=65000))
 
     # OpenAI models
     GPT35_Turbo_0125 = ("GPT35_Turbo_0125", ModelProvider.AZURE, lambda: get_azure_config('gpt-35-turbo-0125'))
