@@ -38,6 +38,9 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     if max_tokens is not None:
         payload['max_tokens'] = max_tokens
 
+    if "reasoning_effort" in config:
+        payload["reasoning_effort"] = config["reasoning_effort"]
+
     response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
 
     if not response.ok:
