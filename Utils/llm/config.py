@@ -44,9 +44,10 @@ def get_open_ai_config(model, max_tokens=None, skip_system=False, system_role_na
         "url": 'https://api.openai.com/v1/chat/completions'
     }
 
-    # if reasoning model o1 or o3, change temperature
-    if model.startswith("o1") or model.startswith("o3"):
+    # if reasoning model o1, o3 or o4, change temperature and reasoning effort
+    if model.startswith("o1") or model.startswith("o3") or model.startswith("o4"):
         config["temperature"] = 1
+        config["reasoning_effort"] = "high"
 
     return config
 
@@ -58,9 +59,9 @@ def get_open_ai_responses_config(model):
         "url": 'https://api.openai.com/v1/responses'
     }
 
-    if model.startswith("o1") or model.startswith("o3"):
+    if model.startswith("o1") or model.startswith("o3") or model.startswith("o4"):
         config["temperature"] = 1
-        config["reasoning_effort"] = "medium"
+        config["reasoning_effort"] = "high"
 
     return config
 
@@ -174,6 +175,10 @@ class Model(Enum):
     OpenAi_o1_1217 = ("OpenAi_o1_1217", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-2024-12-17', system_role_name="developer"))
     OpenAi_o1_mini_0912 = ("OpenAi_o1_mini_0912", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-mini-2024-09-12', skip_system=True))
     OpenAi_o3_mini_0131 = ("OpenAi_o3_mini_0131", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-mini-2025-01-31', system_role_name="developer"))
+    GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-2025-04-14', system_role_name="developer"))
+    GPT41mini_0414 = ("GPT41mini_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-mini-2025-04-14', system_role_name="developer"))
+    OpenAi_o3_0416 = ("OpenAi_o3_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-2025-04-16', system_role_name="developer"))
+    OpenAi_o4_mini_0416 = ("OpenAi_o4_mini_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o4-mini-2025-04-16', system_role_name="developer"))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
     # Claude models
