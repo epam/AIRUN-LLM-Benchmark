@@ -34,14 +34,20 @@ def get_azure_config(model, max_tokens=None):
     return config
 
 
-def get_open_ai_config(model, max_tokens=None, skip_system=False, system_role_name="system"):
+def get_open_ai_config(
+    model,
+    max_tokens=None, 
+    skip_system=False, 
+    system_role_name="system",
+    base_url='https://api.openai.com/v1'
+):
     config = {
         "model_id": model,
         "api_key": open_api_key,
         "max_tokens": max_tokens,
         "skip_system": skip_system,
         "system_role_name": system_role_name,
-        "url": 'https://api.openai.com/v1/chat/completions'
+        "url": f'{base_url}/chat/completions'
     }
 
     # if reasoning model o1, o3 or o4, change temperature and reasoning effort
