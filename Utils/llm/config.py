@@ -166,8 +166,8 @@ class Model(Enum):
     Gemini_15_Pro_002 = ("Gemini_15_Pro_002", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-1.5-pro-002"))
     Gemini_20_Flash_Think_0121 = ("Gemini_20_Flash_Think_0121", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-01-21"))
     Gemini_20_Pro_0205 = ("Gemini_20_Pro_0205", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"))
-    Gemma_3_27B = ("Gemma_3_27B", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemma-3-27b-it", True))
     Gemini_25_Pro_0325 = ("Gemini_25_Pro_0325", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-03-25", max_tokens=65000))
+    Gemini_25_Flash_0417 = ("Gemini_25_Flash_0417", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-04-17", max_tokens=65000))
 
     # OpenAI models
     GPT35_Turbo_0125 = ("GPT35_Turbo_0125", ModelProvider.AZURE, lambda: get_azure_config('gpt-35-turbo-0125'))
@@ -183,8 +183,13 @@ class Model(Enum):
     OpenAi_o3_mini_0131 = ("OpenAi_o3_mini_0131", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-mini-2025-01-31', system_role_name="developer"))
     GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-2025-04-14', system_role_name="developer"))
     GPT41mini_0414 = ("GPT41mini_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-mini-2025-04-14', system_role_name="developer"))
+    GPT41nano_0414 = ("GPT41nano_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-nano-2025-04-14'))
     OpenAi_o3_0416 = ("OpenAi_o3_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-2025-04-16', system_role_name="developer"))
     OpenAi_o4_mini_0416 = ("OpenAi_o4_mini_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o4-mini-2025-04-16', system_role_name="developer"))
+    Gemma_3_1B = ("Gemma_3_1B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-1b-it', base_url='http://10.82.37.83:8000/v1'))
+    Gemma_3_4B = ("Gemma_3_4B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-4b-it', base_url='http://10.82.37.84:8000/v1'))
+    Gemma_3_27B = ("Gemma_3_27B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-27b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
+    Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-12b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
     # Claude models
