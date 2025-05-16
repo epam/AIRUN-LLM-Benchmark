@@ -1,4 +1,5 @@
 # Before use - authorize via amazon aws cli https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#cli-configure-sso-configure
+# docs on API https://docs.aws.amazon.com/nova/latest/userguide/using-converse-api.html
 import boto3
 from Utils.llm.config import Model, default_temperature
 
@@ -23,8 +24,8 @@ def request_bedrock_data(system_prompt, messages, model: Model):
     )
 
     return {
-        'content': response["output"]["message"]["content"][0]["text"],
-        'tokens': {
+        "content": response["output"]["message"]["content"][0]["text"],
+        "tokens": {
             "input_tokens": response["usage"]["inputTokens"],
             "output_tokens": response["usage"]["outputTokens"],
         }
