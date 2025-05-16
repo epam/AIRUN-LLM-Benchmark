@@ -112,8 +112,8 @@ def get_anthropic_vertexai_config(model, location_id=None):
     }
 
 
-def get_amazon_nova_pro_config():
-    MODEL_ID = "us.amazon.nova-pro-v1:0"
+def get_amazon_nova_model_config(model):
+    MODEL_ID = model
 
     return {
         "model_id": MODEL_ID
@@ -167,6 +167,7 @@ class Model(Enum):
     Gemini_20_Flash_Think_0121 = ("Gemini_20_Flash_Think_0121", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-01-21"))
     Gemini_20_Pro_0205 = ("Gemini_20_Pro_0205", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"))
     Gemini_25_Pro_0325 = ("Gemini_25_Pro_0325", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-03-25", max_tokens=65000))
+    Gemini_25_Pro_0506 = ("Gemini_25_Pro_0506", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-05-06", max_tokens=65000))
     Gemini_25_Flash_0417 = ("Gemini_25_Flash_0417", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-04-17", max_tokens=65000))
 
     # OpenAI models
@@ -208,7 +209,8 @@ class Model(Enum):
     DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1', 16000))
     DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-v3-0324', 16000))
     Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/llama4-maverick-instruct-basic', 131000))
-    AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_pro_config())
+    AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
+    AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):
         """Initialize the model"""
