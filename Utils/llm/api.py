@@ -155,7 +155,7 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, s
     payload = {
         "contents": contents,
         "system_instruction": system_instruction,
-        "generation_config": {
+        "generationConfig": {
             "maxOutputTokens": config.get("max_tokens", 8192),
             "temperature": default_temperature,
             "responseMimeType": "text/plain"
@@ -169,25 +169,17 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, s
 
     data = response.json()
 
-    if model in [Model.Gemini_25_Pro_0506, Model.Gemini_25_Flash_0417]:
-        parts = data["candidates"][0]["content"]["parts"]
-        thoughts = parts[0]["text"] if len(parts) > 1 else None
-        content = parts[1]["text"] if thoughts else parts[0]["text"]
-
-        return {
-            'thoughts': thoughts,
-            'content': content,
-            'tokens': {
-                "input_tokens": data["usageMetadata"]["promptTokenCount"],
-                "output_tokens": data["usageMetadata"]["candidatesTokenCount"],
-            }
-        }
+    parts = data["candidates"][0]["content"]["parts"]
+    thoughts = parts[0]["text"] if len(parts) > 1 else None
+    content = parts[1]["text"] if thoughts else parts[0]["text"]
 
     return {
-        'content': data["candidates"][0]["content"]["parts"][0]["text"],
-        'tokens': {
+        "thoughts": thoughts,
+        "content": content,
+        "tokens": {
             "input_tokens": data["usageMetadata"]["promptTokenCount"],
-            "output_tokens": data["usageMetadata"]["candidatesTokenCount"],
+            "output_tokens": data["usageMetadata"]["totalTokenCount"],
+            "reasoning_tokens": data["usageMetadata"].get("thoughtsTokenCount", 0),
         }
     }
 

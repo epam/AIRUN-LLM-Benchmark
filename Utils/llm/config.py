@@ -163,12 +163,8 @@ class ModelProvider(Enum):
 
 class Model(Enum):
     # Gemini models
-    Gemini_15_Pro_002 = ("Gemini_15_Pro_002", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-1.5-pro-002"))
-    Gemini_20_Flash_Think_0121 = ("Gemini_20_Flash_Think_0121", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-flash-thinking-exp-01-21"))
-    Gemini_20_Pro_0205 = ("Gemini_20_Pro_0205", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.0-pro-exp-02-05"))
-    Gemini_25_Pro_0325 = ("Gemini_25_Pro_0325", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-03-25", max_tokens=65000))
-    Gemini_25_Pro_0506 = ("Gemini_25_Pro_0506", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-05-06", max_tokens=65000))
-    Gemini_25_Flash_0417 = ("Gemini_25_Flash_0417", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-04-17", max_tokens=65000))
+    Gemini_25_Pro_0506 = ("Gemini_25_Pro_0506", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-05-06", max_tokens=65536))
+    Gemini_25_Flash_0520 = ("Gemini_25_Flash_0520", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-05-20", max_tokens=65536))
 
     # OpenAI models
     GPT35_Turbo_0125 = ("GPT35_Turbo_0125", ModelProvider.AZURE, lambda: get_azure_config('gpt-35-turbo-0125'))
