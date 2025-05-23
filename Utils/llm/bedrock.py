@@ -3,9 +3,9 @@
 import boto3
 from Utils.llm.config import Model, default_temperature
 
-client = boto3.client("bedrock-runtime")
 
 def request_bedrock_data(system_prompt, messages, model: Model):
+    client = boto3.client("bedrock-runtime", region_name="us-east-1")
     config = model()
 
     system = [{"text": system_prompt}]
