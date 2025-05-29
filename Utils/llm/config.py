@@ -1,5 +1,4 @@
 import os
-import subprocess
 from dotenv import load_dotenv
 from enum import Enum
 
@@ -11,15 +10,9 @@ open_api_key = os.getenv('OPENAI_API_KEY')
 xai_api_key = os.getenv('XAI_API_KEY')
 fireworks_api_key = os.getenv('FIREWORKS_API_KEY')
 google_ai_api_key = os.getenv('GOOGLE_AI_STUDIO_API_KEY')
-gcloud_path = os.getenv('GCLOUD_PATH')
 gcloud_project_id = os.getenv('GCLOUD_PROJECT_ID')
 default_temperature = 0
 attempts_count = 1
-
-
-def get_gcp_access_token():
-    return subprocess.check_output(
-        [gcloud_path, 'auth', 'print-access-token']).decode('utf-8').strip()
 
 
 def get_azure_config(model, max_tokens=None):
@@ -36,8 +29,8 @@ def get_azure_config(model, max_tokens=None):
 
 def get_open_ai_config(
     model,
-    max_tokens=None, 
-    skip_system=False, 
+    max_tokens=None,
+    skip_system=False,
     system_role_name="system",
     base_url='https://api.openai.com/v1'
 ):
@@ -98,17 +91,25 @@ def get_gemini_ai_studio_config(model, skip_system=False, max_tokens=None):
         "url": f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_ai_api_key}"
     }
 
+# Docs: https://docs.anthropic.com/en/api/claude-on-vertex-ai#making-requests
+def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None):
+    thinking = {
+        "type": "disabled"
+    }
 
-def get_anthropic_vertexai_config(model, location_id=None):
-    LOCATION_ID = location_id or "europe-west1"
-    PROJECT_ID = gcloud_project_id
-    gcp_access_token = get_gcp_access_token()
+    if enabled_thinking:
+        thinking = {
+            "type": "enabled",
+            "budget_tokens": 15000,
+        }
 
     return {
-        "version": "vertex-2023-10-16",
+        "region": "us-east5",
+        "project_id": gcloud_project_id,
         "model_id": model,
-        "api_key": gcp_access_token,
-        "url": f"https://{LOCATION_ID}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION_ID}/publishers/anthropic/models/{model}:streamRawPredict"
+        "thinking": thinking,
+        "max_tokens": max_tokens or 64000,
+        "temperature": 1 if enabled_thinking else default_temperature
     }
 
 
@@ -117,35 +118,6 @@ def get_amazon_nova_model_config(model):
 
     return {
         "model_id": MODEL_ID
-    }
-
-
-def get_sonnet_37_vertex_config(enabled_thinking=False):
-    LOCATION_ID = "us-east5"
-    PROJECT_ID = gcloud_project_id
-    MODEL_ID = "claude-3-7-sonnet@20250219"
-    gcp_access_token = get_gcp_access_token()
-
-    thinking = {
-        "type": "disabled"
-    }
-
-    if enabled_thinking:
-        thinking = {
-            "type": "enabled",
-            "budget_tokens": 4096,
-        }
-
-    return {
-        "version": "vertex-2023-10-16",
-        "model_id": MODEL_ID,
-        "api_key": gcp_access_token,
-        "extra_params": {
-            "thinking": thinking,
-            "max_tokens": 20000 if enabled_thinking else 8192,
-            "temperature": 1 if enabled_thinking else default_temperature
-        },
-        "url": f"https://{LOCATION_ID}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{LOCATION_ID}/publishers/anthropic/models/{MODEL_ID}:streamRawPredict"
     }
 
 
@@ -189,12 +161,11 @@ class Model(Enum):
     Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-12b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
+
     # Claude models
-    Haiku_35 = ("Claude_Haiku_35", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-3-5-haiku@20241022', 'us-east5'))
-    Sonnet_35 = ("Claude_Sonnet_35", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-3-5-sonnet@20240620'))
-    Sonnet_35v2 = ("Claude_Sonnet_35v2", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-3-5-sonnet-v2@20241022'))
-    Sonnet_37 = ("Claude_Sonnet_37", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_sonnet_37_vertex_config())
-    Sonnet_37_Thinking = ("Claude_Sonnet_37_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_sonnet_37_vertex_config(True))
+    Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-sonnet-4@20250514'))
+    Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-sonnet-4@20250514', True))
+    Opus_4_Thinking = ("Claude_Opus_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-opus-4@20250514', True, 32000))
 
     # Other models
     GrokBeta = ("GrokBeta", ModelProvider.XAI, lambda: get_xai_config('grok-beta'))

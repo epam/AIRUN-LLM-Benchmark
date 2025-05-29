@@ -3,6 +3,7 @@ import re
 import requests
 from datetime import datetime
 from typing import List, Dict, Literal
+from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.bedrock import request_bedrock_data
 
@@ -184,48 +185,6 @@ def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, s
     }
 
 
-def request_claude_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
-    config = model()
-
-    headers = {
-        'Content-Type': 'application/json; charset=utf-8',
-        "Authorization": f"Bearer {config['api_key']}",
-    }
-    payload = {
-        "anthropic_version": config['version'],
-        "max_tokens": 4096,
-        "stream": False,
-        "temperature": default_temperature,
-        "system": system_prompt,
-        "messages": messages,  # [{"role": "user", "content": prompt}]
-        **config.get("extra_params", {})
-    }
-    response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
-
-    if not response.ok:
-        raise APIException(response.status_code, response.content)
-
-    data = response.json()
-
-    text_content = None
-    thinking_content = None
-
-    for item in data["content"]:
-        if item["type"] == "text":
-            text_content = item["text"]
-        elif item["type"] == "thinking":
-            thinking_content = item["thinking"]
-
-    return {
-        "content": text_content,
-        "thoughts": thinking_content,
-        "tokens": {
-            "input_tokens": data["usage"]["input_tokens"],
-            "output_tokens": data["usage"]["output_tokens"],
-        }
-    }
-
-
 def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
     print(f'\tAttempt {attempt} at {datetime.now()}')
@@ -236,7 +195,7 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
             case ModelProvider.AISTUDIO:
                 data = request_google_ai_studio_data(system_prompt, messages, model)
             case ModelProvider.VERTEXAI_ANTHROPIC:
-                data = request_claude_data(system_prompt, messages, model)
+                data = request_anthropic_vertex_data(system_prompt, messages, model)
             case ModelProvider.AMAZON:
                 data = request_bedrock_data(system_prompt, messages, model)
             case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
