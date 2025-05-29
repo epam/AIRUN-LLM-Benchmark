@@ -83,13 +83,12 @@ def get_fireworks_config(model, max_tokens):
     }
 
 
-def get_gemini_ai_studio_config(model, skip_system=False, max_tokens=None):
+def get_gemini_ai_studio_config(model, max_tokens=None):
     return {
         "model_id": model,
-        "skip_system": skip_system,
-        "max_tokens": max_tokens,
-        "url": f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={google_ai_api_key}"
+        "max_tokens": max_tokens
     }
+
 
 # Docs: https://docs.anthropic.com/en/api/claude-on-vertex-ai#making-requests
 def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None):

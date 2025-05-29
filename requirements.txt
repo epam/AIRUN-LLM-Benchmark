@@ -8,4 +8,5 @@ langchain-core
 boto3
 langchain-google-vertexai
 anthropic[vertex]
+google-genai
 git+https://github.com/epam/AIRUN-Evaluation-Framework.git@main
