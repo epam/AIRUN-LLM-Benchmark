@@ -3,9 +3,10 @@ import re
 import requests
 from datetime import datetime
 from typing import List, Dict, Literal
-from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.config import Model, default_temperature, ModelProvider
+from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.bedrock import request_bedrock_data
+from Utils.llm.gemini_vertex import request_ai_studio_data
 
 
 class APIException(Exception):
@@ -139,52 +140,6 @@ def request_openai_response_format_data(system_prompt: str, messages: List[dict[
     return result
 
 
-def request_google_ai_studio_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
-    config = model()
-
-    headers = {
-        'Content-Type': 'application/json',
-    }
-
-    contents = [
-        {"role": message['role'], "parts": [{"text": message['content']}]}
-        for message in messages
-    ]
-
-    system_instruction = {"role": "user", "parts": [{"text": system_prompt}]} if not config.get("skip_system", False) else None
-
-    payload = {
-        "contents": contents,
-        "system_instruction": system_instruction,
-        "generationConfig": {
-            "maxOutputTokens": config.get("max_tokens", 8192),
-            "temperature": default_temperature,
-            "responseMimeType": "text/plain"
-        },
-    }
-
-    response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
-
-    if not response.ok:
-        raise APIException(response.status_code, response.content)
-
-    data = response.json()
-
-    parts = data["candidates"][0]["content"]["parts"]
-    thoughts = parts[0]["text"] if len(parts) > 1 else None
-    content = parts[1]["text"] if thoughts else parts[0]["text"]
-
-    return {
-        "thoughts": thoughts,
-        "content": content,
-        "tokens": {
-            "input_tokens": data["usageMetadata"]["promptTokenCount"],
-            "output_tokens": data["usageMetadata"]["totalTokenCount"],
-            "reasoning_tokens": data["usageMetadata"].get("thoughtsTokenCount", 0),
-        }
-    }
-
-
 def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
     print(f'\tAttempt {attempt} at {datetime.now()}')
@@ -193,7 +148,7 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
 
         match model.provider:
             case ModelProvider.AISTUDIO:
-                data = request_google_ai_studio_data(system_prompt, messages, model)
+                data = request_ai_studio_data(system_prompt, messages, model)
             case ModelProvider.VERTEXAI_ANTHROPIC:
                 data = request_anthropic_vertex_data(system_prompt, messages, model)
             case ModelProvider.AMAZON:
