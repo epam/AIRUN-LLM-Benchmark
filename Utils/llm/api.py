@@ -63,7 +63,7 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     if data["choices"][0]["message"].get("reasoning_content"):
         result["thoughts"] = data["choices"][0]["message"]["reasoning_content"]
 
-    if model == Model.DeepSeekR1:
+    if model in [Model.DeepSeekR1, Model.DeepSeekR1_0528]:
         # For DeepSeekR1, we need to extract the reasoning and content separately
         think_match = re.search(r'<think>([\s\S]*?)</think>', result["content"], re.DOTALL)
         result["thoughts"] = think_match.group(1).strip() if think_match else None
@@ -105,7 +105,7 @@ def request_openai_response_format_data(system_prompt: str, messages: List[dict[
     }
 
     if "max_tokens" in config:
-        payload["max_tokens"] = config["max_tokens"]
+        payload["max_output_tokens"] = config["max_tokens"]
 
     if "reasoning_effort" in config:
         payload["reasoning"] = {
