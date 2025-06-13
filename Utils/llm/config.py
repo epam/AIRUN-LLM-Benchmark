@@ -51,14 +51,15 @@ def get_open_ai_config(
     return config
 
 
-def get_open_ai_responses_config(model):
+def get_open_ai_responses_config(model, max_tokens=None):
     config = {
+        "max_tokens": max_tokens,
         "model_id": model,
         "api_key": open_api_key,
         "url": 'https://api.openai.com/v1/responses'
     }
 
-    if model.startswith("o1") or model.startswith("o3") or model.startswith("o4"):
+    if model.startswith("o1") or model.startswith("o3") or model.startswith("o4") or model.startswith("codex"):
         config["temperature"] = 1
         config["reasoning_effort"] = "high"
 
@@ -135,6 +136,7 @@ class ModelProvider(Enum):
 class Model(Enum):
     # Gemini models
     Gemini_25_Pro_0506 = ("Gemini_25_Pro_0506", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-05-06", max_tokens=65536))
+    Gemini_25_Pro_0605 = ("Gemini_25_Pro_0605", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-06-05", max_tokens=65536))
     Gemini_25_Flash_0520 = ("Gemini_25_Flash_0520", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-05-20", max_tokens=65536))
 
     # OpenAI models
@@ -160,6 +162,8 @@ class Model(Enum):
     Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-12b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
+    OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o3-pro-2025-06-10', 100000))
+    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('codex-mini-latest', 100000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-sonnet-4@20250514'))
@@ -174,6 +178,7 @@ class Model(Enum):
     Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/qwen2p5-coder-32b-instruct', 4096))
     DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1', 16000))
     DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-v3-0324', 16000))
+    DeepSeekR1_0528 = ("DeepSeekR1_0528", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1-0528', 16000))
     Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/llama4-maverick-instruct-basic', 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
