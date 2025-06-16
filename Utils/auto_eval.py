@@ -15,16 +15,16 @@ from Utils.llm.config import Model
 
 load_dotenv()
 
-results_repo_path = os.getenv('RESULTS_REPO_PATH')
+results_repo_path = os.getenv("RESULTS_REPO_PATH")
 if not results_repo_path:
     raise ValueError("RESULTS_REPO_PATH environment variable is not set. Please set it before running the script.")
 
-gcloud_project_id = os.getenv('GCLOUD_PROJECT_ID')
+gcloud_project_id = os.getenv("GCLOUD_PROJECT_ID")
 if not gcloud_project_id:
     raise ValueError("GCLOUD_PROJECT_ID environment variable is not set. Please set it before running the script.")
 
 results_path = Path(results_repo_path).resolve()
-criteria_path = Path(__file__).resolve().parent.parent / 'Scenarios' / 'Criteria' / 'JS'
+criteria_path = Path(__file__).resolve().parent.parent / "Scenarios" / "Criteria" / "JS"
 
 
 def get_evaluation_models() -> List[BaseLanguageModel]:
@@ -46,9 +46,7 @@ def get_evaluation_models() -> List[BaseLanguageModel]:
     )
 
     # Define OpenAI o3-mini model
-    o3mini = ChatOpenAI(
-        model="o3-mini"
-    )
+    o3mini = ChatOpenAI(model="o3-mini")
 
     return [sonnet, o3mini]
 
@@ -103,7 +101,7 @@ def construct_category_name(category, dataset, complexity, size):
 
 def extract_content(file_path) -> str:
     """Extract the content from the file."""
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         content = file.read()
 
     # Regular expression to find content between "### Answer:\n" and "\n### Tokens:"
@@ -117,11 +115,11 @@ def extract_content(file_path) -> str:
 
 
 def evaluate_scenario(
-        base_path: Path,
-        output: str,
-        category_criteria_path: Path,
-        evaluation_model: BaseLanguageModel,
-        grading_model: BaseLanguageModel
+    base_path: Path,
+    output: str,
+    category_criteria_path: Path,
+    evaluation_model: BaseLanguageModel,
+    grading_model: BaseLanguageModel,
 ) -> Tuple[EvaluationResult, EvaluationResult]:
     """
     Evaluate a single scenario from a dataset.
@@ -154,9 +152,7 @@ def evaluate_scenario(
 
     print(f"Evaluating scenario {scenario_name} with {evaluation_model.model_name}")
 
-    completeness_report = evaluate_metric(
-        completeness_evaluation_steps, output, evaluation_model
-    )
+    completeness_report = evaluate_metric(completeness_evaluation_steps, output, evaluation_model)
 
     try:
         write_file(
@@ -164,13 +160,11 @@ def evaluate_scenario(
             completeness_report,
         )
     except FileNotFoundError:
-        print(f"Scenario directory not found: {scenario_name}. Skipping completeness report.", )
+        print(f"Scenario directory not found: {scenario_name}. Skipping completeness report.")
     except OSError as e:
         print(f"Failed to write completeness report for scenario {scenario_name}: {e}")
 
-    accuracy_report = evaluate_metric(
-        accuracy_evaluation_steps, output, evaluation_model
-    )
+    accuracy_report = evaluate_metric(accuracy_evaluation_steps, output, evaluation_model)
 
     try:
         write_file(
@@ -178,19 +172,15 @@ def evaluate_scenario(
             accuracy_report,
         )
     except FileNotFoundError:
-        print(f"Scenario directory not found: {scenario_name}. Skipping accuracy report.", )
+        print(f"Scenario directory not found: {scenario_name}. Skipping accuracy report.")
     except OSError as e:
         print(f"Failed to write accuracy report for scenario {scenario_name}: {e}")
 
     print(f"Grading scenario {scenario_name} with {grading_model.model_name}")
-    accuracy: EvaluationResult = grade_metric(
-        accuracy_report, grading_model
-    )
+    accuracy: EvaluationResult = grade_metric(accuracy_report, grading_model)
     accuracy.set_metadata(meta)
 
-    completeness: EvaluationResult = grade_metric(
-        completeness_report, grading_model
-    )
+    completeness: EvaluationResult = grade_metric(completeness_report, grading_model)
     completeness.set_metadata(meta)
 
     return accuracy, completeness
@@ -227,11 +217,11 @@ def main(model: Model, language: str = "JS"):
 
     summary_report = pd.read_csv(summary_path)
     for index, row in summary_report.iterrows():
-        experiment_type = row['Type']
-        category = row['Category']
-        dataset = row['Dataset'] if row['Dataset'] != 'none' else ''
-        complexity = row['Complexity'] if row['Complexity'] != 'none' else ''
-        size = row['Size'] if row['Size'] != 'none' else ''
+        experiment_type = row["Type"]
+        category = row["Category"]
+        dataset = row["Dataset"] if row["Dataset"] != "none" else ""
+        complexity = row["Complexity"] if row["Complexity"] != "none" else ""
+        size = row["Size"] if row["Size"] != "none" else ""
         category_name = construct_category_name(category, dataset, complexity, size)
 
         acc, comp = row.get("Accuracy", None), row.get("Completeness", None)
@@ -259,10 +249,14 @@ def main(model: Model, language: str = "JS"):
                     accuracy_cell_model_name = f"Accuracy_{evaluation_model.model_name}"
                     completeness_cell_model_name = f"Completeness_{evaluation_model.model_name}"
 
-                    acc_model, comp_model = row.get(accuracy_cell_model_name, None), row.get(completeness_cell_model_name, None)
+                    acc_model, comp_model = row.get(accuracy_cell_model_name, None), row.get(
+                        completeness_cell_model_name, None
+                    )
 
                     if pd.notna(acc_model) and pd.notna(comp_model):
-                        print(f"Skipping evaluation for {category_name} by {evaluation_model.model_name} as it already has results.")
+                        print(
+                            f"Skipping evaluation for {category_name} by {evaluation_model.model_name} as it already has results."
+                        )
                         continue
 
                     (accuracy, completeness) = evaluate_scenario(
@@ -277,7 +271,9 @@ def main(model: Model, language: str = "JS"):
 
                     # add the normalized results to the summary
                     summary_report.at[index, accuracy_cell_model_name] = round(accuracy_data["weighted_score"] - 1, 2)
-                    summary_report.at[index, completeness_cell_model_name] = round(completeness_data["weighted_score"] - 1, 2)
+                    summary_report.at[index, completeness_cell_model_name] = round(
+                        completeness_data["weighted_score"] - 1, 2
+                    )
 
                 # calculate average accuracy and completeness by models evaluations
                 summary_report.at[index, "Accuracy"] = round(
@@ -285,7 +281,10 @@ def main(model: Model, language: str = "JS"):
                 )
 
                 summary_report.at[index, "Completeness"] = round(
-                    summary_report.loc[index, [f"Completeness_{model.model_name}" for model in evaluation_models]].mean(), 2
+                    summary_report.loc[
+                        index, [f"Completeness_{model.model_name}" for model in evaluation_models]
+                    ].mean(),
+                    2,
                 )
 
                 summary_report.to_csv(summary_path, index=False)

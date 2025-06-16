@@ -7,21 +7,21 @@ from Utils.llm.config import Model
 
 def get_file_content(file_path):
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
             return content
     except UnicodeDecodeError:
-        print(f'Can\'t read file {file_path} it\'s not a text')
+        print(f"Can't read file {file_path} it's not a text")
         return None
 
 
 def name_without_extension(file_name: str) -> str:
-    parts = file_name.split('.', 1)
+    parts = file_name.split(".", 1)
     return parts[0]
 
 
 def get_output_folder_name(answers_path, current_datetime, report_name):
-    formatted_datetime = str(current_datetime).replace(' ', '_').replace(':', '-')
+    formatted_datetime = str(current_datetime).replace(" ", "_").replace(":", "-")
     return os.path.join(answers_path, "result_" + formatted_datetime, report_name)
 
 
@@ -29,29 +29,30 @@ def generate_report(answers_path, file_content, data, report_name, attempt, curr
     current_output_path = get_output_folder_name(answers_path, current_datetime, name_without_extension(report_name))
     if not os.path.exists(current_output_path):
         os.makedirs(current_output_path)
-    output_file_path = os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
-    with open(output_file_path, 'w', encoding="utf-8") as output_file:
-        output_file.write(file_content + '\n' + data)
+    output_file_path = (
+        os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
+    )
+    with open(output_file_path, "w", encoding="utf-8") as output_file:
+        output_file.write(file_content + "\n" + data)
 
 
 def get_answer_from_model(prompt: str, system_prompt: str, model, attempt: int = 1):
     data = ask_model(
-        messages=[dict(role="user", content=prompt)],
-        system_prompt=system_prompt,
-        model=model,
-        attempt=attempt
+        messages=[dict(role="user", content=prompt)], system_prompt=system_prompt, model=model, attempt=attempt
     )
 
     if "error" in data:
         return data["error"]
 
-    thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ''
+    thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ""
     print(f"\tSuccess! Execution time: {data['execute_time']}")
 
-    return (f'{thoughts}'
-            f'### Answer:\n{data["content"]}\n\n'
-            f'### Tokens: {str(data["tokens"])}\n'
-            f'### Execution time: {data["execute_time"]}\n')
+    return (
+        f"{thoughts}"
+        f'### Answer:\n{data["content"]}\n\n'
+        f'### Tokens: {str(data["tokens"])}\n'
+        f'### Execution time: {data["execute_time"]}\n'
+    )
 
 
 def get_questions_by_path(directory_path):
@@ -68,13 +69,17 @@ def get_questions_by_path(directory_path):
     return files
 
 
-def generate_answers_from_files(category: Path, output_dir, model, current_datetime, attempts_count, launch_list, skip_list):
+def generate_answers_from_files(
+    category: Path, output_dir, model, current_datetime, attempts_count, launch_list, skip_list
+):
     system_prompt = get_file_content(category / "system.txt")
     questions = get_questions_by_path(category)
 
     for question_name in questions:
-        if launch_list and question_name not in launch_list: continue
-        if skip_list and question_name in skip_list: continue
+        if launch_list and question_name not in launch_list:
+            continue
+        if skip_list and question_name in skip_list:
+            continue
 
         for attempt in range(1, attempts_count + 1):
             file_content = get_file_content(category / question_name)
@@ -93,11 +98,14 @@ def main(model: Model, lang, attempts_count, launch_list, skip_list):
     categories_path = base_path / "Scenarios" / "Tasks_Enriched" / lang
 
     for category in categories_path.iterdir():
-        if not category.is_dir(): continue
+        if not category.is_dir():
+            continue
 
         output_dir = results_path / "Output" / f"{model}" / lang / category.name
 
-        generate_answers_from_files(category, output_dir, model, current_datetime, attempts_count, launch_list, skip_list)
+        generate_answers_from_files(
+            category, output_dir, model, current_datetime, attempts_count, launch_list, skip_list
+        )
 
 
 if __name__ == "__main__":

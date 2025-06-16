@@ -11,16 +11,14 @@ def traverse_files_and_get_content(repo_path: str):
         for file in files:
             file_path = os.path.join(subdir, file)
             relative_path = os.path.relpath(file_path, repo_path)
-            extension = file.split('.')[-1]
+            extension = file.split(".")[-1]
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
-                output.append(f'```{extension}\n'
-                              f'// {relative_path}\n'
-                              f'{content}\n```\n')
-                print(f'Reading {relative_path}')
+                output.append(f"```{extension}\n" f"// {relative_path}\n" f"{content}\n```\n")
+                print(f"Reading {relative_path}")
             except UnicodeDecodeError:
-                print(f'Can\'t read file {file_path}, it\'s not a text file')
+                print(f"Can't read file {file_path}, it's not a text file")
     return "\n".join(output)
 
 
@@ -54,7 +52,7 @@ def enrich_task_with_dataset(task_file_path: str, output_dir: str, base_dataset_
         return
 
     # Read task file
-    with open(task_file_path, 'r', encoding='utf-8') as f:
+    with open(task_file_path, "r", encoding="utf-8") as f:
         task_content = f.read()
 
     # Get dataset path
@@ -79,7 +77,7 @@ def enrich_task_with_dataset(task_file_path: str, output_dir: str, base_dataset_
 
     # Write enriched content to output file
     output_file_path = os.path.join(output_task_dir, task_file_name)
-    with open(output_file_path, 'w', encoding='utf-8') as f:
+    with open(output_file_path, "w", encoding="utf-8") as f:
         f.write(enriched_content)
 
     print(f"Successfully enriched {task_file_name} with {dataset_name} dataset")

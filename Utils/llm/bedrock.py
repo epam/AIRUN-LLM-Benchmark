@@ -9,10 +9,7 @@ def request_bedrock_data(system_prompt, messages, model: Model):
     config = model()
 
     system = [{"text": system_prompt}]
-    formatted_messages = [
-        {"role": message['role'], "content": [{"text": message['content']}]}
-        for message in messages
-    ]
+    formatted_messages = [{"role": message["role"], "content": [{"text": message["content"]}]} for message in messages]
 
     inf_params = {"temperature": default_temperature}
 
@@ -28,5 +25,5 @@ def request_bedrock_data(system_prompt, messages, model: Model):
         "tokens": {
             "input_tokens": response["usage"]["inputTokens"],
             "output_tokens": response["usage"]["outputTokens"],
-        }
+        },
     }

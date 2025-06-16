@@ -4,31 +4,24 @@ from anthropic import AnthropicVertex
 from Utils.llm.config import Model
 
 
-def request_anthropic_vertex_data(
-    system_prompt: str, 
-    messages: List[Dict[str, str]], 
-    model: Model
-) -> Dict[str, Any]:
+def request_anthropic_vertex_data(system_prompt: str, messages: List[Dict[str, str]], model: Model) -> Dict[str, Any]:
     """
     Request data from Anthropic Vertex AI API.
-    
+
     Args:
         system_prompt: System prompt for the model
         messages: List of message dictionaries with role and content
         model: Model configuration
-        
+
     Returns:
         Dictionary containing response content, thoughts, and token usage
-        
+
     Raises:
         Exception: If API request fails or configuration is invalid
     """
     try:
         config = model()
-        client = AnthropicVertex(
-            region=config["region"], 
-            project_id=config["project_id"]
-        )
+        client = AnthropicVertex(region=config["region"], project_id=config["project_id"])
     except Exception as e:
         raise Exception(f"Failed to initialize Anthropic Vertex client: {e}")
 
@@ -44,7 +37,7 @@ def request_anthropic_vertex_data(
         model=config["model_id"],
     ) as stream:
         message = stream.get_final_message()
-        
+
         # Extract content from message
         for item in message.content:
             if item.type == "text":
@@ -58,7 +51,7 @@ def request_anthropic_vertex_data(
         "tokens": {
             "input_tokens": message.usage.input_tokens,
             "output_tokens": message.usage.output_tokens,
-        }
+        },
     }
 
 
@@ -67,7 +60,7 @@ if __name__ == "__main__":
     data = request_anthropic_vertex_data(
         "You should answer in french.",
         [{"role": "user", "content": "Send me a recipe for banana bread."}],
-        Model.Sonnet_4_Thinking
+        Model.Sonnet_4_Thinking,
     )
     print("Thoughts:\n", data["thoughts"])
     print("Content:\n", data["content"])

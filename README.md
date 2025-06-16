@@ -33,23 +33,16 @@ To complete benchmark, you need to clone the additional repository:
 
 ### Prepare Python Virtual Environment
 
-1. Create a Python virtual environment
-   ```bash
-   python -m venv .venv
-   ```
-2. Activate virtual env using respective Linux or Windows command
-   ```bash
-   source .venv/bin/activate
-   ```
-   or
-   ```bash
-   .venv\Scripts\activate
-   ```
-3. Install necessary dependencies:
-   ```bash
-   pip install -r ./requirements.txt
-   ```
-4. (Optional) Connect your python venv with your IDE
+1. Install prerequisites:
+- Python (>= 3.12)
+- [Poetry](https://python-poetry.org/)
+
+2. Run:
+  ```bash
+  poetry install
+  ```
+
+3. (Optional) Connect your python venv with your IDE
 
 ### Environment Variables Setup
 
