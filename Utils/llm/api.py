@@ -25,21 +25,21 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     system_role_name: Literal["system", "developer"] = config.get("system_role_name", "system")
 
     headers = {
-        'Content-Type': 'application/json',
-        'Api-Key': config["api_key"],
+        "Content-Type": "application/json",
+        "Api-Key": config["api_key"],
         "Authorization": f"Bearer {config['api_key']}",
     }
 
     payload = {
-        'model': config["model_id"],
-        'messages': ([] if skip_system else [{'role': system_role_name, 'content': system_prompt}]) + messages,
-        'temperature': config.get("temperature", default_temperature),
-        **extra_params
+        "model": config["model_id"],
+        "messages": ([] if skip_system else [{"role": system_role_name, "content": system_prompt}]) + messages,
+        "temperature": config.get("temperature", default_temperature),
+        **extra_params,
     }
 
     max_tokens = config.get("max_tokens")
     if max_tokens is not None:
-        payload['max_tokens'] = max_tokens
+        payload["max_tokens"] = max_tokens
 
     if "reasoning_effort" in config:
         payload["reasoning_effort"] = config["reasoning_effort"]
@@ -55,7 +55,7 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
         "tokens": {
             "input_tokens": data["usage"]["prompt_tokens"],
             "output_tokens": data["usage"]["completion_tokens"],
-        }
+        },
     }
 
     if "reasoning_tokens" in data["usage"].get("completion_tokens_details", {}):
@@ -66,16 +66,16 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
 
     if model in [Model.DeepSeekR1, Model.DeepSeekR1_0528]:
         # For DeepSeekR1, we need to extract the reasoning and content separately
-        think_match = re.search(r'<think>([\s\S]*?)</think>', result["content"], re.DOTALL)
+        think_match = re.search(r"<think>([\s\S]*?)</think>", result["content"], re.DOTALL)
         result["thoughts"] = think_match.group(1).strip() if think_match else None
-        result["content"] = re.sub(r'<think>[\s\S]*?</think>', '', result["content"]).strip()
+        result["content"] = re.sub(r"<think>[\s\S]*?</think>", "", result["content"]).strip()
 
     return result
 
 
 def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
-    print(f'\tAttempt {attempt} at {datetime.now()}')
+    print(f"\tAttempt {attempt} at {datetime.now()}")
     try:
         data = None
 
@@ -98,37 +98,31 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
             "thoughts": data.get("thoughts", None),
             "content": data["content"],
             "tokens": data["tokens"],
-            "execute_time": execute_time
+            "execute_time": execute_time,
         }
     except APIException as e:
         print(f"Error: {e.status_code}")
         print(f"Error: {e.content}")
         if e.status_code == 429:
-            print('Will try in 1 minute...')
+            print("Will try in 1 minute...")
             time.sleep(60)
             return ask_model(messages, system_prompt, model, attempt + 1)
         else:
             if attempt > 2:
-                return {
-                    "error": f'### Error: {e.content}\n'
-                }
+                return {"error": f"### Error: {e.content}\n"}
             else:
                 print("\tTrying again...")
                 time.sleep(10)
                 return ask_model(messages, system_prompt, model, attempt + 1)
     except requests.exceptions.Timeout:
         if attempt > 2:
-            return {
-                "error": f'### Error: Timeout error\n'
-            }
+            return {"error": f"### Error: Timeout error\n"}
         print("\tRequest timed out. Trying again...")
         return ask_model(messages, system_prompt, model, attempt + 1)
     except Exception as e:
         print(f"\tError: {str(e)}")
         if attempt > 2:
-            return {
-                "error": f'### Error: can not get the content\n'
-            }
+            return {"error": f"### Error: can not get the content\n"}
         else:
             print("\tTrying again...")
             time.sleep(5)

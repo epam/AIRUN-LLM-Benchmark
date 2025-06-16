@@ -1,0 +1,37 @@
+[project]
+name = "airun-llm-benchmark"
+version = "0.1.0"
+description = "AIRUN LLM Benchmark"
+authors = []
+license = {text = "Apache 2.0"}
+readme = "README.md"
+requires-python = ">=3.12.4,<4.0"
+dependencies = [
+    "requests (>=2.32.4,<3.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "notebook (>=7.4.3,<8.0.0)",
+    "pandas (>=2.3.0,<3.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "langchain-openai (>=0.3.23,<0.4.0)",
+    "langchain-core (>=0.3.65,<0.4.0)",
+    "boto3 (>=1.38.36,<2.0.0)",
+    "langchain-google-vertexai (>=2.0.25,<3.0.0)",
+    "anthropic[vertex] (>=0.54.0,<0.55.0)",
+    "google-genai (>=1.20.0,<2.0.0)",
+    "auto-llm-eval @ git+https://github.com/epam/AIRUN-Evaluation-Framework.git@main",
+    "openai (>=1.86.0,<2.0.0)",
+    "black[jupyter] (>=25.1.0,<26.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
+
+[tool.poetry]
+package-mode = false

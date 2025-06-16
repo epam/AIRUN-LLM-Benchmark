@@ -4,13 +4,13 @@ from enum import Enum
 
 load_dotenv()
 
-deployed_llm_base_url = os.getenv('AZURE_DEPLOYMENT_BASE_URL')
-deployed_llm_key = os.getenv('AZURE_DEPLOYMENT_KEY')
-open_api_key = os.getenv('OPENAI_API_KEY')
-xai_api_key = os.getenv('XAI_API_KEY')
-fireworks_api_key = os.getenv('FIREWORKS_API_KEY')
-google_ai_api_key = os.getenv('GOOGLE_AI_STUDIO_API_KEY')
-gcloud_project_id = os.getenv('GCLOUD_PROJECT_ID')
+deployed_llm_base_url = os.getenv("AZURE_DEPLOYMENT_BASE_URL")
+deployed_llm_key = os.getenv("AZURE_DEPLOYMENT_KEY")
+open_api_key = os.getenv("OPENAI_API_KEY")
+xai_api_key = os.getenv("XAI_API_KEY")
+fireworks_api_key = os.getenv("FIREWORKS_API_KEY")
+google_ai_api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
+gcloud_project_id = os.getenv("GCLOUD_PROJECT_ID")
 default_temperature = 0
 attempts_count = 1
 
@@ -21,18 +21,14 @@ def get_azure_config(model, max_tokens=None):
             "max_tokens": max_tokens,
             "model_id": model,
             "api_key": deployed_llm_key,
-            "url": f'{deployed_llm_base_url}/openai/deployments/{model}/chat/completions?api-version=2023-12-01-preview'
+            "url": f"{deployed_llm_base_url}/openai/deployments/{model}/chat/completions?api-version=2023-12-01-preview",
         }
 
     return config
 
 
 def get_open_ai_config(
-    model,
-    max_tokens=None,
-    skip_system=False,
-    system_role_name="system",
-    base_url='https://api.openai.com/v1'
+    model, max_tokens=None, skip_system=False, system_role_name="system", base_url="https://api.openai.com/v1"
 ):
     config = {
         "model_id": model,
@@ -40,7 +36,7 @@ def get_open_ai_config(
         "max_tokens": max_tokens,
         "skip_system": skip_system,
         "system_role_name": system_role_name,
-        "url": f'{base_url}/chat/completions'
+        "url": f"{base_url}/chat/completions",
     }
 
     # if reasoning model o1, o3 or o4, change temperature and reasoning effort
@@ -68,8 +64,8 @@ def get_xai_config(model, **kwargs):
     return {
         "model_id": model,
         "api_key": xai_api_key,
-        "url": 'https://api.x.ai/v1/chat/completions',
-        "extra_params": kwargs
+        "url": "https://api.x.ai/v1/chat/completions",
+        "extra_params": kwargs,
     }
 
 
@@ -78,22 +74,17 @@ def get_fireworks_config(model, max_tokens):
         "model_id": model,
         "max_tokens": max_tokens,
         "api_key": fireworks_api_key,
-        "url": "https://api.fireworks.ai/inference/v1/chat/completions"
+        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
     }
 
 
 def get_gemini_ai_studio_config(model, max_tokens=None):
-    return {
-        "model_id": model,
-        "max_tokens": max_tokens
-    }
+    return {"model_id": model, "max_tokens": max_tokens}
 
 
 # Docs: https://docs.anthropic.com/en/api/claude-on-vertex-ai#making-requests
 def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None):
-    thinking = {
-        "type": "disabled"
-    }
+    thinking = {"type": "disabled"}
 
     if enabled_thinking:
         thinking = {
@@ -107,16 +98,14 @@ def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None
         "model_id": model,
         "thinking": thinking,
         "max_tokens": max_tokens or 64000,
-        "temperature": 1 if enabled_thinking else default_temperature
+        "temperature": 1 if enabled_thinking else default_temperature,
     }
 
 
 def get_amazon_nova_model_config(model):
     MODEL_ID = model
 
-    return {
-        "model_id": MODEL_ID
-    }
+    return {"model_id": MODEL_ID}
 
 
 class ModelProvider(Enum):
@@ -132,54 +121,56 @@ class ModelProvider(Enum):
 
 
 class Model(Enum):
+    # fmt: off
     # Gemini models
     Gemini_25_Pro_0506 = ("Gemini_25_Pro_0506", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-05-06", max_tokens=65536))
     Gemini_25_Pro_0605 = ("Gemini_25_Pro_0605", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-06-05", max_tokens=65536))
     Gemini_25_Flash_0520 = ("Gemini_25_Flash_0520", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-05-20", max_tokens=65536))
 
     # OpenAI models
-    GPT35_Turbo_0125 = ("GPT35_Turbo_0125", ModelProvider.AZURE, lambda: get_azure_config('gpt-35-turbo-0125'))
-    GPT4o_0513 = ("GPT4o_0513", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4o-2024-05-13'))
-    GPT4o_0806 = ("GPT4o_0806", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4o-2024-08-06', 16384))
-    GPT4o_1120 = ("GPT4o_1120", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4o-2024-11-20'))
-    GPT45_0227 = ("GPT45_0227", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.5-preview-2025-02-27', 16384))
-    ChatGPT4o = ("ChatGPT4o", ModelProvider.OPENAI, lambda: get_open_ai_config('chatgpt-4o-latest', 16384))
-    GPT4o_mini = ("GPT4o_mini", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4o-mini-2024-07-18'))
-    OpenAi_o1_0912 = ("OpenAi_o1_0912", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-preview-2024-09-12', skip_system=True))
-    OpenAi_o1_1217 = ("OpenAi_o1_1217", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-2024-12-17', system_role_name="developer"))
-    OpenAi_o1_mini_0912 = ("OpenAi_o1_mini_0912", ModelProvider.OPENAI, lambda: get_open_ai_config('o1-mini-2024-09-12', skip_system=True))
-    OpenAi_o3_mini_0131 = ("OpenAi_o3_mini_0131", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-mini-2025-01-31', system_role_name="developer"))
-    GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-2025-04-14', system_role_name="developer"))
-    GPT41mini_0414 = ("GPT41mini_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-mini-2025-04-14', system_role_name="developer"))
-    GPT41nano_0414 = ("GPT41nano_0414", ModelProvider.OPENAI, lambda: get_open_ai_config('gpt-4.1-nano-2025-04-14'))
-    OpenAi_o3_0416 = ("OpenAi_o3_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o3-2025-04-16', system_role_name="developer"))
-    OpenAi_o4_mini_0416 = ("OpenAi_o4_mini_0416", ModelProvider.OPENAI, lambda: get_open_ai_config('o4-mini-2025-04-16', system_role_name="developer"))
-    Gemma_3_1B = ("Gemma_3_1B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-1b-it', base_url='http://10.82.37.83:8000/v1'))
-    Gemma_3_4B = ("Gemma_3_4B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-4b-it', base_url='http://10.82.37.84:8000/v1'))
-    Gemma_3_27B = ("Gemma_3_27B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-27b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
-    Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config('google/gemma-3-12b-it-qat-q4_0-gguf', base_url='http://10.82.37.86:8000/v1'))
+    GPT35_Turbo_0125 = ("GPT35_Turbo_0125", ModelProvider.AZURE, lambda: get_azure_config("gpt-35-turbo-0125"))
+    GPT4o_0513 = ("GPT4o_0513", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4o-2024-05-13"))
+    GPT4o_0806 = ("GPT4o_0806", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4o-2024-08-06", 16384))
+    GPT4o_1120 = ("GPT4o_1120", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4o-2024-11-20"))
+    GPT45_0227 = ("GPT45_0227", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.5-preview-2025-02-27", 16384))
+    ChatGPT4o = ("ChatGPT4o", ModelProvider.OPENAI, lambda: get_open_ai_config("chatgpt-4o-latest", 16384))
+    GPT4o_mini = ("GPT4o_mini", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4o-mini-2024-07-18"))
+    OpenAi_o1_0912 = ("OpenAi_o1_0912", ModelProvider.OPENAI, lambda: get_open_ai_config("o1-preview-2024-09-12", skip_system=True))
+    OpenAi_o1_1217 = ("OpenAi_o1_1217", ModelProvider.OPENAI, lambda: get_open_ai_config("o1-2024-12-17", system_role_name="developer"))
+    OpenAi_o1_mini_0912 = ("OpenAi_o1_mini_0912", ModelProvider.OPENAI, lambda: get_open_ai_config("o1-mini-2024-09-12", skip_system=True))
+    OpenAi_o3_mini_0131 = ("OpenAi_o3_mini_0131", ModelProvider.OPENAI, lambda: get_open_ai_config("o3-mini-2025-01-31", system_role_name="developer"))
+    GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-2025-04-14", system_role_name="developer"))
+    GPT41mini_0414 = ("GPT41mini_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-mini-2025-04-14", system_role_name="developer"))
+    GPT41nano_0414 = ("GPT41nano_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-nano-2025-04-14"))
+    OpenAi_o3_0416 = ("OpenAi_o3_0416", ModelProvider.OPENAI, lambda: get_open_ai_config("o3-2025-04-16", system_role_name="developer"))
+    OpenAi_o4_mini_0416 = ("OpenAi_o4_mini_0416", ModelProvider.OPENAI, lambda: get_open_ai_config("o4-mini-2025-04-16", system_role_name="developer"))
+    Gemma_3_1B = ("Gemma_3_1B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-1b-it", base_url="http://10.82.37.83:8000/v1"))
+    Gemma_3_4B = ("Gemma_3_4B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-4b-it", base_url="http://10.82.37.84:8000/v1"))
+    Gemma_3_27B = ("Gemma_3_27B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-27b-it-qat-q4_0-gguf", base_url="http://10.82.37.86:8000/v1"))
+    Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-12b-it-qat-q4_0-gguf", base_url="http://10.82.37.86:8000/v1"))
 
-    OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o1-pro-2025-03-19'))
-    OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('o3-pro-2025-06-10', 100000))
-    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config('codex-mini-latest', 100000))
+    OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o1-pro-2025-03-19"))
+    OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o3-pro-2025-06-10", 100000))
+    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", 100000))
 
     # Claude models
-    Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-sonnet-4@20250514'))
-    Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-sonnet-4@20250514', True))
-    Opus_4_Thinking = ("Claude_Opus_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config('claude-opus-4@20250514', True, 32000))
+    Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
+    Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514", True))
+    Opus_4_Thinking = ("Claude_Opus_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4@20250514", True, 32000))
 
     # Other models
-    GrokBeta = ("GrokBeta", ModelProvider.XAI, lambda: get_xai_config('grok-beta'))
-    Grok2_1212 = ("Grok2_1212", ModelProvider.XAI, lambda: get_xai_config('grok-2-1212'))
-    Grok3_beta = ("Grok3_beta", ModelProvider.XAI, lambda: get_xai_config('grok-3'))
-    Grok3mini_beta = ("Grok3mini_beta", ModelProvider.XAI, lambda: get_xai_config('grok-3-mini', reasoning_effort='high'))
-    Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/qwen2p5-coder-32b-instruct', 4096))
-    DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1', 16000))
-    DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-v3-0324', 16000))
-    DeepSeekR1_0528 = ("DeepSeekR1_0528", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/deepseek-r1-0528', 16000))
-    Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config('accounts/fireworks/models/llama4-maverick-instruct-basic', 131000))
+    GrokBeta = ("GrokBeta", ModelProvider.XAI, lambda: get_xai_config("grok-beta"))
+    Grok2_1212 = ("Grok2_1212", ModelProvider.XAI, lambda: get_xai_config("grok-2-1212"))
+    Grok3_beta = ("Grok3_beta", ModelProvider.XAI, lambda: get_xai_config("grok-3"))
+    Grok3mini_beta = ("Grok3mini_beta", ModelProvider.XAI, lambda: get_xai_config("grok-3-mini", reasoning_effort="high"))
+    Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/qwen2p5-coder-32b-instruct", 4096))
+    DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-r1", 16000))
+    DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-v3-0324", 16000))
+    DeepSeekR1_0528 = ("DeepSeekR1_0528", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-r1-0528", 16000))
+    Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/llama4-maverick-instruct-basic", 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
+    # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):
         """Initialize the model"""
