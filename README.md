@@ -79,16 +79,15 @@ If you want to add new scenario to the benchmark, you need to follow these steps
 1. Create a new directory `Scenarios/Tasks/{language}` if directory for your language does not exist.
 2. Add your category (e.g., "component_test") to the `Scenarios/Tasks/{language}` directory.
 3. Add your scenario (e.g., "WriteTestsForComponent_RepoName_complexity_size") to the `Scenarios/Tasks/{language}` directory.
-4. Don't forget to add `<place_code_here>` in your scenario file to enrich the template with the code from the repository later.
+4. Don't forget to add `<place_code_here repo="REPO_NAME"/>` in your scenario file to enrich the template with the code from the repository during test run.
 5. Add criteria to `Scenarios/Tasks/{language}/Criteria` for evaluation results.
-6. Launch first cell from [run_tasks.ipynb](run_tasks.ipynb) to enrich the template with the code from the repository.
 
 ## How to complete experiment
 
 ### Run the benchmark with standard categories
 
 1. Open the [run_tasks.ipynb](run_tasks.ipynb) notebook.
-2. Start from the second cell, you can set model and scenarios to run or skip.
+2. Start from the first cell, you can set model and scenarios to run or skip.
 3. Next cell generate summary report in AIRUN-LLM-Benchmark-Results repository.
 4. Last cell will evaluate the results and generate report in AIRUN-LLM-Benchmark-Results repository.
 5. Result will be in `AIRUN-LLM-Benchmark-Results` repository in `Output/{model}/{language}` directory.
