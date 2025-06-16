@@ -7,6 +7,7 @@ from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.bedrock import request_bedrock_data
 from Utils.llm.gemini_vertex import request_ai_studio_data
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
 class APIException(Exception):
@@ -16,29 +17,75 @@ class APIException(Exception):
         super().__init__(self.content)
 
 
-def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+def format_openai_messages(messages):
+    api_messages = []
+    for message in messages:
+        api_content = []
+        for content in message.content_list:
+            if isinstance(content, TextAIMessageContent):
+                api_content.append(
+                    {
+                        "type": "text",
+                        "text": content.text,
+                    }
+                )
+            elif isinstance(content, ImageAIMessageContent):
+                api_content.append(
+                    {
+                        "type": "text",
+                        "text": f"Next image filename: {content.file_name}",
+                    }
+                )
+                api_content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": content.to_base64_url(),
+                        },
+                    }
+                )
+
+        api_message = {
+            "role": message.role,
+            "content": api_content,
+        }
+        api_messages.append(api_message)
+    return api_messages
+
+
+def request_openai_format_data(
+    system_prompt: str, messages: List[AIMessage], model: Model
+):
     config = model()
 
     skip_system = config.get("skip_system", False)
     extra_params = config.get("extra_params", {})
-    system_role_name: Literal["system", "developer"] = config.get("system_role_name", "system")
+    system_role_name: Literal["system", "developer"] = config.get(
+        "system_role_name", "system"
+    )
 
     headers = {
-        'Content-Type': 'application/json',
-        'Api-Key': config["api_key"],
+        "Content-Type": "application/json",
+        "Api-Key": config["api_key"],
         "Authorization": f"Bearer {config['api_key']}",
     }
 
     payload = {
-        'model': config["model_id"],
-        'messages': ([] if skip_system else [{'role': system_role_name, 'content': system_prompt}]) + messages,
-        'temperature': config.get("temperature", default_temperature),
-        **extra_params
+        "model": config["model_id"],
+        "messages": [],
+        "temperature": config.get("temperature", default_temperature),
+        **extra_params,
     }
+
+    if not skip_system:
+        payload["messages"].append({"role": system_role_name, "content": system_prompt})
+
+    api_messages = format_openai_messages(messages)
+    payload["messages"].extend(api_messages)
 
     max_tokens = config.get("max_tokens")
     if max_tokens is not None:
-        payload['max_tokens'] = max_tokens
+        payload["max_tokens"] = max_tokens
 
     if "reasoning_effort" in config:
         payload["reasoning_effort"] = config["reasoning_effort"]
@@ -54,25 +101,32 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
         "tokens": {
             "input_tokens": data["usage"]["prompt_tokens"],
             "output_tokens": data["usage"]["completion_tokens"],
-        }
+        },
     }
 
     if "reasoning_tokens" in data["usage"].get("completion_tokens_details", {}):
-        result["tokens"]["reasoning_tokens"] = data["usage"]["completion_tokens_details"]["reasoning_tokens"]
+        compl_tokens_details = data["usage"]["completion_tokens_details"]
+        result["tokens"]["reasoning_tokens"] = compl_tokens_details["reasoning_tokens"]
 
     if data["choices"][0]["message"].get("reasoning_content"):
         result["thoughts"] = data["choices"][0]["message"]["reasoning_content"]
 
     if model == Model.DeepSeekR1:
         # For DeepSeekR1, we need to extract the reasoning and content separately
-        think_match = re.search(r'<think>([\s\S]*?)</think>', result["content"], re.DOTALL)
+        think_match = re.search(
+            r"<think>([\s\S]*?)</think>", result["content"], re.DOTALL
+        )
         result["thoughts"] = think_match.group(1).strip() if think_match else None
-        result["content"] = re.sub(r'<think>[\s\S]*?</think>', '', result["content"]).strip()
+        result["content"] = re.sub(
+            r"<think>[\s\S]*?</think>", "", result["content"]
+        ).strip()
 
     return result
 
 
-def request_openai_response_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+def request_openai_response_format_data(
+    system_prompt: str, messages: List[AIMessage], model: Model
+):
     config = model()
 
     headers = {
@@ -80,37 +134,27 @@ def request_openai_response_format_data(system_prompt: str, messages: List[dict[
         "Authorization": f"Bearer {config["api_key"]}",
     }
 
-    developer_message = [{
-        "role": "developer",
-        "content": [{
-            "type": "input_text", "text": system_prompt
-        }]
-    }]
+    developer_message = [
+        {
+            "role": "developer",
+            "content": [{"type": "input_text", "text": system_prompt}],
+        }
+    ]
 
-    input_messages = [{
-        "role": "user",
-        "content": [{"type": "input_text", "text": message["content"]}]
-    } for message in messages]
-
+    input_messages = format_openai_messages(messages)
     payload = {
         "model": config["model_id"],
         "input": developer_message + input_messages,
         "temperature": config.get("temperature", default_temperature),
-        "text": {
-            "format": {
-                "type": "text"
-            }
-        },
-        "store": False
+        "text": {"format": {"type": "text"}},
+        "store": False,
     }
 
     if "max_tokens" in config:
         payload["max_tokens"] = config["max_tokens"]
 
     if "reasoning_effort" in config:
-        payload["reasoning"] = {
-            "effort": config["reasoning_effort"]
-        }
+        payload["reasoning"] = {"effort": config["reasoning_effort"]}
 
     response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
 
@@ -119,11 +163,19 @@ def request_openai_response_format_data(system_prompt: str, messages: List[dict[
 
     data = response.json()
 
-    content = next(item["content"][0]["text"] for item in data["output"] if item["type"] == "message")
-    reasoning = next((item["summary"][0].get("text", None)
-                      for item in data["output"]
-                      if item["type"] == "reasoning" and len(item["summary"]) > 0),
-                     None)
+    content = next(
+        item["content"][0]["text"]
+        for item in data["output"]
+        if item["type"] == "message"
+    )
+    reasoning = next(
+        (
+            item["summary"][0].get("text", None)
+            for item in data["output"]
+            if item["type"] == "reasoning" and len(item["summary"]) > 0
+        ),
+        None,
+    )
 
     result = {
         "content": content,
@@ -131,18 +183,21 @@ def request_openai_response_format_data(system_prompt: str, messages: List[dict[
         "tokens": {
             "input_tokens": data["usage"]["input_tokens"],
             "output_tokens": data["usage"]["output_tokens"],
-        }
+        },
     }
 
     if "reasoning_tokens" in data["usage"].get("output_tokens_details", {}):
-        result["tokens"]["reasoning_tokens"] = data["usage"]["output_tokens_details"]["reasoning_tokens"]
+        output_tokens_details = data["usage"]["output_tokens_details"]
+        result["tokens"]["reasoning_tokens"] = output_tokens_details["reasoning_tokens"]
 
     return result
 
 
-def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
+def ask_model(
+    messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1
+) -> Dict[str, str]:
     start_time = time.time()
-    print(f'\tAttempt {attempt} at {datetime.now()}')
+    print(f"\tAttempt {attempt} at {datetime.now()}")
     try:
         data = None
 
@@ -153,10 +208,17 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
                 data = request_anthropic_vertex_data(system_prompt, messages, model)
             case ModelProvider.AMAZON:
                 data = request_bedrock_data(system_prompt, messages, model)
-            case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
+            case (
+                ModelProvider.OPENAI
+                | ModelProvider.AZURE
+                | ModelProvider.XAI
+                | ModelProvider.FIREWORKS
+            ):
                 data = request_openai_format_data(system_prompt, messages, model)
             case ModelProvider.OPENAI_RESPONSES:
-                data = request_openai_response_format_data(system_prompt, messages, model)
+                data = request_openai_response_format_data(
+                    system_prompt, messages, model
+                )
             case _:
                 raise Exception(f"Unknown model provider: {model.provider}")
 
@@ -165,37 +227,31 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
             "thoughts": data.get("thoughts", None),
             "content": data["content"],
             "tokens": data["tokens"],
-            "execute_time": execute_time
+            "execute_time": execute_time,
         }
     except APIException as e:
         print(f"Error: {e.status_code}")
         print(f"Error: {e.content}")
         if e.status_code == 429:
-            print('Will try in 1 minute...')
+            print("Will try in 1 minute...")
             time.sleep(60)
             return ask_model(messages, system_prompt, model, attempt + 1)
         else:
             if attempt > 2:
-                return {
-                    "error": f'### Error: {e.content}\n'
-                }
+                return {"error": f"### Error: {e.content}\n"}
             else:
                 print("\tTrying again...")
                 time.sleep(10)
                 return ask_model(messages, system_prompt, model, attempt + 1)
     except requests.exceptions.Timeout:
         if attempt > 2:
-            return {
-                "error": f'### Error: Timeout error\n'
-            }
+            return {"error": f"### Error: Timeout error\n"}
         print("\tRequest timed out. Trying again...")
         return ask_model(messages, system_prompt, model, attempt + 1)
     except Exception as e:
         print(f"\tError: {str(e)}")
         if attempt > 2:
-            return {
-                "error": f'### Error: can not get the content\n'
-            }
+            return {"error": f"### Error: can not get the content\n"}
         else:
             print("\tTrying again...")
             time.sleep(5)

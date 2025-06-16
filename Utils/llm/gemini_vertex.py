@@ -4,18 +4,17 @@ from google import genai
 from google.genai import types
 
 from Utils.llm.config import google_ai_api_key, Model, default_temperature
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
 def request_ai_studio_data(
-        system_prompt: str,
-        messages: List[Dict[str, str]],
-        model: Model
+    system_prompt: str, messages: List[AIMessage], model: Model
 ) -> Dict[str, Any]:
     """
     Request data from Google Gemini Vertex AI API.
     Args:
         system_prompt: System prompt for the model
-        messages: List of message dictionaries with role and content
+        messages: List of messages with role and content
         model: Model configuration
 
     Returns:
@@ -28,8 +27,16 @@ def request_ai_studio_data(
     except Exception as e:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
+    # TODO: add images support
     contents = [
-        {"role": message['role'], "parts": [{"text": message['content']}]}
+        {
+            "role": message.role,
+            "parts": [
+                {"text": content.text}
+                for content in message.content_list
+                if isinstance(content, TextAIMessageContent)
+            ],
+        }
         for message in messages
     ]
 
@@ -40,10 +47,8 @@ def request_ai_studio_data(
             system_instruction=system_prompt,
             max_output_tokens=config["max_tokens"],
             temperature=default_temperature,
-            thinking_config=types.ThinkingConfig(
-                include_thoughts=True
-            )
-        )
+            thinking_config=types.ThinkingConfig(include_thoughts=True),
+        ),
     )
 
     text_content: Optional[str] = None
@@ -66,7 +71,7 @@ def request_ai_studio_data(
             "input_tokens": metadata.prompt_token_count,
             "output_tokens": metadata.total_token_count - metadata.prompt_token_count,
             "reasoning_tokens": metadata.thoughts_token_count or 0,
-        }
+        },
     }
 
 
@@ -76,7 +81,7 @@ if __name__ == "__main__":
     data = request_ai_studio_data(
         "You should answer in french.",
         [{"role": "user", "content": "Send me a recipe for banana bread."}],
-        Model.Gemini_25_Flash_0520
+        Model.Gemini_25_Flash_0520,
     )
 
     print("Thoughts:\n", data["thoughts"])
