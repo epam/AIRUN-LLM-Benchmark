@@ -7,6 +7,7 @@ from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.bedrock import request_bedrock_data
 from Utils.llm.gemini_vertex import request_ai_studio_data
+from Utils.llm.responses_api import request_openai_responses_data
 
 
 class APIException(Exception):
@@ -72,74 +73,6 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     return result
 
 
-def request_openai_response_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
-    config = model()
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {config["api_key"]}",
-    }
-
-    developer_message = [{
-        "role": "developer",
-        "content": [{
-            "type": "input_text", "text": system_prompt
-        }]
-    }]
-
-    input_messages = [{
-        "role": "user",
-        "content": [{"type": "input_text", "text": message["content"]}]
-    } for message in messages]
-
-    payload = {
-        "model": config["model_id"],
-        "input": developer_message + input_messages,
-        "temperature": config.get("temperature", default_temperature),
-        "text": {
-            "format": {
-                "type": "text"
-            }
-        },
-        "store": False
-    }
-
-    if "max_tokens" in config:
-        payload["max_output_tokens"] = config["max_tokens"]
-
-    if "reasoning_effort" in config:
-        payload["reasoning"] = {
-            "effort": config["reasoning_effort"]
-        }
-
-    response = requests.post(config["url"], headers=headers, json=payload, timeout=300)
-
-    if not response.ok:
-        raise APIException(response.status_code, response.content)
-
-    data = response.json()
-
-    content = next(item["content"][0]["text"] for item in data["output"] if item["type"] == "message")
-    reasoning = next((item["summary"][0].get("text", None)
-                      for item in data["output"]
-                      if item["type"] == "reasoning" and len(item["summary"]) > 0),
-                     None)
-
-    result = {
-        "content": content,
-        "thoughts": reasoning,
-        "tokens": {
-            "input_tokens": data["usage"]["input_tokens"],
-            "output_tokens": data["usage"]["output_tokens"],
-        }
-    }
-
-    if "reasoning_tokens" in data["usage"].get("output_tokens_details", {}):
-        result["tokens"]["reasoning_tokens"] = data["usage"]["output_tokens_details"]["reasoning_tokens"]
-
-    return result
-
-
 def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
     start_time = time.time()
     print(f'\tAttempt {attempt} at {datetime.now()}')
@@ -156,7 +89,7 @@ def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, 
             case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
                 data = request_openai_format_data(system_prompt, messages, model)
             case ModelProvider.OPENAI_RESPONSES:
-                data = request_openai_response_format_data(system_prompt, messages, model)
+                data = request_openai_responses_data(system_prompt, messages, model)
             case _:
                 raise Exception(f"Unknown model provider: {model.provider}")
 
