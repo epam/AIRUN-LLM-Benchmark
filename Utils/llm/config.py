@@ -55,8 +55,6 @@ def get_open_ai_responses_config(model, max_tokens=None):
     config = {
         "max_tokens": max_tokens,
         "model_id": model,
-        "api_key": open_api_key,
-        "url": 'https://api.openai.com/v1/responses'
     }
 
     if model.startswith("o1") or model.startswith("o3") or model.startswith("o4") or model.startswith("codex"):
