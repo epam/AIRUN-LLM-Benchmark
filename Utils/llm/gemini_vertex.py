@@ -25,16 +25,24 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
     except Exception as e:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
-    # TODO: add images support
-    contents = [
-        {
-            "role": message.role,
-            "parts": [
-                {"text": content.text} for content in message.content_list if isinstance(content, TextAIMessageContent)
-            ],
-        }
-        for message in messages
-    ]
+    contents: List[types.ContentDict] = []
+    for message in messages:
+        parts: list[types.PartDict] = []
+        for content in message.content_list:
+            if isinstance(content, TextAIMessageContent):
+                parts.append({"text": content.text})
+            elif isinstance(content, ImageAIMessageContent):
+                parts.append({"text": f"Next image file name: {content.file_name}"})
+                parts.append({"inline_data": {"data": content.binary_content, "mime_type": content.media_type()}})
+            else:
+                print(f"Gemini Vertex API: Unsupported content type: {type(content)}")
+
+        contents.append(
+            {
+                "role": message.role,
+                "parts": parts,
+            }
+        )
 
     response = client.models.generate_content(
         model=config["model_id"],
@@ -50,8 +58,6 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
     text_content: Optional[str] = None
     thinking_content: Optional[str] = None
 
-    metadata = response.usage_metadata
-
     for part in response.candidates[0].content.parts:
         if not part.text:
             continue
@@ -60,6 +66,7 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
         else:
             text_content = part.text
 
+    metadata = response.usage_metadata
     return {
         "content": text_content,
         "thoughts": thinking_content,

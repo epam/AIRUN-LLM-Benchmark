@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from anthropic import AnthropicVertex
-from anthropic.types import TextBlockParam
+from anthropic.types import TextBlockParam, ImageBlockParam, Base64ImageSourceParam
 
 from Utils.llm.config import Model
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
@@ -30,7 +30,6 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
     text_content: Optional[str] = None
     thinking_content: Optional[str] = None
 
-    # TODO: verify message format
     api_messages = []
     for message in messages:
         api_content = []
@@ -38,8 +37,18 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
             if isinstance(content, TextAIMessageContent):
                 api_content.append(TextBlockParam(text=content.text, type="text"))
             elif isinstance(content, ImageAIMessageContent):
-                # TODO: add images support
-                pass
+                api_content.append(TextBlockParam(text=f"Next image file name: {content.file_name}", type="text"))
+                api_content.append(
+                    ImageBlockParam(
+                        type="image",
+                        source=Base64ImageSourceParam(
+                            type="base64", data=content.to_base64(), media_type=content.media_type()
+                        ),
+                    )
+                )
+            else:
+                print(f"Anthropic Vertex API: Unsupported content type: {type(content)}")
+
         api_messages.append({"role": message.role, "content": api_content})
 
     with client.messages.stream(

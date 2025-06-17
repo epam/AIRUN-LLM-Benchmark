@@ -26,19 +26,22 @@ class ImageAIMessageContent(AIMessageContent):
         self.file_name = file_name
         self.binary_content = binary_content
 
-    def to_base64_url(self) -> str:
-        base64_str = base64.b64encode(self.binary_content).decode("utf-8")
-        file_extension = self.file_name.split(".")[-1]
-        if file_extension.lower() in ["jpg", "jpeg"]:
-            mime_type = "image/jpeg"
-        elif file_extension.lower() == "png":
-            mime_type = "image/png"
-        elif file_extension.lower() == "gif":
-            mime_type = "image/gif"
+    def media_type(self) -> str:
+        file_extension = self.file_name.split(".")[-1].lower()
+        if file_extension in ["jpg", "jpeg"]:
+            return "image/jpeg"
+        elif file_extension == "png":
+            return "image/png"
+        elif file_extension == "gif":
+            return "image/gif"
         else:
             raise ValueError(f"Unsupported image format: {file_extension}")
 
-        return f"data:{mime_type};base64,{base64_str}"
+    def to_base64(self) -> str:
+        return base64.b64encode(self.binary_content).decode("utf-8")
+
+    def to_base64_url(self) -> str:
+        return f"data:{self.media_type()};base64,{self.to_base64()}"
 
 
 class AIMessage:
