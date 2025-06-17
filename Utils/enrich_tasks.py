@@ -17,7 +17,6 @@ def traverse_files_and_get_content(repo_path: str):
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 output.append(f"```{extension}\n" f"// {relative_path}\n" f"{content}\n```\n")
-                print(f"Reading {relative_path}")
             except UnicodeDecodeError:
                 print(f"Can't read file {file_path}, it's not a text file")
     return "\n".join(output)
@@ -38,7 +37,6 @@ def enrich_task_content(task_name: str, task_content: str, datasets_categoty: Pa
         repo_name = match.group(1)
         repo_path = datasets_categoty / repo_name
         if repo_path.exists() and repo_path.is_dir():
-            print(f"Enriching task {task_name} with repository {repo_name}")
             repo_content = traverse_files_and_get_content(str(repo_path))
             enriched_content = re.sub(
                 code_placement_pattern,
@@ -51,5 +49,4 @@ def enrich_task_content(task_name: str, task_content: str, datasets_categoty: Pa
             print(f"Enrich task {task_name}: repository {repo_name} not found in datasets category, skipping...")
             return task_content
     else:
-        print(f"Enrich task {task_name}: no repository found in task content, skipping...")
         return task_content
