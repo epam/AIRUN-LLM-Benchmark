@@ -2,7 +2,7 @@ Your task is to modify the application on React 18.x, which utilizes the SWAPI o
 You should add a character search functionality and optimize it efficiently (avoid overloading the Backend with requests).
 
 <source_code>
-<place_code_here>
+<place_code_here repo="ReactFetchAPI"/>
 </source_code>
 
 Please follow these steps:

@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 
 
@@ -16,97 +17,36 @@ def traverse_files_and_get_content(repo_path: str):
                 with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
                 output.append(f"```{extension}\n" f"// {relative_path}\n" f"{content}\n```\n")
-                print(f"Reading {relative_path}")
             except UnicodeDecodeError:
                 print(f"Can't read file {file_path}, it's not a text file")
     return "\n".join(output)
 
 
-def extract_dataset_name(task_file_name: str, base_dataset: str):
+def enrich_task_content(task_name: str, task_content: str, datasets_categoty: Path) -> str:
     """
-    Extracts dataset name from task file name.
-    For example: "WriteTestsForActualCode_ReactSelect_extra_high_high.md" -> "ReactSelect"
+    Enriches the task content by replacing the <source_code> tag with the content of the
+    corresponding repository (from datasets) specified in the <place_code_here repo="REPO_NAME"/> tag.
+    If the repository does not exist or is not a directory, skips the enrichment.
     """
-    # Get all dataset names
-    dataset_names = os.listdir(base_dataset) or []
-
-    # Check if any dataset name appears as a substring in the task file name
-    for dataset in dataset_names:
-        if dataset in task_file_name:
-            return dataset
-
-    return None
-
-
-def enrich_task_with_dataset(task_file_path: str, output_dir: str, base_dataset_path: str):
-    """
-    Reads a task file, identifies the dataset to use, and creates an enriched version
-    with the dataset files included.
-    """
-    # Extract task file name and get dataset name
-    task_file_name = os.path.basename(task_file_path)
-    dataset_name = extract_dataset_name(task_file_name, base_dataset_path)
-
-    if not dataset_name:
-        print(f"Could not determine dataset for {task_file_name}, skipping...")
-        return
-
-    # Read task file
-    with open(task_file_path, "r", encoding="utf-8") as f:
-        task_content = f.read()
-
-    # Get dataset path
-    dataset_path = os.path.join(base_dataset_path, dataset_name)
-
-    # Check if dataset exists
-    if not os.path.exists(dataset_path):
-        print(f"Dataset {dataset_name} not found at {dataset_path}, skipping...")
-        return
-
-    # Get dataset content
-    dataset_content = traverse_files_and_get_content(dataset_path)
-
-    # Replace placeholder with dataset content
-    enriched_content = task_content.replace("<place_code_here>", dataset_content)
-
-    # Create output directory if it doesn't exist
-    task_dir = os.path.dirname(task_file_path)
-    rel_path = os.path.relpath(task_dir, os.path.join(Path(__file__).resolve().parent.parent, "Scenarios", "Tasks"))
-    output_task_dir = os.path.join(output_dir, rel_path)
-    os.makedirs(output_task_dir, exist_ok=True)
-
-    # Write enriched content to output file
-    output_file_path = os.path.join(output_task_dir, task_file_name)
-    with open(output_file_path, "w", encoding="utf-8") as f:
-        f.write(enriched_content)
-
-    print(f"Successfully enriched {task_file_name} with {dataset_name} dataset")
-
-
-def enrich_tasks(language: str = "JS"):
-    """
-    Main function to process all task files.
-    """
-    base_path = Path(__file__).resolve().parent.parent
-    tasks_path = base_path / "Scenarios" / "Tasks" / language
-    output_dir = base_path / "Scenarios" / "Tasks_Enriched"
-    base_dataset_path = base_path / "Dataset" / language
-
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Track successfully enriched files
-    enriched_count = 0
-
-    # Walk through all tasks
-    for subdir, dirs, files in os.walk(tasks_path):
-        for file in files:
-            if file.endswith(".md"):
-                file_path = os.path.join(subdir, file)
-                enrich_task_with_dataset(file_path, str(output_dir), str(base_dataset_path))
-                enriched_count += 1
-
-    print(f"Completed: Enriched {enriched_count} task files")
-
-
-if __name__ == "__main__":
-    enrich_tasks()
+    code_placement_pattern = r'<place_code_here\s+repo="([^"]+)"\s*\/>'
+    match = re.search(
+        code_placement_pattern,
+        task_content,
+    )
+    if match:
+        repo_name = match.group(1)
+        repo_path = datasets_categoty / repo_name
+        if repo_path.exists() and repo_path.is_dir():
+            repo_content = traverse_files_and_get_content(str(repo_path))
+            enriched_content = re.sub(
+                code_placement_pattern,
+                lambda _m: repo_content,  # to avoid backslash eacaping issues
+                task_content,
+                count=1,
+            )
+            return enriched_content
+        else:
+            print(f"Enrich task {task_name}: repository {repo_name} not found in datasets category, skipping...")
+            return task_content
+    else:
+        return task_content
