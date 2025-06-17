@@ -2,14 +2,26 @@
 # docs on API https://docs.aws.amazon.com/nova/latest/userguide/using-converse-api.html
 import boto3
 from Utils.llm.config import Model, default_temperature
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
-def request_bedrock_data(system_prompt, messages, model: Model):
+def request_bedrock_data(system_prompt: str, messages: list[AIMessage], model: Model):
     client = boto3.client("bedrock-runtime", region_name="us-east-1")
     config = model()
 
     system = [{"text": system_prompt}]
-    formatted_messages = [{"role": message["role"], "content": [{"text": message["content"]}]} for message in messages]
+    # TODO: add images support
+    formatted_messages = [
+        {
+            "role": message.role,
+            "content": [
+                {"text": content.text}
+                for content in message.content_list
+                if isinstance(content, TextAIMessageContent)
+            ],
+        }
+        for message in messages
+    ]
 
     inf_params = {"temperature": default_temperature}
 

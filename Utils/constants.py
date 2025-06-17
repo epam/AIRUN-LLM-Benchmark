@@ -9,6 +9,7 @@ repo_to_complexity = {
     "AngularCosmoPage": "avg_high",
     "ReactSignUp": "high_low",
     "ToDoApp_AngularJS": "avg_avg_2",
+    "ToDoApp_AngularJS_Bug1": "low_avg",
     "ToDoApp_ReactJS": "high_avg",
     "AngularCalendar": "high_high",
     "Piano_NativeJS": "high_low",
@@ -52,6 +53,7 @@ repo_to_technology = {
     "ReactNavbar": "React",
     "ReactFetchAPI": "React",
     "ToDoApp_AngularJS": "Angular",
+    "ToDoApp_AngularJS_Bug1": "Angular",
     "ToDoApp_jQuery": "jQuery",
     "Piano_NativeJS": "NativeJS",
 }
