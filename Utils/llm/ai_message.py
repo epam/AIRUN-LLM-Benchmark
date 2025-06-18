@@ -20,6 +20,12 @@ class TextAIMessageContent(AIMessageContent):
 class ImageAIMessageContent(AIMessageContent):
     file_name: str
     binary_content: bytes
+    SUPPORTED_FORMATS: dict[str, str] = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif",
+    }
 
     def __init__(
         self,
@@ -32,14 +38,10 @@ class ImageAIMessageContent(AIMessageContent):
 
     def media_type(self) -> str:
         file_extension = self.file_name.split(".")[-1].lower()
-        if file_extension in ["jpg", "jpeg"]:
-            return "image/jpeg"
-        elif file_extension == "png":
-            return "image/png"
-        elif file_extension == "gif":
-            return "image/gif"
-        else:
+        if file_extension not in self.SUPPORTED_FORMATS:
             raise ValueError(f"Unsupported image format: {file_extension}")
+
+        return self.SUPPORTED_FORMATS[file_extension]
 
     def to_base64(self) -> str:
         return base64.b64encode(self.binary_content).decode("utf-8")
