@@ -2,7 +2,8 @@ import base64
 
 
 class AIMessageContent:
-    pass
+    def to_dict(self):
+        pass
 
 
 class TextAIMessageContent(AIMessageContent):
@@ -11,6 +12,9 @@ class TextAIMessageContent(AIMessageContent):
     def __init__(self, text: str):
         super().__init__()
         self.text = text
+
+    def to_dict(self):
+        return self.text
 
 
 class ImageAIMessageContent(AIMessageContent):
@@ -43,6 +47,9 @@ class ImageAIMessageContent(AIMessageContent):
     def to_base64_url(self) -> str:
         return f"data:{self.media_type()};base64,{self.to_base64()}"
 
+    def to_dict(self):
+        return self.file_name
+
 
 class AIMessage:
     role: str
@@ -51,3 +58,9 @@ class AIMessage:
     def __init__(self, role: str, content_list: list[AIMessageContent]):
         self.role = role
         self.content_list = content_list
+
+    def to_dict(self):
+        return {
+            "role": self.role,
+            "content_list": [c.to_dict() for c in self.content_list]
+        }
