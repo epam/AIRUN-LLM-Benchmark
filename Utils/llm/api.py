@@ -22,7 +22,7 @@ def format_openai_messages(messages):
     api_messages = []
     for message in messages:
         api_content = []
-        for content in message.content_list:
+        for content in message.content:
             if isinstance(content, TextAIMessageContent):
                 api_content.append(
                     {

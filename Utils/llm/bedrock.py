@@ -12,13 +12,13 @@ def request_bedrock_data(system_prompt: str, messages: list[AIMessage], model: M
     system = [{"text": system_prompt}]
     formatted_messages = []
     for message in messages:
-        content_list = []
-        for content in message.content_list:
+        api_content = []
+        for content in message.content:
             if isinstance(content, TextAIMessageContent):
-                content_list.append({"text": content.text})
+                api_content.append({"text": content.text})
             elif isinstance(content, ImageAIMessageContent):
-                content_list.append({"text": f"Next image file name: {content.file_name}"})
-                content_list.append(
+                api_content.append({"text": f"Next image file name: {content.file_name}"})
+                api_content.append(
                     {
                         "image": {
                             "format": content.media_type().split("/")[1],
@@ -31,7 +31,7 @@ def request_bedrock_data(system_prompt: str, messages: list[AIMessage], model: M
             else:
                 print(f"Bedrock API: Unsupported content type: {type(content)}")
 
-        formatted_messages.append({"role": message.role, "content": content_list})
+        formatted_messages.append({"role": message.role, "content": api_content})
 
     inf_params = {"temperature": default_temperature}
 

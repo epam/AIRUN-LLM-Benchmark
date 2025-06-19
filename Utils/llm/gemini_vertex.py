@@ -28,7 +28,7 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
     contents: List[types.ContentDict] = []
     for message in messages:
         parts: list[types.PartDict] = []
-        for content in message.content_list:
+        for content in message.content:
             if isinstance(content, TextAIMessageContent):
                 parts.append({"text": content.text})
             elif isinstance(content, ImageAIMessageContent):
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     data = request_ai_studio_data(
         "You should answer in french.",
-        [{"role": "user", "content": "Send me a recipe for banana bread."}],
+        [AIMessage(role="user",content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         Model.Gemini_25_Flash_0520,
     )
 

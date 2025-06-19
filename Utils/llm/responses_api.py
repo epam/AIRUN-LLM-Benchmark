@@ -38,7 +38,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
     input_messages: List[ResponseInputItemParam] = []
     for message in messages:
         api_message_content: List[ResponseInputContentParam] = []
-        for content in message.content_list:
+        for content in message.content:
             if isinstance(content, TextAIMessageContent):
                 api_message_content.append(ResponseInputTextParam(type="input_text", text=content.text))
             elif isinstance(content, ImageAIMessageContent):
@@ -111,9 +111,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
 if __name__ == "__main__":
     data = request_openai_responses_data(
         system_prompt="You should answer in french.",
-        messages=[
-            AIMessage(role="user", content_list=[TextAIMessageContent(text="Send me a recipe for banana bread.")])
-        ],
+        messages=[AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         model=Model.OpenAi_o3_0416,
     )
 

@@ -53,14 +53,14 @@ class ImageAIMessageContent(AIMessageContent):
 
 class AIMessage:
     role: str
-    content_list: list[AIMessageContent]
+    content: list[AIMessageContent]
 
-    def __init__(self, role: str, content_list: list[AIMessageContent]):
+    def __init__(self, role: str, content: list[AIMessageContent]):
         self.role = role
-        self.content_list = content_list
+        self.content = content
 
     def to_dict(self):
         return {
             "role": self.role,
-            "content_list": [c.to_dict() for c in self.content_list]
+            "content": [c.to_dict() for c in self.content]
         }

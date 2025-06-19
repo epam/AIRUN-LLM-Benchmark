@@ -38,9 +38,9 @@ def generate_report(answers_path, file_content, data, report_name, attempt, curr
         output_file.write(file_content + "\n" + data)
 
 
-def get_answer_from_model(content_list: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
+def get_answer_from_model(content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
     data = ask_model(
-        messages=[AIMessage(role="user", content_list=content_list)],
+        messages=[AIMessage(role="user", content=content)],
         system_prompt=system_prompt,
         model=model,
         attempt=attempt,

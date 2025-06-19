@@ -33,7 +33,7 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
     api_messages = []
     for message in messages:
         api_content = []
-        for content in message.content_list:
+        for content in message.content:
             if isinstance(content, TextAIMessageContent):
                 api_content.append(TextBlockParam(text=content.text, type="text"))
             elif isinstance(content, ImageAIMessageContent):
@@ -80,13 +80,9 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
 
 if __name__ == "__main__":
     # Test the API function
-    message = AIMessage(
-        role="user",
-        content_list=[TextAIMessageContent(text="Send me a recipe for banana bread.")],
-    )
     data = request_anthropic_vertex_data(
         system_prompt="You should answer in french.",
-        messages=[message],
+        messages=[AIMessage( role="user",content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         model=Model.Sonnet_4_Thinking,
     )
     print("Thoughts:\n", data["thoughts"])
