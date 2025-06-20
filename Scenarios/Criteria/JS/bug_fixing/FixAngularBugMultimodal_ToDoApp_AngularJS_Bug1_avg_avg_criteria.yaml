@@ -1,0 +1,10 @@
+evaluation_steps:
+  accuracy:
+  - Check that all recommended solutions address the root cause of the issues
+  completeness:
+  - Ensure that all identified bugs are addressed
+metadata:
+  category: FixAngularBugMultimodal_ToDoApp_Bug1_AngularJS_avg_avg
+  experiment: bug_fixing
+  repository: ToDoApp_Bug1_AngularJS
+  scenario_id: 25

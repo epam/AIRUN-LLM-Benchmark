@@ -1,13 +1,24 @@
+from datetime import datetime
 from time import sleep
 from typing import List, Dict, Any
 from openai import OpenAI
 from openai.types.shared_params import Reasoning
-from openai.types.responses import EasyInputMessageParam
+from openai.types.responses import (
+    EasyInputMessageParam,
+    ResponseInputContentParam,
+    ResponseInputTextParam,
+    ResponseInputImageParam,
+    ResponseInputItemParam,
+    ResponseOutputMessage,
+    ResponseOutputText,
+    ResponseReasoningItem,
+)
 
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 from Utils.llm.config import Model
 
 
-def request_openai_responses_data(system_prompt: str, messages: List[Dict[str, str]], model: Model) -> Dict[str, Any]:
+def request_openai_responses_data(system_prompt: str, messages: List[AIMessage], model: Model) -> Dict[str, Any]:
     """
     Request data from OpenAI Responses API.
 
@@ -23,11 +34,25 @@ def request_openai_responses_data(system_prompt: str, messages: List[Dict[str, s
         Exception: If API request fails or configuration is invalid
     """
     config = model()
-    developer_message = [EasyInputMessageParam(role="developer", content=system_prompt)]
-    input_messages = [
-        EasyInputMessageParam(role="user" if message["role"] == "user" else "assistant", content=message["content"])
-        for message in messages
-    ]
+    developer_message: List[ResponseInputItemParam] = [EasyInputMessageParam(role="developer", content=system_prompt)]
+    input_messages: List[ResponseInputItemParam] = []
+    for message in messages:
+        api_message_content: List[ResponseInputContentParam] = []
+        for content in message.content:
+            if isinstance(content, TextAIMessageContent):
+                api_message_content.append(ResponseInputTextParam(type="input_text", text=content.text))
+            elif isinstance(content, ImageAIMessageContent):
+                api_message_content.append(
+                    ResponseInputTextParam(type="input_text", text=f"Next image filename: {content.file_name}")
+                )
+                api_message_content.append(
+                    ResponseInputImageParam(type="input_image", image_url=content.to_base64_url(), detail="auto")
+                )
+            else:
+                print(f"OpenAI responses API: Unsupported content type: {type(content)}")
+        input_messages.append(
+            EasyInputMessageParam(role="user" if message.role == "user" else "assistant", content=api_message_content)
+        )
 
     try:
         client = OpenAI()
@@ -46,27 +71,37 @@ def request_openai_responses_data(system_prompt: str, messages: List[Dict[str, s
 
     try:
         while resp.status in {"queued", "in_progress"}:
-            print(f"Response status: {resp.status}")
+            print(f"\r\tResponse status: {resp.status} | Last update: {datetime.now()}", end="", flush=True)
             sleep(30)
             resp = client.responses.retrieve(resp.id)
+        print()
     except Exception as e:
         raise Exception(f"Failed to retrieve response: {e}")
 
     response = resp.output
 
-    content = next(item.content[0].text for item in response if item.type == "message")
-    reasoning = next(
-        (item.summary[0].get("text", None) for item in response if item.type == "reasoning" and len(item.summary) > 0),
-        None,
+    content = next(
+        item.content[0].text
+        for item in response
+        if isinstance(item, ResponseOutputMessage)
+        and isinstance(item.content[0], ResponseOutputText)
+        and len(item.content) > 0
+    )
+    reasoning = "\n".join(
+        summary.text
+        for item in response
+        if isinstance(item, ResponseReasoningItem)
+        for summary in item.summary
+        if summary.text
     )
 
     result = {
         "content": content,
         "thoughts": reasoning,
         "tokens": {
-            "input_tokens": resp.usage.input_tokens,
-            "output_tokens": resp.usage.output_tokens,
-            "reasoning_tokens": resp.usage.output_tokens_details.reasoning_tokens,  # Default to 0 if not present
+            "input_tokens": resp.usage.input_tokens if resp.usage else None,
+            "output_tokens": resp.usage.output_tokens if resp.usage else None,
+            "reasoning_tokens": (resp.usage.output_tokens_details.reasoning_tokens if resp.usage else None),
         },
     }
 
@@ -76,7 +111,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[Dict[str, s
 if __name__ == "__main__":
     data = request_openai_responses_data(
         system_prompt="You should answer in french.",
-        messages=[{"role": "user", "content": "Send me a recipe for banana bread."}],
+        messages=[AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         model=Model.OpenAi_o3_0416,
     )
 

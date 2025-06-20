@@ -2,12 +2,13 @@ import time
 import re
 import requests
 from datetime import datetime
-from typing import List, Dict, Literal
+from typing import Any, List, Dict, Literal
 from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.bedrock import request_bedrock_data
 from Utils.llm.gemini_vertex import request_ai_studio_data
 from Utils.llm.responses_api import request_openai_responses_data
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
 class APIException(Exception):
@@ -17,7 +18,45 @@ class APIException(Exception):
         super().__init__(self.content)
 
 
-def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]], model: Model):
+def format_openai_messages(messages):
+    api_messages = []
+    for message in messages:
+        api_content = []
+        for content in message.content:
+            if isinstance(content, TextAIMessageContent):
+                api_content.append(
+                    {
+                        "type": "text",
+                        "text": content.text,
+                    }
+                )
+            elif isinstance(content, ImageAIMessageContent):
+                api_content.append(
+                    {
+                        "type": "text",
+                        "text": f"Next image filename: {content.file_name}",
+                    }
+                )
+                api_content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": content.to_base64_url(),
+                        },
+                    }
+                )
+
+        api_message = {
+            "role": message.role,
+            "content": api_content,
+        }
+        api_messages.append(api_message)
+    return api_messages
+
+
+def request_openai_format_data(
+    system_prompt: str, messages: List[AIMessage], model: Model
+):
     config = model()
 
     skip_system = config.get("skip_system", False)
@@ -32,10 +71,16 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
 
     payload = {
         "model": config["model_id"],
-        "messages": ([] if skip_system else [{"role": system_role_name, "content": system_prompt}]) + messages,
+        "messages": [],
         "temperature": config.get("temperature", default_temperature),
         **extra_params,
     }
+
+    if not skip_system:
+        payload["messages"].append({"role": system_role_name, "content": system_prompt})
+
+    api_messages = format_openai_messages(messages)
+    payload["messages"].extend(api_messages)
 
     max_tokens = config.get("max_tokens")
     if max_tokens is not None:
@@ -73,7 +118,7 @@ def request_openai_format_data(system_prompt: str, messages: List[dict[str, str]
     return result
 
 
-def ask_model(messages: List[dict[str, str]], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, str]:
+def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, Any]:
     start_time = time.time()
     print(f"\tAttempt {attempt} at {datetime.now()}")
     try:

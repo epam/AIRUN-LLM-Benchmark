@@ -4,14 +4,15 @@ from google import genai
 from google.genai import types
 
 from Utils.llm.config import google_ai_api_key, Model, default_temperature
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
-def request_ai_studio_data(system_prompt: str, messages: List[Dict[str, str]], model: Model) -> Dict[str, Any]:
+def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model: Model) -> Dict[str, Any]:
     """
     Request data from Google Gemini Vertex AI API.
     Args:
         system_prompt: System prompt for the model
-        messages: List of message dictionaries with role and content
+        messages: List of messages with role and content
         model: Model configuration
 
     Returns:
@@ -24,7 +25,24 @@ def request_ai_studio_data(system_prompt: str, messages: List[Dict[str, str]], m
     except Exception as e:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
-    contents = [{"role": message["role"], "parts": [{"text": message["content"]}]} for message in messages]
+    contents: List[types.ContentDict] = []
+    for message in messages:
+        parts: list[types.PartDict] = []
+        for content in message.content:
+            if isinstance(content, TextAIMessageContent):
+                parts.append({"text": content.text})
+            elif isinstance(content, ImageAIMessageContent):
+                parts.append({"text": f"Next image file name: {content.file_name}"})
+                parts.append({"inline_data": {"data": content.binary_content, "mime_type": content.media_type()}})
+            else:
+                print(f"Gemini Vertex API: Unsupported content type: {type(content)}")
+
+        contents.append(
+            {
+                "role": message.role,
+                "parts": parts,
+            }
+        )
 
     response = client.models.generate_content(
         model=config["model_id"],
@@ -40,8 +58,6 @@ def request_ai_studio_data(system_prompt: str, messages: List[Dict[str, str]], m
     text_content: Optional[str] = None
     thinking_content: Optional[str] = None
 
-    metadata = response.usage_metadata
-
     for part in response.candidates[0].content.parts:
         if not part.text:
             continue
@@ -50,6 +66,7 @@ def request_ai_studio_data(system_prompt: str, messages: List[Dict[str, str]], m
         else:
             text_content = part.text
 
+    metadata = response.usage_metadata
     return {
         "content": text_content,
         "thoughts": thinking_content,
@@ -66,7 +83,7 @@ if __name__ == "__main__":
 
     data = request_ai_studio_data(
         "You should answer in french.",
-        [{"role": "user", "content": "Send me a recipe for banana bread."}],
+        [AIMessage(role="user",content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         Model.Gemini_25_Flash_0520,
     )
 
