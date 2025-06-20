@@ -1,9 +1,9 @@
 import base64
+import json
 
 
 class AIMessageContent:
-    def to_dict(self):
-        pass
+    pass
 
 
 class TextAIMessageContent(AIMessageContent):
@@ -13,7 +13,7 @@ class TextAIMessageContent(AIMessageContent):
         super().__init__()
         self.text = text
 
-    def to_dict(self):
+    def __str__(self):
         return self.text
 
 
@@ -49,7 +49,7 @@ class ImageAIMessageContent(AIMessageContent):
     def to_base64_url(self) -> str:
         return f"data:{self.media_type()};base64,{self.to_base64()}"
 
-    def to_dict(self):
+    def __str__(self):
         return self.file_name
 
 
@@ -61,8 +61,5 @@ class AIMessage:
         self.role = role
         self.content = content
 
-    def to_dict(self):
-        return {
-            "role": self.role,
-            "content": [c.to_dict() for c in self.content]
-        }
+    def __str__(self):
+        return json.dumps({"role": self.role, "content": [c.__str__() for c in self.content]}, indent=4)
