@@ -40,7 +40,7 @@ evaluation_steps:
   - Validate the documentation explains URL validation and error handling
   - Ensure the documentation describes the tag suggestion system based on user input
 metadata:
-  category: BusinessFunctionality_AngularCosmoPage_avg_high
+  category: BusinessFunctionality_AngularJSCosmoPage_avg_high
   experiment: solution_documentation
   repository: angular_cosmo_page
   scenario_id: 14

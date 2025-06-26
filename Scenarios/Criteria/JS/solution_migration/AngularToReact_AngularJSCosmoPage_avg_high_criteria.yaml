@@ -32,7 +32,7 @@ evaluation_steps:
   - Verify that all translation functionality is preserved
   - Confirm that the application maintains the same URL structure and parameters
 metadata:
-  category: AngularToReact_AngularCosmoPage_avg_high
+  category: AngularToReact_AngularJSCosmoPage_avg_high
   experiment: solution_migration
   repository: angular_cosmo_page
   scenario_id: 7

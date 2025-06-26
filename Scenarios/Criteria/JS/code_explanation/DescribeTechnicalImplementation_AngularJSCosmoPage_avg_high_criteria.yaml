@@ -27,7 +27,7 @@ evaluation_steps:
   - Verify the documentation explains all significant event broadcasting and inter-component communication
 
 metadata:
-  category: DescribeTechnicalImplementation_AngularCosmoPage_avg_high
+  category: DescribeTechnicalImplementation_AngularJSCosmoPage_avg_high
   experiment: code_explanation
   repository: angular_cosmo_page
   scenario_id: 17

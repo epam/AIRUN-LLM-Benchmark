@@ -88,7 +88,7 @@ def save_grading_report(grading_path: Path, report: List[dict[str, Any]]):
 
 def construct_category_name(category, dataset, complexity, size):
     """Construct the category name."""
-    # Example: AngularToReact, AngularCosmoPage, avg, high => AngularToReact_AngularCosmoPage_avg_high
+    # Example: AngularToReact, AngularJSCosmoPage, avg, high => AngularToReact_AngularJSCosmoPage_avg_high
     parts = [category]
     if dataset:
         parts.append(dataset)

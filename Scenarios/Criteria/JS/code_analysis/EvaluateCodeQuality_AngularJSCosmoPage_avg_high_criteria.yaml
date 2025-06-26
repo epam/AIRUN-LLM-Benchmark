@@ -26,7 +26,7 @@ evaluation_steps:
   - Confirm callback nesting and promise handling are evaluated for maintainability
   - Ensure that the analysis includes recommendations for migration to modern frameworks where appropriate
 metadata:
-  category: EvaluateCodeQuality_AngularCosmoPage_avg_high
+  category: EvaluateCodeQuality_AngularJSCosmoPage_avg_high
   experiment: code_analysis
   repository: angular_cosmo_page
   scenario_id: 20
