@@ -1,6 +1,8 @@
 import base64
 import json
+from typing import Literal
 
+MediaType = Literal["image/jpeg", "image/png", "image/gif"]
 
 class AIMessageContent:
     pass
@@ -20,7 +22,7 @@ class TextAIMessageContent(AIMessageContent):
 class ImageAIMessageContent(AIMessageContent):
     file_name: str
     binary_content: bytes
-    SUPPORTED_FORMATS: dict[str, str] = {
+    SUPPORTED_FORMATS: dict[str, MediaType] = {
         "jpg": "image/jpeg",
         "jpeg": "image/jpeg",
         "png": "image/png",
@@ -36,7 +38,7 @@ class ImageAIMessageContent(AIMessageContent):
         self.file_name = file_name
         self.binary_content = binary_content
 
-    def media_type(self) -> str:
+    def media_type(self) -> MediaType:
         file_extension = self.file_name.split(".")[-1].lower()
         if file_extension not in self.SUPPORTED_FORMATS:
             raise ValueError(f"Unsupported image format: {file_extension}")
@@ -51,6 +53,44 @@ class ImageAIMessageContent(AIMessageContent):
 
     def __str__(self):
         return self.file_name
+
+
+class ToolCallAIMessageContent(AIMessageContent):
+    name: str
+    arguments: dict
+    id: str
+
+    def __init__(self, name: str, arguments: dict, id: str):
+        super().__init__()
+        self.name = name
+        self.arguments = arguments
+        self.id = id
+
+    def __str__(self):
+        return json.dumps({
+            "name": self.name,
+            "arguments": self.arguments,
+            "id": self.id
+        })
+
+
+class ToolResponseAIMessageContent(AIMessageContent):
+    name: str
+    result: str
+    id: str
+
+    def __init__(self, name: str, result: str, id: str):
+        super().__init__()
+        self.name = name
+        self.result = result
+        self.id = id
+
+    def __str__(self):
+        return json.dumps({
+            "name": self.name,
+            "result": self.result,
+            "id": self.id
+        })
 
 
 class AIMessage:
