@@ -3,11 +3,13 @@ from typing import List, Dict, Any, Optional
 from google import genai
 from google.genai import types
 
+from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import google_ai_api_key, Model, default_temperature
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent
+from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
 
 
-def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model: Model) -> Dict[str, Any]:
+def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None) -> Dict[str, Any]:
     """
     Request data from Google Gemini Vertex AI API.
     Args:
@@ -25,17 +27,17 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
     except Exception as e:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
+    formatter_factory = get_formatter_factory(FormatterProvider.GEMINI)
+    
     contents: List[types.ContentDict] = []
     for message in messages:
         parts: list[types.PartDict] = []
         for content in message.content:
-            if isinstance(content, TextAIMessageContent):
-                parts.append({"text": content.text})
-            elif isinstance(content, ImageAIMessageContent):
-                parts.append({"text": f"Next image file name: {content.file_name}"})
-                parts.append({"inline_data": {"data": content.binary_content, "mime_type": content.media_type()}})
-            else:
-                print(f"Gemini Vertex API: Unsupported content type: {type(content)}")
+            try:
+                formatted_content = formatter_factory.format_content(content)
+                parts.extend(formatted_content)
+            except ValueError as e:
+                print(f"Gemini Vertex API: {e}")
 
         contents.append(
             {
@@ -48,6 +50,7 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
         model=config["model_id"],
         contents=contents,
         config=types.GenerateContentConfig(
+            tools=tools.to_gemini_format() if tools else None,
             system_instruction=system_prompt,
             max_output_tokens=config["max_tokens"],
             temperature=default_temperature,
@@ -57,19 +60,26 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
 
     text_content: Optional[str] = None
     thinking_content: Optional[str] = None
+    tool_calls: List[Any] = []
 
     for part in response.candidates[0].content.parts:
-        if not part.text:
-            continue
         if part.thought:
             thinking_content = part.text
-        else:
+        elif part.function_call:
+            tool_calls.append({
+                "name": part.function_call.name,
+                "arguments": part.function_call.args,
+                "id": part.function_call.id,
+            })
+        elif part.text:
             text_content = part.text
+
 
     metadata = response.usage_metadata
     return {
         "content": text_content,
         "thoughts": thinking_content,
+        "tool_calls": tool_calls,
         "tokens": {
             "input_tokens": metadata.prompt_token_count,
             "output_tokens": metadata.total_token_count - metadata.prompt_token_count,

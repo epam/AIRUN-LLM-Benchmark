@@ -3,12 +3,15 @@ import re
 import requests
 from datetime import datetime
 from typing import Any, List, Dict, Literal
+
+from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import Model, default_temperature, ModelProvider
 from Utils.llm.anthropic_vertex import request_anthropic_vertex_data
 from Utils.llm.bedrock import request_bedrock_data
-from Utils.llm.gemini_vertex import request_ai_studio_data
+from Utils.llm.gemini_ai_studio import request_ai_studio_data
 from Utils.llm.responses_api import request_openai_responses_data
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
+from Utils.llm.ai_message import AIMessage
+from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
 
 
 class APIException(Exception):
@@ -19,32 +22,16 @@ class APIException(Exception):
 
 
 def format_openai_messages(messages):
+    formatter_factory = get_formatter_factory(FormatterProvider.OPENAI)
     api_messages = []
     for message in messages:
         api_content = []
         for content in message.content:
-            if isinstance(content, TextAIMessageContent):
-                api_content.append(
-                    {
-                        "type": "text",
-                        "text": content.text,
-                    }
-                )
-            elif isinstance(content, ImageAIMessageContent):
-                api_content.append(
-                    {
-                        "type": "text",
-                        "text": f"Next image filename: {content.file_name}",
-                    }
-                )
-                api_content.append(
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": content.to_base64_url(),
-                        },
-                    }
-                )
+            try:
+                formatted_content = formatter_factory.format_content(content)
+                api_content.extend(formatted_content)
+            except ValueError as e:
+                print(f"OpenAI format API: {e}")
 
         api_message = {
             "role": message.role,
@@ -118,7 +105,7 @@ def request_openai_format_data(
     return result
 
 
-def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1) -> Dict[str, Any]:
+def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet = None) -> Dict[str, Any]:
     start_time = time.time()
     print(f"\tAttempt {attempt} at {datetime.now()}")
     try:
@@ -126,15 +113,15 @@ def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attem
 
         match model.provider:
             case ModelProvider.AISTUDIO:
-                data = request_ai_studio_data(system_prompt, messages, model)
+                data = request_ai_studio_data(system_prompt, messages, model, tools)
             case ModelProvider.VERTEXAI_ANTHROPIC:
-                data = request_anthropic_vertex_data(system_prompt, messages, model)
+                data = request_anthropic_vertex_data(system_prompt, messages, model, tools)
             case ModelProvider.AMAZON:
                 data = request_bedrock_data(system_prompt, messages, model)
             case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
                 data = request_openai_format_data(system_prompt, messages, model)
             case ModelProvider.OPENAI_RESPONSES:
-                data = request_openai_responses_data(system_prompt, messages, model)
+                data = request_openai_responses_data(system_prompt, messages, model, tools)
             case _:
                 raise Exception(f"Unknown model provider: {model.provider}")
 
@@ -143,6 +130,7 @@ def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attem
             "thoughts": data.get("thoughts", None),
             "content": data["content"],
             "tokens": data["tokens"],
+            "tool_calls": data.get("tool_calls", []),
             "execute_time": execute_time,
         }
     except APIException as e:
@@ -151,19 +139,19 @@ def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attem
         if e.status_code == 429:
             print("Will try in 1 minute...")
             time.sleep(60)
-            return ask_model(messages, system_prompt, model, attempt + 1)
+            return ask_model(messages, system_prompt, model, attempt + 1, tools)
         else:
             if attempt > 2:
                 return {"error": f"### Error: {e.content}\n"}
             else:
                 print("\tTrying again...")
                 time.sleep(10)
-                return ask_model(messages, system_prompt, model, attempt + 1)
+                return ask_model(messages, system_prompt, model, attempt + 1, tools)
     except requests.exceptions.Timeout:
         if attempt > 2:
             return {"error": f"### Error: Timeout error\n"}
         print("\tRequest timed out. Trying again...")
-        return ask_model(messages, system_prompt, model, attempt + 1)
+        return ask_model(messages, system_prompt, model, attempt + 1, tools)
     except Exception as e:
         print(f"\tError: {str(e)}")
         if attempt > 2:
@@ -171,4 +159,4 @@ def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attem
         else:
             print("\tTrying again...")
             time.sleep(5)
-            return ask_model(messages, system_prompt, model, attempt + 1)
+            return ask_model(messages, system_prompt, model, attempt + 1, tools)
