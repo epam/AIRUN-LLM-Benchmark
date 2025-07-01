@@ -1,0 +1,33 @@
+<div class="historical-container">
+  <div class="control-panel">
+    <mto-autocomplete 
+      class="autocomplete-field"
+      [placeholder]="'Search location...'"
+      [datasource]="locationDatasource"
+      (itemSelected)="onLocationSelected($event)"
+      (loading)="autocompleteLoading = $event"
+      (error)="autocompleteError = $event"
+    />
+    <mto-input class="input-field" placeholder="Latitude" [(value)]="latitude" />
+    <mto-input class="input-field" placeholder="Longitude" [(value)]="longitude" />
+    <mto-input class="input-field" placeholder="Timezone" [(value)]="timezone" />
+    <mto-button class="submit-button" label="Apply" (submit)="fetchHistoricalData()" />
+  </div>
+  <div class="data-card-list">
+    @if (temp2m) {
+      <mto-waterfall class="waterfall-card" [data]="temp2m" label="Temperature (2m)" />
+    } 
+    @if (relHumidity2m) {
+      <mto-waterfall class="waterfall-card" [data]="relHumidity2m" label="Relative Humidity (2m)" />
+    } 
+    @if (windSpeed10m) {
+      <mto-waterfall class="waterfall-card" [data]="windSpeed10m" label="Wind Speed (10m)" />
+    } 
+    @if (surfacePressure) {
+      <mto-waterfall class="waterfall-card" [data]="surfacePressure" label="Surface Pressure" />
+    }
+    @if (precipitation) {
+      <mto-waterfall class="waterfall-card" [data]="precipitation" label="Precipitation" />
+    }
+  </div>
+</div>

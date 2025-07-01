@@ -1,0 +1,10 @@
+evaluation_steps:
+  accuracy:
+  - Check that all recommended solutions address the root cause of the issue
+  completeness:
+  - Ensure that all identified issues are addressed
+metadata:
+  category: Implement_AngularMeteo_Issue1_avg_avg
+  experiment: multimodal
+  repository: AngularMeteo_Issue1
+  scenario_id: 25

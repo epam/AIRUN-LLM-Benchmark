@@ -1,0 +1,4 @@
+<div class="app-container">
+  <mto-header label="Historical Weather Data" [loading]="loading"/>
+  <mto-historical (loading)="loading = $event" (error)="error = $event"/>
+</div>
