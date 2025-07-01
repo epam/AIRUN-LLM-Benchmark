@@ -27,7 +27,14 @@ def get_output_folder_name(answers_path, current_datetime, report_name):
     return os.path.join(answers_path, "result_" + formatted_datetime, report_name)
 
 
-def generate_report(answers_path, file_content, data, report_name, attempt, current_datetime):
+def generate_report(
+    answers_path: Path,
+    content: list[AIMessageContent],
+    data: str,
+    report_name: str,
+    attempt: int,
+    current_datetime: datetime,
+):
     current_output_path = get_output_folder_name(answers_path, current_datetime, name_without_extension(report_name))
     if not os.path.exists(current_output_path):
         os.makedirs(current_output_path)
@@ -35,7 +42,7 @@ def generate_report(answers_path, file_content, data, report_name, attempt, curr
         os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
     )
     with open(output_file_path, "w", encoding="utf-8") as output_file:
-        output_file.write(file_content + "\n" + data)
+        output_file.write("\n".join([str_content.__str__() for str_content in content]) + "\n\n" + data)
 
 
 def get_answer_from_model(content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
@@ -89,12 +96,12 @@ def get_task_images(images_category: Path) -> list[ImageAIMessageContent]:
 def generate_answers_from_files(
     task_category: Path,
     datasets_category: Path,
-    output_dir,
-    model,
-    current_datetime,
-    attempts_count,
-    launch_list,
-    skip_list,
+    output_dir: Path,
+    model: Model,
+    current_datetime: datetime,
+    attempts_count: int,
+    launch_list: list[str],
+    skip_list: list[str],
 ):
     system_prompt = get_file_content(task_category / "system.txt")
     if system_prompt is None:
@@ -122,10 +129,10 @@ def generate_answers_from_files(
             print(f"Attempt #{attempt}, get answer for {task_name}")
             data = f"## Run {attempt}:\n"
             data += get_answer_from_model(message_content, system_prompt, model)
-            generate_report(output_dir, task_content, data, task_name, attempt, current_datetime)
+            generate_report(output_dir, message_content, data, task_name, attempt, current_datetime)
 
 
-def main(model: Model, lang, attempts_count, launch_list, skip_list):
+def main(model: Model, lang: str, attempts_count: int, launch_list: list[str], skip_list: list[str]):
     print(f"Starting answers generation for {model}")
     current_datetime = datetime.now()
     base_path = Path(__file__).resolve().parent.parent
@@ -138,7 +145,7 @@ def main(model: Model, lang, attempts_count, launch_list, skip_list):
         if not task_category.is_dir():
             continue
 
-        output_dir = results_path / "Output" / f"{model}" / lang / task_category.name
+        output_dir: Path = results_path / "Output" / f"{model}" / lang / task_category.name
 
         generate_answers_from_files(
             task_category,

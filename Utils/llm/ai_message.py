@@ -82,7 +82,7 @@ class ImageAIMessageContent(AIMessageContent):
         return f"data:{self.media_type()};base64,{self.to_base64()}"
 
     def __str__(self):
-        return self.file_name
+        return f"[image: {self.file_name}]"
 
 
 class ToolCallAIMessageContent(AIMessageContent):
