@@ -5,7 +5,7 @@ from Utils.llm.config import Model, default_temperature
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
 
 
-def request_bedrock_data(system_prompt: str, messages: list[AIMessage], model: Model):
+def request_data(system_prompt: str, messages: list[AIMessage], model: Model):
     client = boto3.client("bedrock-runtime", region_name="us-east-1")
     config = model()
 

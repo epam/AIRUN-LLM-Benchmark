@@ -3,11 +3,11 @@ from anthropic import AnthropicVertex
 
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import Model
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent
-from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
+from Utils.llm.ai_message import AIMessage
+from Utils.llm.message_converter import get_converter, ConverterProvider
 
 
-def request_anthropic_vertex_data(
+def request_data(
     system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
 ) -> Dict[str, Any]:
     """
@@ -35,19 +35,8 @@ def request_anthropic_vertex_data(
     thinking_content: Optional[str] = None
     tool_calls: List[Any] = []
 
-    formatter_factory = get_formatter_factory(FormatterProvider.ANTHROPIC)
-
-    api_messages = []
-    for message in messages:
-        api_content = []
-        for content in message.content:
-            try:
-                formatted_content = formatter_factory.format_content(content)
-                api_content.extend(formatted_content)
-            except ValueError as e:
-                print(f"Anthropic Vertex API: {e}")
-
-        api_messages.append({"role": message.role, "content": api_content})
+    converter = get_converter(ConverterProvider.ANTHROPIC)
+    api_messages = converter.convert(messages)
 
     with client.messages.stream(
         max_tokens=config["max_tokens"],
@@ -56,7 +45,7 @@ def request_anthropic_vertex_data(
         messages=api_messages,
         thinking=config["thinking"],
         model=config["model_id"],
-        tools=tools.to_anthropic_format() if tools else None,
+        tools=tools.to_anthropic_format() if tools else [],
     ) as stream:
         message = stream.get_final_message()
 
@@ -88,12 +77,13 @@ def request_anthropic_vertex_data(
 
 if __name__ == "__main__":
     # Test the API function
-    data = request_anthropic_vertex_data(
+    data = request_data(
         system_prompt="You should answer in french.",
-        messages=[AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
-        model=Model.Sonnet_4_Thinking,
+        messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
+        model=Model.Gemini_25_Flash_0520,
         tools=None,
     )
+
     print("Thoughts:\n", data["thoughts"])
     print("Content:\n", data["content"])
     print("Tokens:")

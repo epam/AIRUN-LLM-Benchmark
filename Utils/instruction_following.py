@@ -2,11 +2,13 @@ import json
 import time
 from pathlib import Path
 import os
+from typing import List
 
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ToolCallAIMessageContent, ToolResponseAIMessageContent
+from Utils.llm.ai_message import AIMessage, AIMessageContentFactory
 from Utils.llm.api import ask_model
 from Utils.llm.config import ModelProvider, Model
 from Utils.llm.ai_tool import AITool, AIToolParameter, AIToolSet
+from Utils.llm.tool_handler import ToolHandlerFactory
 
 RESULTS_BASE_PATH = os.getenv("RESULTS_REPO_PATH")
 
@@ -52,9 +54,6 @@ tool_set.add_tool(write_file_tool)
 end_task_tool = AITool(name="end_task", description="End the translation task when complete")
 tool_set.add_tool(end_task_tool)
 
-# Convert to the format needed by your current model provider
-# TOOLS = tool_set.to_anthropic_format()  # or tool_set.to_openai_format() for OpenAI
-
 SYSTEM_PROMPT = """
 As an AI proficient in software engineering, particularly in Frontend development, React and Angular, 
 your objective is to resolve the provided development tasks.
@@ -74,37 +73,26 @@ TASK = """
 Your task is to:
 1. First use the list_files tool to get the complete file structure of legacy application
 2. Request content of each file and analyze its implementation using the read_file tool
-3. After getting and analyzing all file content - think thoroughly and use the file_structure tool to return the new file structure of translated application
+3. After getting and analyzing all files content - think thoroughly and use the file_structure tool to return the new file structure of translated application
 
 Do not provide any images, application will reuse previous.
 Do not provide any configs.
 
 After you return the file structure of the updated application, 
-I will request you for each file by the file_path in the list and you should use the write_file tool to give me converted file.
+You need to provide the converted code for each file in the new application structure using write_file tool to give me converted file.
 {instructions}
 
 Do not add any comments in generated code and follow the instructions precisely. Once you finish the whole task, please use the end_task tool.
 """
 
 
-def list_files(base_path):
-    base_path = Path(base_path)
-    file_list = []
-    for file_path in base_path.rglob("*"):
-        if file_path.is_file():
-            relative_path = file_path.relative_to(base_path)
-            file_list.append(str(relative_path))
-
-    return file_list
-
-
 def run_experiment(task, model, dataset_path, output_path, start_time):
-    messages: list[AIMessage] = []
+    messages: List[AIMessage] = []
     input_tokens = output_tokens = reasoning_tokens = 0
-    requests_list = [AIMessage(role="user", content=[TextAIMessageContent(text=task)])]
-    files_read_by_model = 0
+    requests_list = [AIMessage.create_user_message(task)]
 
-    while True:
+    task_in_progress = True
+    while task_in_progress:
         if len(requests_list) > 0:
             messages.append(requests_list.pop())
             print(f"Requests left: {len(requests_list)}")
@@ -119,99 +107,57 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
         print("RESPONSE:")
         print(json.dumps(answer, indent=4))
 
-        tokens = answer["tokens"]  # {'input_tokens': 168, 'output_tokens': 2031, 'reasoning_tokens': 576}
+        tokens = answer["tokens"]
         input_tokens += tokens["input_tokens"]
         output_tokens += tokens["output_tokens"]
         reasoning_tokens += tokens.get("reasoning_tokens", 0)
-        ai_role = "model" if model.provider == ModelProvider.AISTUDIO else "assistant"
 
         content = answer["content"]
+        thoughts = answer["thoughts"]
 
-        messages.append(AIMessage(role=ai_role, content=[TextAIMessageContent(text=content)] if content else []))
+        # Use factory method to create assistant message
+        use_model_role = model.provider == ModelProvider.AISTUDIO
+        assistant_message = AIMessage.create_assistant_message(content or [], use_model_role)
+        messages.append(assistant_message)
 
-        # Handle tool calls instead of JSON commands
+        tools_content = []
+        # Handle tool calls using the strategy pattern
         if "tool_calls" in answer and answer["tool_calls"]:
-            tool_call = answer["tool_calls"][0]  # Handle first tool call
-            tool_name = tool_call["name"]
-            tool_args = tool_call["arguments"]
-            tool_id = tool_call["id"]
+            for tool_call in answer["tool_calls"]:
+                tool_name = tool_call["name"]
+                tool_args = tool_call["arguments"]
+                tool_id = tool_call["id"]
 
-            messages[-1].content.append(ToolCallAIMessageContent(tool_name, tool_args, tool_id))
+                # Add tool call to the message
+                tool_call_content = AIMessageContentFactory.create_tool_call(tool_name, tool_args, tool_id)
+                messages[-1].content.append(tool_call_content)
 
-            if tool_name == "end_task":
-                print("Ending task.")
-                break
-            elif tool_name == "list_files":
-                try:
-                    file_list = list_files(dataset_path)
-                    files_content = "\n".join(file_list)
-                    response = [ToolResponseAIMessageContent(tool_name, files_content, tool_id)]
-                    requests_list.append(AIMessage(role="user", content=response))
-                except Exception as e:
-                    print(f"Error listing files at {dataset_path}: {e}")
-                    content = f"Error: Could not list files directory files"
-                    response = [TextAIMessageContent(text=content)]
-                    requests_list.append(AIMessage(role="user", content=response))
-            elif tool_name == "read_file":
-                file_path = tool_args["file_path"]
-                full_path = Path(dataset_path, file_path)
-                response = []
-                try:
-                    with open(full_path, "r") as file:
-                        content = file.read()
-                        response = [ToolResponseAIMessageContent(tool_name, content, tool_id)]
-                        files_read_by_model += 1
-                except FileNotFoundError:
-                    print(f"Error: File at {full_path} not found.")
-                    content = f"Error: File at {file_path} not found or file_path is incorrect."
-                    response = [TextAIMessageContent(text=content)]
+                # Handle end_task specially
+                if tool_name == "end_task":
+                    print("Ending task.")
+                    task_in_progress = False
+                    break
 
-                requests_list.append(AIMessage(role="user", content=response))
-            elif tool_name == "write_file":
-                response = []
-                file_path = tool_args["file_path"]
-                full_path = Path(output_path, file_path.lstrip("/"))
-                full_path.parent.mkdir(parents=True, exist_ok=True)
-                content = tool_args["content"]
+                # Use the tool handler factory to get appropriate handler
                 try:
-                    with open(full_path, "w") as file:
-                        if ".json" in file_path:
-                            json.dump(content, file, indent=4)
-                        else:
-                            file.write(content)
-                    print(f"File written successfully at {file_path}.")
-                    response = [ToolResponseAIMessageContent(tool_name, "File written successfully", tool_id)]
-                except IOError as e:
-                    print(f"Failed to write file at {file_path}. Error: {e}")
-                    response = [ToolResponseAIMessageContent(tool_name, "Failed to write file", tool_id)]
-                messages.append(AIMessage(role="user", content=response))
-            elif tool_name == "file_structure":
-                file_paths = tool_args["file_paths"]
-                for path in file_paths:
-                    requests_list.append(
-                        AIMessage(role="user", content=[TextAIMessageContent(text=f"Give me converted code of {path}")])
-                    )
-                    print(path)
-                messages.append(
-                    AIMessage(
-                        role="user",
-                        content=[
-                            ToolResponseAIMessageContent(tool_name, "File structure received successfully", tool_id)
-                        ],
-                    )
-                )
-            else:
-                reply = f"Unknown tool: {tool_name}. Please use only supported tools: read_file, write_file, file_structure, list_files, end_task"
-                requests_list.append(AIMessage(role="user", content=[TextAIMessageContent(text=reply)]))
-            # Todo - add log to results directory and read from it
+                    handler = ToolHandlerFactory.create_handler(tool_name, dataset_path, output_path)
+                    response_messages = handler.handle(tool_name, tool_args, tool_id)
+                    tools_content.append(response_messages)
+                except ValueError as e:
+                    # Handle unknown tools
+                    error_message = f"Unknown tool: {tool_name}. Please use only supported tools: read_file, write_file, file_structure, list_files, end_task"
+                    error_response = AIMessageContentFactory.create_text(error_message)
+                    tools_content.append(error_response)
         else:
             # Handle case where no tool calls are made
-            reply = "Please use the provided tools to complete the task."
-            requests_list.append(AIMessage(role="user", content=[TextAIMessageContent(text=reply)]))
+            prompt_message = "Please use the provided tools to complete the task."
+            prompt_response = AIMessageContentFactory.create_text(prompt_message)
+            tools_content.append(prompt_response)
+
+        requests_list.append(AIMessage.create_user_message(tools_content))
 
     end_time = int(time.time())
     output = {
-        # ToDo: check here Mikhail, is it ok to call __dict__ on AIMessage?
         "messages": [message.__dict__ for message in messages],
         "time": end_time - start_time,
         "total_tokens": {
@@ -228,28 +174,20 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
 
 # ----------------------- do not remove comment -----------------------
 if __name__ == "__main__":
-    model = Model.Codex_Mini_Latest
+    # model = Model.Codex_Mini_Latest
+    # model = Model.Gemini_25_Flash_0520
+    # model = Model.Sonnet_4
+    # model = Model.Grok3mini_beta
+    # model = Model.DeepSeekV3_0324
+    model = Model.GPT41_0414
     current_unix_time = int(time.time())
     base_path = Path(__file__).resolve().parent.parent
     DATASET_PATH = base_path / "Dataset/JS/Piano_NativeJS"
-    # OUTPUT_PATH = f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/translate_to_react/{current_unix_time}/"
-    OUTPUT_PATH = f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/native/{current_unix_time}/"
+    OUTPUT_PATH = Path(f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/native/{current_unix_time}/")
 
-    # OBJECTIVE = "Your task is to translate outdated AngularJS app code to recent version of React using functional components and hooks."
     OBJECTIVE = (
         "Your task is to translate outdated app code to recent version of React using functional components and hooks."
     )
-
-    # INSTRUCTIONS = f"""
-    # Apply these instructions for translated application:
-    #     - Use the following libraries: TypeScript, Redux Toolkit with createSlice, and nanoid.
-    #     - Provide configuration of the store and provider if needed.
-    #     - Split the code into separate components.
-    #     - Optimize the code where possible.
-    #     - The converted code should not contain any TODOs.
-    #     - Return the translated code as markdown code snippets.
-    #     - Simply return the codebase without additional comments or explanations on how to convert it.
-    # """
 
     INSTRUCTIONS = f"""
     Apply these instructions for translated application:
@@ -266,12 +204,3 @@ if __name__ == "__main__":
     run_experiment(
         task=task, model=model, dataset_path=DATASET_PATH, output_path=OUTPUT_PATH, start_time=current_unix_time
     )
-
-
-# output = {
-#     "messages": [AIMessage(role="user", content=[TextAIMessageContent(text=task)])],
-# }
-# messages_log = json.dumps(output,default=lambda x: x.__dict__, indent=4)
-#
-# with open("message_log.json", 'w') as file:
-#     file.write(messages_log)

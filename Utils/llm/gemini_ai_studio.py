@@ -5,11 +5,11 @@ from google.genai import types
 
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import google_ai_api_key, Model, default_temperature
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent
-from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
+from Utils.llm.ai_message import AIMessage
+from Utils.llm.message_converter import get_converter, ConverterProvider
 
 
-def request_ai_studio_data(
+def request_data(
     system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
 ) -> Dict[str, Any]:
     """
@@ -18,6 +18,7 @@ def request_ai_studio_data(
         system_prompt: System prompt for the model
         messages: List of messages with role and content
         model: Model configuration
+        tools: Optional set of tools to use with the model
 
     Returns:
         Dictionary containing response content, thoughts, and token usage
@@ -29,24 +30,8 @@ def request_ai_studio_data(
     except Exception as e:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
-    formatter_factory = get_formatter_factory(FormatterProvider.GEMINI)
-
-    contents: List[types.ContentDict] = []
-    for message in messages:
-        parts: list[types.PartDict] = []
-        for content in message.content:
-            try:
-                formatted_content = formatter_factory.format_content(content)
-                parts.extend(formatted_content)
-            except ValueError as e:
-                print(f"Gemini Vertex API: {e}")
-
-        contents.append(
-            {
-                "role": message.role,
-                "parts": parts,
-            }
-        )
+    converter = get_converter(ConverterProvider.GEMINI)
+    contents = converter.convert(messages)
 
     response = client.models.generate_content(
         model=config["model_id"],
@@ -94,10 +79,11 @@ def request_ai_studio_data(
 if __name__ == "__main__":
     # Example usage
 
-    data = request_ai_studio_data(
-        "You should answer in french.",
-        [AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
-        Model.Gemini_25_Flash_0520,
+    data = request_data(
+        system_prompt="You should answer in french.",
+        messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
+        model=Model.Gemini_25_Flash_0520,
+        tools=None,
     )
 
     print("Thoughts:\n", data["thoughts"])
