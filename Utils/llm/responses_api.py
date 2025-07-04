@@ -18,7 +18,7 @@ from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
 from Utils.llm.config import Model
 
-# Responses API Example 
+# Responses API Example
 """
 from openai import OpenAI
 client = OpenAI()
@@ -132,7 +132,9 @@ response = client.responses.create(
 """
 
 
-def request_openai_responses_data(system_prompt: str, messages: List[AIMessage], model: Model, tools: AIToolSet = None) -> Dict[str, Any]:
+def request_openai_responses_data(
+    system_prompt: str, messages: List[AIMessage], model: Model, tools: AIToolSet = None
+) -> Dict[str, Any]:
     """
     Request data from OpenAI Responses API.
 
@@ -150,7 +152,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
     config = model()
     developer_message: List[ResponseInputItemParam] = [EasyInputMessageParam(role="developer", content=system_prompt)]
     formatter_factory = get_formatter_factory(FormatterProvider.OPENAI_RESPONSES)
-    
+
     input_messages: List[ResponseInputItemParam] = []
     for message in messages:
         api_message_content: List[ResponseInputContentParam] = []
@@ -201,7 +203,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
             and isinstance(item.content[0], ResponseOutputText)
             and len(item.content) > 0
         ),
-        None
+        None,
     )
     reasoning = "\n".join(
         summary.text

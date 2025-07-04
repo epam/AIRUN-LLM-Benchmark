@@ -14,13 +14,13 @@ class ToolProvider(Enum):
 
 class AIToolParameter:
     def __init__(
-        self, 
-        name: str, 
-        param_type: str, 
+        self,
+        name: str,
+        param_type: str,
         description: str,
         required: bool = False,
         enum_values: Optional[List[str]] = None,
-        items_type: Optional[str] = None
+        items_type: Optional[str] = None,
     ):
         self.name = name
         self.param_type = param_type
@@ -31,27 +31,19 @@ class AIToolParameter:
 
     def to_schema_property(self) -> Dict[str, Any]:
         """Convert to JSON schema property format"""
-        prop = {
-            "type": self.param_type,
-            "description": self.description
-        }
-        
+        prop = {"type": self.param_type, "description": self.description}
+
         if self.enum_values:
             prop["enum"] = self.enum_values
-            
+
         if self.param_type == "array" and self.items_type:
             prop["items"] = {"type": self.items_type}
-            
+
         return prop
 
 
 class AITool:
-    def __init__(
-        self,
-        name: str,
-        description: str,
-        parameters: List[AIToolParameter] = None
-    ):
+    def __init__(self, name: str, description: str, parameters: List[AIToolParameter] = None):
         self.name = name
         self.description = description
         self.parameters = parameters or []
@@ -65,7 +57,7 @@ class AITool:
         """Convert to Anthropic/Claude tool format"""
         properties = {}
         required = []
-        
+
         for param in self.parameters:
             properties[param.name] = param.to_schema_property()
             if param.required:
@@ -74,24 +66,18 @@ class AITool:
         return AnthropicToolParam(
             name=self.name,
             description=self.description,
-            input_schema={
-                "type": "object",
-                "properties": properties,
-                "required": required
-            }
+            input_schema={"type": "object", "properties": properties, "required": required},
         )
-
 
     def to_openai_responses_format(self) -> OpenAIResponsesToolParam:
         """Convert to OpenAI tool format"""
         properties = {}
         required = []
-        
+
         for param in self.parameters:
             properties[param.name] = param.to_schema_property()
             if param.required:
                 required.append(param.name)
-
 
         return OpenAIResponsesToolParam(
             name=self.name,
@@ -102,39 +88,30 @@ class AITool:
                 "type": "object",
                 "properties": properties,
                 "required": required,
-                "additionalProperties": False
-            }
+                "additionalProperties": False,
+            },
         )
-
 
     def to_gemini_format(self) -> types.FunctionDeclaration:
         """Convert to Gemini tool format"""
         properties = {}
         required = []
-        
+
         for param in self.parameters:
             properties[param.name] = param.to_schema_property()
             if param.required:
                 required.append(param.name)
 
         tool = {
-                "name": self.name,
-                "description": self.description,
-                "parameters": {
-                    "type": "object",
-                    "properties": properties,
-                    "required": required
-                }
-            }
+            "name": self.name,
+            "description": self.description,
+            "parameters": {"type": "object", "properties": properties, "required": required},
+        }
 
         return types.FunctionDeclaration(
             name=self.name,
             description=self.description,
-            parameters=types.Schema(
-                type=types.Type.OBJECT,
-                properties=properties,
-                required=required
-            )
+            parameters=types.Schema(type=types.Type.OBJECT, properties=properties, required=required),
         )
 
     # def to_format(self, provider: ToolProvider) -> Union[AnthropicToolParam, OpenAIResponsesToolParam]:
@@ -157,14 +134,15 @@ class AITool:
 
 class AIToolSet:
     """Collection of AI tools with bulk conversion methods"""
-    
+
     def __init__(self, tools: List[AITool] = None):
         self.tools = tools or []
 
-    def add_tool(self, tool: AITool) -> 'AIToolSet':
+    def add_tool(self, tool: AITool) -> "AIToolSet":
         """Add a tool to the set"""
         self.tools.append(tool)
         return self
+
     # ToDo: check here Mikhail
     # def to_format(self, provider: ToolProvider) -> List[Union[types.Tool, AnthropicToolParam, OpenAIResponsesToolParam]]:
     #     """Convert all tools to specified provider format"""

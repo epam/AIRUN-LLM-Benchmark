@@ -41,9 +41,7 @@ def format_openai_messages(messages):
     return api_messages
 
 
-def request_openai_format_data(
-    system_prompt: str, messages: List[AIMessage], model: Model
-):
+def request_openai_format_data(system_prompt: str, messages: List[AIMessage], model: Model):
     config = model()
 
     skip_system = config.get("skip_system", False)
@@ -105,7 +103,9 @@ def request_openai_format_data(
     return result
 
 
-def ask_model(messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet = None) -> Dict[str, Any]:
+def ask_model(
+    messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet = None
+) -> Dict[str, Any]:
     start_time = time.time()
     print(f"\tAttempt {attempt} at {datetime.now()}")
     try:

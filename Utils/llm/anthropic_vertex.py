@@ -7,7 +7,9 @@ from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
 
 
-def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None) -> Dict[str, Any]:
+def request_anthropic_vertex_data(
+    system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
+) -> Dict[str, Any]:
     """
     Request data from Anthropic Vertex AI API.
 
@@ -34,7 +36,7 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
     tool_calls: List[Any] = []
 
     formatter_factory = get_formatter_factory(FormatterProvider.ANTHROPIC)
-    
+
     api_messages = []
     for message in messages:
         api_content = []
@@ -65,11 +67,13 @@ def request_anthropic_vertex_data(system_prompt: str, messages: List[AIMessage],
             elif item.type == "thinking":
                 thinking_content = item.thinking
             elif item.type == "tool_use":
-                tool_calls.append({
-                    "name": item.name,
-                    "arguments": item.input,
-                    "id": item.id,
-                })
+                tool_calls.append(
+                    {
+                        "name": item.name,
+                        "arguments": item.input,
+                        "id": item.id,
+                    }
+                )
 
     return {
         "content": text_content,
@@ -86,7 +90,7 @@ if __name__ == "__main__":
     # Test the API function
     data = request_anthropic_vertex_data(
         system_prompt="You should answer in french.",
-        messages=[AIMessage( role="user",content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
+        messages=[AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         model=Model.Sonnet_4_Thinking,
         tools=None,
     )
