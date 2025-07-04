@@ -8,23 +8,20 @@ from Utils.llm.api import ask_model
 from Utils.llm.config import ModelProvider, Model
 from Utils.llm.ai_tool import AITool, AIToolParameter, AIToolSet
 
-RESULTS_BASE_PATH = os.getenv('RESULTS_REPO_PATH')
+RESULTS_BASE_PATH = os.getenv("RESULTS_REPO_PATH")
 
 # Create tools using the new AITool class
 tool_set = AIToolSet()
 
 # Add list_files tool
-list_files_tool = AITool(
-    name="list_files",
-    description="List all files in the legacy directory"
-)
+list_files_tool = AITool(name="list_files", description="List all files in the legacy directory")
 tool_set.add_tool(list_files_tool)
 
 # Add read_file tool
 read_file_tool = AITool(
     name="read_file",
     description="Read the content of a file from the legacy application",
-    parameters=[AIToolParameter("file_path", "string", "Path to the file to read", required=True)]
+    parameters=[AIToolParameter("file_path", "string", "Path to the file to read", required=True)],
 )
 tool_set.add_tool(read_file_tool)
 
@@ -33,8 +30,10 @@ file_structure_tool = AITool(
     name="file_structure",
     description="Return the new file structure of the new application",
     parameters=[
-        AIToolParameter("file_paths", "array", "List of file paths for the new application", required=True, items_type="string")
-    ]
+        AIToolParameter(
+            "file_paths", "array", "List of file paths for the new application", required=True, items_type="string"
+        )
+    ],
 )
 tool_set.add_tool(file_structure_tool)
 
@@ -44,16 +43,13 @@ write_file_tool = AITool(
     description="Write converted code to a file in the new application",
     parameters=[
         AIToolParameter("file_path", "string", "Path where the file should be written", required=True),
-        AIToolParameter("content", "string", "The converted code content", required=True)
-    ]
+        AIToolParameter("content", "string", "The converted code content", required=True),
+    ],
 )
 tool_set.add_tool(write_file_tool)
 
 # Add end_task tool
-end_task_tool = AITool(
-    name="end_task",
-    description="End the translation task when complete"
-)
+end_task_tool = AITool(name="end_task", description="End the translation task when complete")
 tool_set.add_tool(end_task_tool)
 
 # Convert to the format needed by your current model provider
@@ -94,7 +90,7 @@ Do not add any comments in generated code and follow the instructions precisely.
 def list_files(base_path):
     base_path = Path(base_path)
     file_list = []
-    for file_path in base_path.rglob('*'):
+    for file_path in base_path.rglob("*"):
         if file_path.is_file():
             relative_path = file_path.relative_to(base_path)
             file_list.append(str(relative_path))
@@ -124,9 +120,9 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
         print(json.dumps(answer, indent=4))
 
         tokens = answer["tokens"]  # {'input_tokens': 168, 'output_tokens': 2031, 'reasoning_tokens': 576}
-        input_tokens += tokens['input_tokens']
-        output_tokens += tokens['output_tokens']
-        reasoning_tokens += tokens.get('reasoning_tokens', 0)
+        input_tokens += tokens["input_tokens"]
+        output_tokens += tokens["output_tokens"]
+        reasoning_tokens += tokens.get("reasoning_tokens", 0)
         ai_role = "model" if model.provider == ModelProvider.AISTUDIO else "assistant"
 
         content = answer["content"]
@@ -161,7 +157,7 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
                 full_path = Path(dataset_path, file_path)
                 response = []
                 try:
-                    with open(full_path, 'r') as file:
+                    with open(full_path, "r") as file:
                         content = file.read()
                         response = [ToolResponseAIMessageContent(tool_name, content, tool_id)]
                         files_read_by_model += 1
@@ -174,11 +170,11 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
             elif tool_name == "write_file":
                 response = []
                 file_path = tool_args["file_path"]
-                full_path = Path(output_path, file_path.lstrip('/'))
+                full_path = Path(output_path, file_path.lstrip("/"))
                 full_path.parent.mkdir(parents=True, exist_ok=True)
                 content = tool_args["content"]
                 try:
-                    with open(full_path, 'w') as file:
+                    with open(full_path, "w") as file:
                         if ".json" in file_path:
                             json.dump(content, file, indent=4)
                         else:
@@ -192,9 +188,18 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
             elif tool_name == "file_structure":
                 file_paths = tool_args["file_paths"]
                 for path in file_paths:
-                    requests_list.append(AIMessage(role="user", content=[TextAIMessageContent(text=f"Give me converted code of {path}")]))
+                    requests_list.append(
+                        AIMessage(role="user", content=[TextAIMessageContent(text=f"Give me converted code of {path}")])
+                    )
                     print(path)
-                messages.append(AIMessage(role="user", content=[ToolResponseAIMessageContent(tool_name, "File structure received successfully", tool_id)]))
+                messages.append(
+                    AIMessage(
+                        role="user",
+                        content=[
+                            ToolResponseAIMessageContent(tool_name, "File structure received successfully", tool_id)
+                        ],
+                    )
+                )
             else:
                 reply = f"Unknown tool: {tool_name}. Please use only supported tools: read_file, write_file, file_structure, list_files, end_task"
                 requests_list.append(AIMessage(role="user", content=[TextAIMessageContent(text=reply)]))
@@ -213,12 +218,13 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
             "reasoning_tokens": reasoning_tokens,
-        }
+        },
     }
     messages_log = json.dumps(output, indent=4, default=str)
     messages_log_path = Path(output_path, "message_log.json")
-    with open(messages_log_path, 'w') as file:
+    with open(messages_log_path, "w") as file:
         file.write(messages_log)
+
 
 # ----------------------- do not remove comment -----------------------
 if __name__ == "__main__":
@@ -230,7 +236,9 @@ if __name__ == "__main__":
     OUTPUT_PATH = f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/native/{current_unix_time}/"
 
     # OBJECTIVE = "Your task is to translate outdated AngularJS app code to recent version of React using functional components and hooks."
-    OBJECTIVE = "Your task is to translate outdated app code to recent version of React using functional components and hooks."
+    OBJECTIVE = (
+        "Your task is to translate outdated app code to recent version of React using functional components and hooks."
+    )
 
     # INSTRUCTIONS = f"""
     # Apply these instructions for translated application:
@@ -251,20 +259,12 @@ if __name__ == "__main__":
         - The converted code should not contain any TODOs.
     """
 
-
-    task = TASK.format(
-        objective=OBJECTIVE,
-        instructions=INSTRUCTIONS
-    )
+    task = TASK.format(objective=OBJECTIVE, instructions=INSTRUCTIONS)
 
     print(task)
 
     run_experiment(
-        task=task,
-        model=model,
-        dataset_path=DATASET_PATH,
-        output_path=OUTPUT_PATH,
-        start_time=current_unix_time
+        task=task, model=model, dataset_path=DATASET_PATH, output_path=OUTPUT_PATH, start_time=current_unix_time
     )
 
 

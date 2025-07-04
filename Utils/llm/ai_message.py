@@ -4,6 +4,7 @@ from typing import Literal
 
 MediaType = Literal["image/jpeg", "image/png", "image/gif"]
 
+
 class AIMessageContent:
     pass
 
@@ -67,11 +68,7 @@ class ToolCallAIMessageContent(AIMessageContent):
         self.id = id
 
     def __str__(self):
-        return json.dumps({
-            "name": self.name,
-            "arguments": self.arguments,
-            "id": self.id
-        })
+        return json.dumps({"name": self.name, "arguments": self.arguments, "id": self.id})
 
 
 class ToolResponseAIMessageContent(AIMessageContent):
@@ -86,11 +83,7 @@ class ToolResponseAIMessageContent(AIMessageContent):
         self.id = id
 
     def __str__(self):
-        return json.dumps({
-            "name": self.name,
-            "result": self.result,
-            "id": self.id
-        })
+        return json.dumps({"name": self.name, "result": self.result, "id": self.id})
 
 
 class AIMessage:

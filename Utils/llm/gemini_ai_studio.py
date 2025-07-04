@@ -9,7 +9,9 @@ from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.message_formatter import get_formatter_factory, FormatterProvider
 
 
-def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None) -> Dict[str, Any]:
+def request_ai_studio_data(
+    system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
+) -> Dict[str, Any]:
     """
     Request data from Google Gemini Vertex AI API.
     Args:
@@ -28,7 +30,7 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
         raise Exception(f"Failed to initialize Gemini Vertex client: {e}")
 
     formatter_factory = get_formatter_factory(FormatterProvider.GEMINI)
-    
+
     contents: List[types.ContentDict] = []
     for message in messages:
         parts: list[types.PartDict] = []
@@ -66,14 +68,15 @@ def request_ai_studio_data(system_prompt: str, messages: List[AIMessage], model:
         if part.thought:
             thinking_content = part.text
         elif part.function_call:
-            tool_calls.append({
-                "name": part.function_call.name,
-                "arguments": part.function_call.args,
-                "id": part.function_call.id,
-            })
+            tool_calls.append(
+                {
+                    "name": part.function_call.name,
+                    "arguments": part.function_call.args,
+                    "id": part.function_call.id,
+                }
+            )
         elif part.text:
             text_content = part.text
-
 
     metadata = response.usage_metadata
     return {
@@ -93,7 +96,7 @@ if __name__ == "__main__":
 
     data = request_ai_studio_data(
         "You should answer in french.",
-        [AIMessage(role="user",content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
+        [AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
         Model.Gemini_25_Flash_0520,
     )
 
