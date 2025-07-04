@@ -1,13 +1,15 @@
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, cast
 from enum import Enum
 
 from anthropic.types import ToolParam as AnthropicToolParam
 from openai.types.responses import FunctionToolParam as OpenAIResponsesToolParam
+from openai.types.chat import ChatCompletionToolParam as OpenAIToolParam
 from google.genai import types
 
 
 class ToolProvider(Enum):
-    OPENAI = "openai"
+    OPENAI_RESPONSES = "openai_responses"
+    OPENAI_COMPLETIONS = "openai_completions"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
 
@@ -31,7 +33,7 @@ class AIToolParameter:
 
     def to_schema_property(self) -> Dict[str, Any]:
         """Convert to JSON schema property format"""
-        prop = {"type": self.param_type, "description": self.description}
+        prop: Dict[str, Any] = {"type": self.param_type, "description": self.description}
 
         if self.enum_values:
             prop["enum"] = self.enum_values
@@ -43,7 +45,7 @@ class AIToolParameter:
 
 
 class AITool:
-    def __init__(self, name: str, description: str, parameters: List[AIToolParameter] = None):
+    def __init__(self, name: str, description: str, parameters: Optional[List[AIToolParameter]] = None):
         self.name = name
         self.description = description
         self.parameters = parameters or []
@@ -92,6 +94,30 @@ class AITool:
             },
         )
 
+    def to_openai_completions_format(self) -> OpenAIToolParam:
+        """Convert to OpenAI Chat Completions tool format"""
+        properties = {}
+        required = []
+
+        for param in self.parameters:
+            properties[param.name] = param.to_schema_property()
+            if param.required:
+                required.append(param.name)
+
+        return OpenAIToolParam(
+            type="function",
+            function={
+                "name": self.name,
+                "description": self.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": properties,
+                    "required": required,
+                    "additionalProperties": False,
+                },
+            },
+        )
+
     def to_gemini_format(self) -> types.FunctionDeclaration:
         """Convert to Gemini tool format"""
         properties = {}
@@ -102,28 +128,11 @@ class AITool:
             if param.required:
                 required.append(param.name)
 
-        tool = {
-            "name": self.name,
-            "description": self.description,
-            "parameters": {"type": "object", "properties": properties, "required": required},
-        }
-
         return types.FunctionDeclaration(
             name=self.name,
             description=self.description,
             parameters=types.Schema(type=types.Type.OBJECT, properties=properties, required=required),
         )
-
-    # def to_format(self, provider: ToolProvider) -> Union[AnthropicToolParam, OpenAIResponsesToolParam]:
-    #     """Convert to specified provider format"""
-    #     if provider == ToolProvider.ANTHROPIC:
-    #         return self.to_anthropic_format()
-    #     elif provider == ToolProvider.OPENAI:
-    #         return self.to_openai_responses_format()
-    #     elif provider == ToolProvider.GEMINI:
-    #         return self.to_gemini_format()
-    #     else:
-    #         raise ValueError(f"Unsupported provider: {provider}")
 
     def __str__(self) -> str:
         return f"AITool(name='{self.name}', parameters={len(self.parameters)})"
@@ -135,7 +144,7 @@ class AITool:
 class AIToolSet:
     """Collection of AI tools with bulk conversion methods"""
 
-    def __init__(self, tools: List[AITool] = None):
+    def __init__(self, tools: Optional[List[AITool]] = None):
         self.tools = tools or []
 
     def add_tool(self, tool: AITool) -> "AIToolSet":
@@ -143,26 +152,34 @@ class AIToolSet:
         self.tools.append(tool)
         return self
 
-    # ToDo: check here Mikhail
-    # def to_format(self, provider: ToolProvider) -> List[Union[types.Tool, AnthropicToolParam, OpenAIResponsesToolParam]]:
-    #     """Convert all tools to specified provider format"""
-    #     return [tool.to_format(provider) for tool in self.tools]
-    #
-    # def to_anthropic_format(self) -> List[AnthropicToolParam]:
-    #     """Convert all tools to Anthropic format"""
-    #     return self.to_format(ToolProvider.ANTHROPIC)
+    def to_format(self, provider: ToolProvider):
+        """Convert all tools to specified provider format"""
+        if provider == ToolProvider.ANTHROPIC:
+            return [tool.to_anthropic_format() for tool in self.tools]
+        elif provider == ToolProvider.OPENAI_RESPONSES:
+            return [tool.to_openai_responses_format() for tool in self.tools]
+        elif provider == ToolProvider.OPENAI_COMPLETIONS:
+            return [tool.to_openai_completions_format() for tool in self.tools]
+        elif provider == ToolProvider.GEMINI:
+            return [types.Tool(function_declarations=[tool.to_gemini_format() for tool in self.tools])]
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
 
     def to_anthropic_format(self) -> List[AnthropicToolParam]:
         """Convert all tools to Anthropic format"""
-        return [tool.to_anthropic_format() for tool in self.tools]
+        return cast(List[AnthropicToolParam], self.to_format(ToolProvider.ANTHROPIC))
 
     def to_openai_responses_format(self) -> List[OpenAIResponsesToolParam]:
-        """Convert all tools to OpenAI format"""
-        return [tool.to_openai_responses_format() for tool in self.tools]
+        """Convert all tools to OpenAI Responses format"""
+        return cast(List[OpenAIResponsesToolParam], self.to_format(ToolProvider.OPENAI_RESPONSES))
+
+    def to_openai_completions_format(self) -> List[OpenAIToolParam]:
+        """Convert all tools to OpenAI Chat Completions format"""
+        return cast(List[OpenAIToolParam], self.to_format(ToolProvider.OPENAI_COMPLETIONS))
 
     def to_gemini_format(self) -> List[types.Tool]:
         """Convert all tools to Gemini format"""
-        return [types.Tool(function_declarations=[tool.to_gemini_format() for tool in self.tools])]
+        return cast(List[types.Tool], self.to_format(ToolProvider.GEMINI))
 
     def __len__(self) -> int:
         return len(self.tools)
