@@ -6,7 +6,7 @@ from typing import Any, List, Dict
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import Model, ModelProvider
 from Utils.llm.anthropic_vertex import request_data as request_anthropic_vertex_data
-from Utils.llm.bedrock import request_data as request_bedrock_data
+from Utils.llm.amazon_nova import request_data as request_amazon_nova_data
 from Utils.llm.gemini_ai_studio import request_data as request_gemini_aistudio_data
 from Utils.llm.responses_api import request_data as request_openai_responses_data
 from Utils.llm.openai_completions import request_data as request_openai_completions_data
@@ -34,7 +34,7 @@ def ask_model(
             case ModelProvider.VERTEXAI_ANTHROPIC:
                 data = request_anthropic_vertex_data(system_prompt, messages, model, tools)
             case ModelProvider.AMAZON:
-                data = request_bedrock_data(system_prompt, messages, model)
+                data = request_amazon_nova_data(system_prompt, messages, model, tools)
             case ModelProvider.OPENAI | ModelProvider.AZURE | ModelProvider.XAI | ModelProvider.FIREWORKS:
                 data = request_openai_completions_data(system_prompt, messages, model, tools)
             case ModelProvider.OPENAI_RESPONSES:

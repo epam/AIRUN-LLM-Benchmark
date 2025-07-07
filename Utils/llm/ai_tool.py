@@ -12,6 +12,7 @@ class ToolProvider(Enum):
     OPENAI_COMPLETIONS = "openai_completions"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
+    AMAZON_NOVA = "amazon_nova"
 
 
 class AIToolParameter:
@@ -49,11 +50,6 @@ class AITool:
         self.name = name
         self.description = description
         self.parameters = parameters or []
-
-    # def add_parameter(self, parameter: AIToolParameter) -> 'AITool':
-    #     """Add a parameter to the tool"""
-    #     self.parameters.append(parameter)
-    #     return self
 
     def to_anthropic_format(self) -> AnthropicToolParam:
         """Convert to Anthropic/Claude tool format"""
@@ -134,6 +130,24 @@ class AITool:
             parameters=types.Schema(type=types.Type.OBJECT, properties=properties, required=required),
         )
 
+    def to_amazon_nova_format(self) -> Dict[str, Any]:
+        """Convert to Amazon Nova tool format"""
+        properties = {}
+        required = []
+
+        for param in self.parameters:
+            properties[param.name] = param.to_schema_property()
+            if param.required:
+                required.append(param.name)
+
+        return {
+            "toolSpec": {
+                "name": self.name,
+                "description": self.description,
+                "inputSchema": {"json": {"type": "object", "properties": properties, "required": required}},
+            }
+        }
+
     def __str__(self) -> str:
         return f"AITool(name='{self.name}', parameters={len(self.parameters)})"
 
@@ -162,6 +176,8 @@ class AIToolSet:
             return [tool.to_openai_completions_format() for tool in self.tools]
         elif provider == ToolProvider.GEMINI:
             return [types.Tool(function_declarations=[tool.to_gemini_format() for tool in self.tools])]
+        elif provider == ToolProvider.AMAZON_NOVA:
+            return [tool.to_amazon_nova_format() for tool in self.tools]
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
@@ -180,6 +196,10 @@ class AIToolSet:
     def to_gemini_format(self) -> List[types.Tool]:
         """Convert all tools to Gemini format"""
         return cast(List[types.Tool], self.to_format(ToolProvider.GEMINI))
+
+    def to_amazon_nova_format(self) -> List[Dict[str, Any]]:
+        """Convert all tools to Amazon Nova format"""
+        return cast(List[Dict[str, Any]], self.to_format(ToolProvider.AMAZON_NOVA))
 
     def __len__(self) -> int:
         return len(self.tools)

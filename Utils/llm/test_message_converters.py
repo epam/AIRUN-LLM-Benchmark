@@ -171,36 +171,38 @@ class TestOpenAIResponsesConverter:
         assert content[1]["type"] == "input_text"
         assert "chart.png" in content[1]["text"]
         assert content[2]["type"] == "input_image"
-    
+
     def test_interleaved_content_order(self):
         """Test that text → tool_call → text maintains correct order."""
         messages = [
-            AIMessage.create_assistant_message([
-                AIMessageContentFactory.create_text("I'll help you with that."),
-                AIMessageContentFactory.create_tool_call("search", {"query": "test"}, "call_123"),
-                AIMessageContentFactory.create_text("Let me analyze the results.")
-            ])
+            AIMessage.create_assistant_message(
+                [
+                    AIMessageContentFactory.create_text("I'll help you with that."),
+                    AIMessageContentFactory.create_tool_call("search", {"query": "test"}, "call_123"),
+                    AIMessageContentFactory.create_text("Let me analyze the results."),
+                ]
+            )
         ]
-        
+
         converter = get_converter(ConverterProvider.OPENAI_RESPONSES)
         result = converter.convert(messages)
-        
+
         # Should have 3 items: text1, tool_call, text2
         assert len(result) == 3
-        
+
         # First item: text content before tool call
         first_item = result[0]
         assert first_item["role"] == "assistant"
         assert len(first_item["content"]) == 1
         assert first_item["content"][0]["type"] == "input_text"
         assert first_item["content"][0]["text"] == "I'll help you with that."
-        
+
         # Second item: tool call
         tool_call_item = result[1]
         assert tool_call_item["type"] == "function_call"
         assert tool_call_item["call_id"] == "call_123"
         assert tool_call_item["name"] == "search"
-        
+
         # Third item: text content after tool call
         third_item = result[2]
         assert third_item["role"] == "assistant"
@@ -368,6 +370,84 @@ class TestGeminiConverter:
         assert parts[2]["inline_data"]["data"] == image_data
 
 
+class TestAmazonNovaConverter:
+    """Tests for Amazon Nova API converter."""
+
+    def test_simple_conversation(self):
+        """Test basic conversation format."""
+        messages = [
+            AIMessage.create_user_message("What's the weather like?"),
+            AIMessage.create_assistant_message("I can help you check the weather."),
+        ]
+
+        converter = get_converter(ConverterProvider.AMAZON_NOVA)
+        result = converter.convert(messages)
+
+        assert len(result) == 2
+        assert result[0]["role"] == "user"
+        assert result[0]["content"][0]["text"] == "What's the weather like?"
+
+        assert result[1]["role"] == "assistant"
+        assert result[1]["content"][0]["text"] == "I can help you check the weather."
+
+    def test_tool_use_format(self):
+        """Test tool use and tool response formatting."""
+        messages = [
+            AIMessage.create_user_message("Check the weather in NYC"),
+            AIMessage.create_assistant_message(
+                [
+                    AIMessageContentFactory.create_text("I'll check the weather for you."),
+                    AIMessageContentFactory.create_tool_call("get_weather", {"location": "NYC"}, "tool_123"),
+                ]
+            ),
+            AIMessage.create_user_message(
+                [AIMessageContentFactory.create_tool_response("get_weather", "Sunny, 75°F", "tool_123")]
+            ),
+        ]
+
+        converter = get_converter(ConverterProvider.AMAZON_NOVA)
+        result = converter.convert(messages)
+
+        assert len(result) == 3
+
+        # Check assistant message with tool use
+        assistant_msg = result[1]
+        assert len(assistant_msg["content"]) == 2
+        assert assistant_msg["content"][0]["text"] == "I'll check the weather for you."
+        assert assistant_msg["content"][1]["toolUse"]["toolUseId"] == "tool_123"
+        assert assistant_msg["content"][1]["toolUse"]["name"] == "get_weather"
+        assert assistant_msg["content"][1]["toolUse"]["input"] == {"location": "NYC"}
+
+        # Check tool result
+        tool_result_msg = result[2]
+        assert tool_result_msg["content"][0]["toolResult"]["toolUseId"] == "tool_123"
+        assert tool_result_msg["content"][0]["toolResult"]["content"][0]["text"] == "Sunny, 75°F"
+        assert tool_result_msg["content"][0]["toolResult"]["status"] == "success"
+
+    def test_image_format(self):
+        """Test image content formatting."""
+        image_data = b"nova_test_image"
+        messages = [
+            AIMessage.create_user_message(
+                [
+                    AIMessageContentFactory.create_text("Analyze this image:"),
+                    AIMessageContentFactory.create_image("photo.jpg", image_data),
+                ]
+            )
+        ]
+
+        converter = get_converter(ConverterProvider.AMAZON_NOVA)
+        result = converter.convert(messages)
+
+        assert len(result) == 1
+        content = result[0]["content"]
+        assert len(content) == 3  # text + filename text + image
+        assert content[0]["text"] == "Analyze this image:"
+        assert "photo.jpg" in content[1]["text"]
+        assert content[2]["image"]["format"] == "jpeg"
+        assert content[2]["image"]["source"]["bytes"] == image_data
+
+
 def run_all_tests():
     """Run all tests manually."""
 
@@ -376,6 +456,7 @@ def run_all_tests():
         TestOpenAIResponsesConverter,
         TestAnthropicConverter,
         TestGeminiConverter,
+        TestAmazonNovaConverter,
     ]
 
     total_tests = 0

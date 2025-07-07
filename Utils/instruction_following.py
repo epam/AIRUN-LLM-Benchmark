@@ -95,7 +95,6 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
     while task_in_progress:
         if len(requests_list) > 0:
             messages.append(requests_list.pop())
-            print(f"Requests left: {len(requests_list)}")
         else:
             break
 
@@ -113,7 +112,6 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
         reasoning_tokens += tokens.get("reasoning_tokens", 0)
 
         content = answer["content"]
-        thoughts = answer["thoughts"]
 
         # Use factory method to create assistant message
         use_model_role = model.provider == ModelProvider.AISTUDIO
@@ -170,37 +168,42 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
     messages_log_path = Path(output_path, "message_log.json")
     with open(messages_log_path, "w") as file:
         file.write(messages_log)
+    print(f"Experiment completed. Messages log saved to {messages_log_path}")
 
 
-# ----------------------- do not remove comment -----------------------
-if __name__ == "__main__":
-    # model = Model.Codex_Mini_Latest
-    # model = Model.Gemini_25_Flash_0520
-    # model = Model.Sonnet_4
-    # model = Model.Grok3mini_beta
-    # model = Model.DeepSeekV3_0324
-    model = Model.GPT41_0414
-    current_unix_time = int(time.time())
+def main(model: Model, objective: str, instructions: str, dataset_path: str, experiment_name: str):
     base_path = Path(__file__).resolve().parent.parent
-    DATASET_PATH = base_path / "Dataset/JS/Piano_NativeJS"
-    OUTPUT_PATH = Path(f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/native/{current_unix_time}/")
-
-    OBJECTIVE = (
-        "Your task is to translate outdated app code to recent version of React using functional components and hooks."
+    dataset_path = base_path / "Dataset" / dataset_path
+    current_unix_time = int(time.time())
+    output_path = Path(
+        f"{RESULTS_BASE_PATH}/Output/{model}/JS/contextual_experiment/{experiment_name}/{current_unix_time}/"
     )
+    main_task = TASK.format(
+        objective=objective,
+        instructions=instructions,
+    )
+    print(main_task)
+    run_experiment(
+        task=main_task, model=model, dataset_path=dataset_path, output_path=output_path, start_time=current_unix_time
+    )
+
+
+if __name__ == "__main__":
+    OBJECTIVE = "Your task is to translate outdated AngularJS app code to recent version of React using functional components and hooks."
 
     INSTRUCTIONS = f"""
     Apply these instructions for translated application:
-        - Use the following libraries: TypeScript.
+        - Use the following libraries: TypeScript, Redux Toolkit with createSlice, and nanoid.
+        - Provide configuration of the store and provider if needed.
         - Split the code into separate components.
         - Optimize the code where possible.
         - The converted code should not contain any TODOs.
     """
 
-    task = TASK.format(objective=OBJECTIVE, instructions=INSTRUCTIONS)
-
-    print(task)
-
-    run_experiment(
-        task=task, model=model, dataset_path=DATASET_PATH, output_path=OUTPUT_PATH, start_time=current_unix_time
+    main(
+        model=Model.GPT41_0414,
+        objective=OBJECTIVE,
+        instructions=INSTRUCTIONS,
+        dataset_path="JS/ToDoApp_AngularJS",
+        experiment_name="translate_to_react",
     )

@@ -113,7 +113,7 @@ class OpenAIResponsesConverter(MessageConverter):
                     if content_buffer:
                         api_messages.append(EasyInputMessageParam(role=role, content=content_buffer))
                         content_buffer = []
-                    
+
                     # Add tool call as separate item
                     api_messages.append(
                         ResponseFunctionToolCallParam(
@@ -128,7 +128,7 @@ class OpenAIResponsesConverter(MessageConverter):
                     if content_buffer:
                         api_messages.append(EasyInputMessageParam(role=role, content=content_buffer))
                         content_buffer = []
-                    
+
                     # Add tool response as separate item
                     api_messages.append(
                         FunctionCallOutput(type="function_call_output", call_id=content.id, output=content.result)
@@ -208,6 +208,49 @@ class GeminiConverter(MessageConverter):
         return contents
 
 
+class AmazonNovaConverter(MessageConverter):
+    """Converter for Amazon Nova API format."""
+
+    def convert(self, messages: List[AIMessage]) -> List[Dict[str, Any]]:
+        """Convert to Amazon Nova API format."""
+        formatted_messages = []
+
+        for message in messages:
+            api_content = []
+
+            for content in message.content:
+                if isinstance(content, TextAIMessageContent):
+                    api_content.append({"text": content.text})
+                elif isinstance(content, ImageAIMessageContent):
+                    api_content.append({"text": f"Next image file name: {content.file_name}"})
+                    api_content.append(
+                        {
+                            "image": {
+                                "format": content.media_type().split("/")[1],
+                                "source": {"bytes": content.binary_content},
+                            }
+                        }
+                    )
+                elif isinstance(content, ToolCallAIMessageContent):
+                    api_content.append(
+                        {"toolUse": {"toolUseId": content.id, "name": content.name, "input": content.arguments}}
+                    )
+                elif isinstance(content, ToolResponseAIMessageContent):
+                    api_content.append(
+                        {
+                            "toolResult": {
+                                "toolUseId": content.id,
+                                "content": [{"text": content.result}],
+                                "status": "success",
+                            }
+                        }
+                    )
+
+            formatted_messages.append({"role": message.role, "content": api_content})
+
+        return formatted_messages
+
+
 class ConverterProvider(Enum):
     """Enumeration of available message converters."""
 
@@ -215,6 +258,7 @@ class ConverterProvider(Enum):
     OPENAI_RESPONSES = "openai_responses"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
+    AMAZON_NOVA = "amazon_nova"
 
 
 def get_converter(provider: Union[ConverterProvider, str]) -> MessageConverter:
@@ -233,5 +277,7 @@ def get_converter(provider: Union[ConverterProvider, str]) -> MessageConverter:
         return AnthropicConverter()
     elif provider == ConverterProvider.GEMINI:
         return GeminiConverter()
+    elif provider == ConverterProvider.AMAZON_NOVA:
+        return AmazonNovaConverter()
     else:
         raise ValueError(f"Unknown converter provider: {provider}")
