@@ -1,0 +1,21 @@
+.indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(2);
+}
+.indicator svg polyline {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.indicator svg polyline#back {
+    stroke: rgba(59, 120, 211, 0.3);
+}
+.indicator svg polyline#front {
+    stroke: #2956d1;
+    stroke-dasharray: 12, 36;
+    stroke-dashoffset: 48;
+    animation: dash 1s linear infinite;
+}
