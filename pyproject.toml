@@ -21,7 +21,8 @@ dependencies = [
     "auto-llm-eval @ git+https://github.com/epam/AIRUN-Evaluation-Framework.git@main",
     "openai (>=1.93.0,<2.0.0)",
     "black[jupyter] (>=25.1.0,<26.0.0)",
-    "dotenv (>=0.9.9,<0.10.0)"
+    "dotenv (>=0.9.9,<0.10.0)",
+    "pre-commit (>=4.2.0,<5.0.0)"
 ]
 
 
