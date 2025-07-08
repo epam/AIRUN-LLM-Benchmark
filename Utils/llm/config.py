@@ -36,7 +36,7 @@ def get_open_ai_config(
         "max_tokens": max_tokens,
         "skip_system": skip_system,
         "system_role_name": system_role_name,
-        "url": f"{base_url}/chat/completions",
+        "url": f"{base_url}",
     }
 
     # if reasoning model o1, o3 or o4, change temperature and reasoning effort
@@ -64,7 +64,7 @@ def get_xai_config(model, **kwargs):
     return {
         "model_id": model,
         "api_key": xai_api_key,
-        "url": "https://api.x.ai/v1/chat/completions",
+        "url": "https://api.x.ai/v1",
         "extra_params": kwargs,
     }
 
@@ -74,7 +74,7 @@ def get_fireworks_config(model, max_tokens):
         "model_id": model,
         "max_tokens": max_tokens,
         "api_key": fireworks_api_key,
-        "url": "https://api.fireworks.ai/inference/v1/chat/completions",
+        "url": "https://api.fireworks.ai/inference/v1",
     }
 
 
