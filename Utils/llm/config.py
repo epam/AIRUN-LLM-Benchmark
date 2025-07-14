@@ -163,6 +163,7 @@ class Model(Enum):
     Grok2_1212 = ("Grok2_1212", ModelProvider.XAI, lambda: get_xai_config("grok-2-1212"))
     Grok3_beta = ("Grok3_beta", ModelProvider.XAI, lambda: get_xai_config("grok-3"))
     Grok3mini_beta = ("Grok3mini_beta", ModelProvider.XAI, lambda: get_xai_config("grok-3-mini", reasoning_effort="high"))
+    Grok4_0709 = ("Grok4_0709", ModelProvider.XAI, lambda: get_xai_config("grok-4-0709")) # reasoning effort is not supported for Grok4
     Qwen25Coder32B = ("Qwen25Coder32B", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/qwen2p5-coder-32b-instruct", 4096))
     DeepSeekR1 = ("DeepSeekR1", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-r1", 16000))
     DeepSeekV3_0324 = ("DeepSeekV3_0324", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-v3-0324", 16000))
