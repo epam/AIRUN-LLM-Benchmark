@@ -9,8 +9,7 @@ import {
 
 // Response from https://api.work/vacancies${params}&area=1 => interface VacancyResponse;
 
-// interface VacancyResponse = {
-//   items: Array<{
+// interface VacancyItem = {
 //     id: string;
 //     name: string;
 //     salary?: {
@@ -40,7 +39,10 @@ import {
 //       requirement: string;
 //       responsibility: string;
 //     };
-//   }>;
+//   }
+
+// interface VacancyResponse = {
+//   items: Array<VacancyItem>;
 //   found: number;
 //   pages: number;
 //   page: number;
