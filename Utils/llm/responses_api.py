@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from time import sleep
 from typing import List, Dict, Any
@@ -5,20 +6,22 @@ from openai import OpenAI
 from openai.types.shared_params import Reasoning
 from openai.types.responses import (
     EasyInputMessageParam,
-    ResponseInputContentParam,
-    ResponseInputTextParam,
-    ResponseInputImageParam,
     ResponseInputItemParam,
     ResponseOutputMessage,
     ResponseOutputText,
     ResponseReasoningItem,
+    ResponseFunctionToolCall,
 )
 
-from Utils.llm.ai_message import AIMessage, TextAIMessageContent, ImageAIMessageContent
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent
+from Utils.llm.ai_tool import AIToolSet
+from Utils.llm.message_converter import get_converter, ConverterProvider
 from Utils.llm.config import Model
 
 
-def request_openai_responses_data(system_prompt: str, messages: List[AIMessage], model: Model) -> Dict[str, Any]:
+def request_data(
+    system_prompt: str, messages: List[AIMessage], model: Model, tools: AIToolSet = None
+) -> Dict[str, Any]:
     """
     Request data from OpenAI Responses API.
 
@@ -35,28 +38,14 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
     """
     config = model()
     developer_message: List[ResponseInputItemParam] = [EasyInputMessageParam(role="developer", content=system_prompt)]
-    input_messages: List[ResponseInputItemParam] = []
-    for message in messages:
-        api_message_content: List[ResponseInputContentParam] = []
-        for content in message.content:
-            if isinstance(content, TextAIMessageContent):
-                api_message_content.append(ResponseInputTextParam(type="input_text", text=content.text))
-            elif isinstance(content, ImageAIMessageContent):
-                api_message_content.append(
-                    ResponseInputTextParam(type="input_text", text=f"Next image filename: {content.file_name}")
-                )
-                api_message_content.append(
-                    ResponseInputImageParam(type="input_image", image_url=content.to_base64_url(), detail="auto")
-                )
-            else:
-                print(f"OpenAI responses API: Unsupported content type: {type(content)}")
-        input_messages.append(
-            EasyInputMessageParam(role="user" if message.role == "user" else "assistant", content=api_message_content)
-        )
+
+    converter = get_converter(ConverterProvider.OPENAI_RESPONSES)
+    input_messages = converter.convert(messages)
 
     try:
         client = OpenAI()
         resp = client.responses.create(
+            tools=tools.to_openai_responses_format() if tools else None,
             model=config["model_id"],
             input=developer_message + input_messages,
             max_output_tokens=config["max_tokens"],
@@ -72,7 +61,7 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
     try:
         while resp.status in {"queued", "in_progress"}:
             print(f"\r\tResponse status: {resp.status} | Last update: {datetime.now()}", end="", flush=True)
-            sleep(30)
+            sleep(10)
             resp = client.responses.retrieve(resp.id)
         print()
     except Exception as e:
@@ -81,23 +70,40 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
     response = resp.output
 
     content = next(
-        item.content[0].text
-        for item in response
-        if isinstance(item, ResponseOutputMessage)
-        and isinstance(item.content[0], ResponseOutputText)
-        and len(item.content) > 0
+        (
+            item.content[0].text
+            for item in response
+            if isinstance(item, ResponseOutputMessage)
+            and isinstance(item.content[0], ResponseOutputText)
+            and len(item.content) > 0
+        ),
+        None,
     )
-    reasoning = "\n".join(
-        summary.text
-        for item in response
-        if isinstance(item, ResponseReasoningItem)
-        for summary in item.summary
-        if summary.text
+    reasoning = (
+        "\n".join(
+            summary.text
+            for item in response
+            if isinstance(item, ResponseReasoningItem)
+            for summary in item.summary
+            if summary.text
+        )
+        or None
     )
+
+    tool_calls = [
+        {
+            "name": item.name,
+            "arguments": json.loads(item.arguments),
+            "id": item.call_id,
+        }
+        for item in response
+        if isinstance(item, ResponseFunctionToolCall)
+    ]
 
     result = {
         "content": content,
         "thoughts": reasoning,
+        "tool_calls": tool_calls,
         "tokens": {
             "input_tokens": resp.usage.input_tokens if resp.usage else None,
             "output_tokens": resp.usage.output_tokens if resp.usage else None,
@@ -109,10 +115,11 @@ def request_openai_responses_data(system_prompt: str, messages: List[AIMessage],
 
 
 if __name__ == "__main__":
-    data = request_openai_responses_data(
+    data = request_data(
         system_prompt="You should answer in french.",
-        messages=[AIMessage(role="user", content=[TextAIMessageContent(text="Send me a recipe for banana bread.")])],
-        model=Model.OpenAi_o3_0416,
+        messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
+        model=Model.OpenAi_o4_mini_0416,
+        tools=None,
     )
 
     print("Thoughts:", data["thoughts"], sep="\n")

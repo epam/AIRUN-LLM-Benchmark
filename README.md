@@ -42,7 +42,12 @@ To complete benchmark, you need to clone the additional repository:
   poetry install
   ```
 
-3. (Optional) Connect your python venv with your IDE
+3. Install pre-commit hooks (one-time setup):
+  ```bash
+  pre-commit install
+  ```
+
+4. (Optional) Connect your python venv with your IDE
 
 ### Environment Variables Setup
 
