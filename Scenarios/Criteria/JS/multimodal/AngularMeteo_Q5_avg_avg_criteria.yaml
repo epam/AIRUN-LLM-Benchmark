@@ -1,0 +1,11 @@
+evaluation_steps:
+  accuracy:
+  - Verify that the answer provided is "a) mto-waterfall"
+  completeness:
+  - Ensure that the answer contains one of the provided options
+metadata:
+  category: AngularMeteo_Q5_avg_avg
+  experiment: multimodal
+  repository: AngularMeteo
+  scenario_id: 33
+  

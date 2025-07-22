@@ -1,0 +1,11 @@
+evaluation_steps:
+  accuracy:
+  - Verify that the answer provided is "b) 232px"
+  completeness:
+  - Ensure that the answer contains one of the provided options
+metadata:
+  category: AngularMeteo_Q2_avg_avg
+  experiment: multimodal
+  repository: AngularMeteo
+  scenario_id: 27
+  
