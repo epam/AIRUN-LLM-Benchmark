@@ -1,0 +1,17 @@
+<input 
+  type="text"
+  class="autocomplete-input"
+  [placeholder]="placeholder()"
+  [(ngModel)]="searchTerm"
+  (input)="onInputChange()"
+  (keydown.esc)="results = []"
+/>
+@if (results.length > 0) {
+  <div class="autocomplete-results">
+    @for (result of results; track result) {
+      <div class="autocomplete-item" (click)="onItemSelected(result)">
+        {{ result.label }}
+      </div>
+    }
+  </div>
+}
