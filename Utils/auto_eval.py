@@ -24,7 +24,7 @@ if not gcloud_project_id:
     raise ValueError("GCLOUD_PROJECT_ID environment variable is not set. Please set it before running the script.")
 
 results_path = Path(results_repo_path).resolve()
-criteria_path = Path(__file__).resolve().parent.parent / "Scenarios" / "Criteria" / "JS"
+criteria_path = Path(results_repo_path) / "Criteria" / "JS"
 
 
 def get_evaluation_models() -> List[BaseLanguageModel]:
