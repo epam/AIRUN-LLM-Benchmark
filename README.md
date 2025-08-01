@@ -29,7 +29,7 @@ These scenarios allow us to comprehensively evaluate the capabilities and limita
 
 To complete benchmark, you need to clone the additional repository:
 
-- https://github.com/epam/AIRUN-LLM-Benchmark-Results - for storing results of benchmark
+- https://github.com/epam/AIRUN-LLM-Benchmark-Results - for storing criteria and results of benchmark
 
 ### Prepare Python Virtual Environment
 
@@ -85,7 +85,7 @@ If you want to add new scenario to the benchmark, you need to follow these steps
 2. Add your category (e.g., "component_test") to the `Scenarios/Tasks/{language}` directory.
 3. Add your scenario (e.g., "WriteTestsForComponent_RepoName_complexity_size") to the `Scenarios/Tasks/{language}` directory.
 4. Don't forget to add `<place_code_here repo="REPO_NAME"/>` in your scenario file to enrich the template with the code from the repository during test run.
-5. Add criteria to `Scenarios/Tasks/{language}/Criteria` for evaluation results.
+5. Add criteria to `{results-repo}/Criteria/{language}/{category}` for evaluation results.
 
 ## How to complete experiment
 
