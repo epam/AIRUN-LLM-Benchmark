@@ -1,0 +1,19 @@
+mto-header {
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    height: 64px;
+    background-color: #b1edff;
+    border-bottom: 3px solid #377abd;
+
+    .header-label {
+      .header-label-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #304963;
+      }
+    }
+  }
+}

@@ -19,7 +19,7 @@ type_mapper = {
     "solution_template_generation": "code_generation",
     "test_generation": "code_generation",
     "solution_migration": "code_translation",
-    "bug_fixing": "bug_fixing",
+    "multimodal": "multimodal",
 }
 
 
@@ -81,7 +81,7 @@ default_types = [
     "code_analysis",  # code_documentation
     "code_explanation",  # code_documentation
     "solution_documentation",  # code_documentation
-    "bug_fixing",  # bug_fixing
+    "multimodal",  # multimodal
     # 'code_documentation',
     # 'code_generation',
     # 'code_translation'
