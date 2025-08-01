@@ -1,7 +1,7 @@
 I have the following application code that needs to migrate:
 
 <source_code>
-<place_code_here repo="AngularCosmoPage"/>
+<place_code_here repo="AngularJSCosmoPage"/>
 </source_code>
 
 Please follow these steps:
