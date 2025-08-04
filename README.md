@@ -22,6 +22,7 @@ These scenarios allow us to comprehensively evaluate the capabilities and limita
 > - https://github.com/tastejs/todomvc/tree/master/examples/typescript-react/js
 > - https://github.com/tastejs/todomvc/tree/master/examples/typescript-angular/js
 > - https://github.com/tastejs/todomvc/tree/master/examples/jquery
+> - https://github.com/algorithm-visualizer/algorithm-visualizer
 
 ## How to Set Up benchmark
 

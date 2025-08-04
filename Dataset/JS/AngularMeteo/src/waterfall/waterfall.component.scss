@@ -1,0 +1,15 @@
+mto-waterfall {
+  .waterfall-container {
+    padding: 8px;
+
+    .waterfall-header {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    .waterfall-plot {
+      margin-top: 8px;
+    }
+  }
+}

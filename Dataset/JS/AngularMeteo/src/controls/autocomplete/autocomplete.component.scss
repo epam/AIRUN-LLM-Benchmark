@@ -1,0 +1,32 @@
+mto-autocomplete {
+  font-size: 14px;
+
+  .autocomplete-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .autocomplete-results {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    width: 200px;
+    margin-top: 4px;
+    z-index: 1000;
+  }
+
+  .autocomplete-item {
+    padding: 8px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  } 
+}

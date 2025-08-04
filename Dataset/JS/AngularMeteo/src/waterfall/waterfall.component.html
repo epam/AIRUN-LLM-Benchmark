@@ -1,0 +1,14 @@
+<div class="waterfall-container">
+  <div class="waterfall-header">
+    @if (label()) {
+      <span class="waterfall-header-label">{{ label() }}</span>
+    }
+    @if (range(); as range) {
+      <span class="waterfall-header-range">Range: {{ range.min.toFixed(1) }} - {{ range.max.toFixed(1) }}</span>
+    }
+  </div>
+  <div class="waterfall-plot">
+    <canvas #waterfallCanvas>
+    </canvas>
+  </div>
+</div>

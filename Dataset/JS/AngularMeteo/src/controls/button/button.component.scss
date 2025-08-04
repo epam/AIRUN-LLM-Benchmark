@@ -1,0 +1,15 @@
+mto-button {
+  font-size: 14px;
+
+  .button {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    &:hover {
+      cursor: pointer;
+      background-color: #f8f8f8;
+    }
+  }
+}
