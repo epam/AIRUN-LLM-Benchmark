@@ -16,7 +16,7 @@ from openai.types.responses import (
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.message_converter import get_converter, ConverterProvider
-from Utils.llm.config import Model
+from Utils.llm.config import Model, default_temperature
 
 
 def request_data(
@@ -42,15 +42,19 @@ def request_data(
     converter = get_converter(ConverterProvider.OPENAI_RESPONSES)
     input_messages = converter.convert(messages)
 
+    verbosity_level = config.get("verbosity")
+    verbosity = {"verbosity": verbosity_level} if verbosity_level else None
+
     try:
         client = OpenAI()
         resp = client.responses.create(
+            text=verbosity,
             tools=tools.to_openai_responses_format() if tools else None,
             model=config["model_id"],
             input=developer_message + input_messages,
             max_output_tokens=config["max_tokens"],
-            temperature=config["temperature"],
-            reasoning=Reasoning(effort=config["reasoning_effort"]),
+            temperature=config.get("temperature", default_temperature),
+            reasoning=Reasoning(effort=config["reasoning_effort"], summary="auto"),
             background=True,
         )
     except Exception as e:
@@ -118,7 +122,7 @@ if __name__ == "__main__":
     data = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.OpenAi_o4_mini_0416,
+        model=Model.GPT5_0807,
         tools=None,
     )
 
