@@ -17,7 +17,7 @@ interface Range {
 })
 export class WaterfallComponent {
   public pointWidth = input<number>(7);
-  public pointHeight = input<number>(3);
+  public pointHeight = input<number>(2);
   public palette = input<string[]>(ironPalette); // HEX values only, i.e. #AABBCC
   public timeAxisWidth = input<number>(64);
   public columnAxisHeight = input<number>(16);
