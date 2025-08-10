@@ -4,5 +4,7 @@ I have the following application code:
 <place_code_here repo="AngularMeteo"/>
 </source_code>
 
-Your task is to analyze the screenshot and codebase, then provide the following information:
-1) The selector of the Angular component marked with a red box in the screenshot.
+Your task is to perform analysis of the screenshot and codebase. The goal of the analysis is to provide the following information:
+1) The selector of the Angular component marked with the red rectangle in the screenshot.
+
+Ensure that the analysis is included in your response.
