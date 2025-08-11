@@ -9,6 +9,7 @@ deployed_llm_key = os.getenv("AZURE_DEPLOYMENT_KEY")
 open_api_key = os.getenv("OPENAI_API_KEY")
 xai_api_key = os.getenv("XAI_API_KEY")
 fireworks_api_key = os.getenv("FIREWORKS_API_KEY")
+cerebras_api_key = os.getenv("CEREBRAS_API_KEY")
 google_ai_api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
 gcloud_project_id = os.getenv("GCLOUD_PROJECT_ID")
 default_temperature = 0
@@ -47,15 +48,14 @@ def get_open_ai_config(
     return config
 
 
-def get_open_ai_responses_config(model, max_tokens=None):
+def get_open_ai_responses_config(model, effort="high", verbosity=None, max_tokens=None):
     config = {
         "max_tokens": max_tokens,
         "model_id": model,
+        "temperature": 1,
+        "reasoning_effort": effort,
+        "verbosity": verbosity,
     }
-
-    if model.startswith("o1") or model.startswith("o3") or model.startswith("o4") or model.startswith("codex"):
-        config["temperature"] = 1
-        config["reasoning_effort"] = "high"
 
     return config
 
@@ -75,6 +75,16 @@ def get_fireworks_config(model, max_tokens):
         "max_tokens": max_tokens,
         "api_key": fireworks_api_key,
         "url": "https://api.fireworks.ai/inference/v1",
+    }
+
+
+def get_cerebras_config(model, max_tokens, reasoning_effort):
+    return {
+        "model_id": model,
+        "max_tokens": max_tokens,
+        "api_key": cerebras_api_key,
+        "reasoning_effort": reasoning_effort,
+        "url": "https://api.cerebras.ai/v1",
     }
 
 
@@ -150,13 +160,15 @@ class Model(Enum):
     Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-12b-it-qat-q4_0-gguf", base_url="http://10.82.37.86:8000/v1"))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o1-pro-2025-03-19"))
-    OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o3-pro-2025-06-10", 100000))
-    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", 100000))
+    OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o3-pro-2025-06-10", max_tokens=100000))
+    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", max_tokens=100000))
+    GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5", effort="low", verbosity="high", max_tokens=128000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
     Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514", True))
     Opus_4_Thinking = ("Claude_Opus_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4@20250514", True, 32000))
+    Opus_41 = ("Claude_Opus_41", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", False, 32000))
 
     # Other models
     GrokBeta = ("GrokBeta", ModelProvider.XAI, lambda: get_xai_config("grok-beta"))
@@ -171,6 +183,7 @@ class Model(Enum):
     Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/llama4-maverick-instruct-basic", 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
+    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=65536, reasoning_effort="low"))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):

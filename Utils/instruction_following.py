@@ -148,7 +148,9 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
                     tools_content.append(error_response)
         else:
             # Handle case where no tool calls are made
-            prompt_message = "Please use the provided tools to complete the task."
+            prompt_message = (
+                "Please use the provided tools to complete the task. Or call end_task tool if task is done."
+            )
             prompt_response = AIMessageContentFactory.create_text(prompt_message)
             tools_content.append(prompt_response)
 

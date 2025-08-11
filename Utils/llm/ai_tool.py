@@ -3,7 +3,7 @@ from enum import Enum
 
 from anthropic.types import ToolParam as AnthropicToolParam
 from openai.types.responses import FunctionToolParam as OpenAIResponsesToolParam
-from openai.types.chat import ChatCompletionToolParam as OpenAIToolParam
+from openai.types.chat import ChatCompletionFunctionToolParam as OpenAIToolParam
 from google.genai import types
 
 
