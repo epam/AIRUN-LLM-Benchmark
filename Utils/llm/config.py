@@ -9,6 +9,7 @@ deployed_llm_key = os.getenv("AZURE_DEPLOYMENT_KEY")
 open_api_key = os.getenv("OPENAI_API_KEY")
 xai_api_key = os.getenv("XAI_API_KEY")
 fireworks_api_key = os.getenv("FIREWORKS_API_KEY")
+cerebras_api_key = os.getenv("CEREBRAS_API_KEY")
 google_ai_api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
 gcloud_project_id = os.getenv("GCLOUD_PROJECT_ID")
 default_temperature = 0
@@ -74,6 +75,16 @@ def get_fireworks_config(model, max_tokens):
         "max_tokens": max_tokens,
         "api_key": fireworks_api_key,
         "url": "https://api.fireworks.ai/inference/v1",
+    }
+
+
+def get_cerebras_config(model, max_tokens, reasoning_effort):
+    return {
+        "model_id": model,
+        "max_tokens": max_tokens,
+        "api_key": cerebras_api_key,
+        "reasoning_effort": reasoning_effort,
+        "url": "https://api.cerebras.ai/v1",
     }
 
 
@@ -172,6 +183,7 @@ class Model(Enum):
     Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/llama4-maverick-instruct-basic", 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
+    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=65536, reasoning_effort="low"))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):

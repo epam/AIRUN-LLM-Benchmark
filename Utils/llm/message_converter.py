@@ -75,7 +75,7 @@ class OpenAICompletionsConverter(MessageConverter):
 
             # Create message for text content and tool calls
             if text_content or tool_calls:
-                msg = {"role": message.role, "content": text_content if text_content else []}
+                msg = {"role": message.role, "content": text_content or None}
                 if tool_calls:
                     msg["tool_calls"] = tool_calls
                 api_messages.append(msg)
