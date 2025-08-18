@@ -30,7 +30,7 @@ These scenarios allow us to comprehensively evaluate the capabilities and limita
 
 To complete benchmark, you need to clone the additional repository:
 
-- https://github.com/epam/AIRUN-LLM-Benchmark-Results - for storing criteria and results of benchmark
+- AIRUN-LLM-Benchmark-Results - for storing criteria and results of benchmark
 
 ### Prepare Python Virtual Environment
 
