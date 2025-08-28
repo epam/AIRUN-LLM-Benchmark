@@ -29,7 +29,7 @@ def get_azure_config(model, max_tokens=None):
 
 
 def get_open_ai_config(
-    model, max_tokens=None, skip_system=False, system_role_name="system", base_url="https://api.openai.com/v1"
+    model, max_tokens=None, skip_system=False, system_role_name="system", base_url="https://api.openai.com/v1", reasoning_effort=None
 ):
     config = {
         "model_id": model,
@@ -38,6 +38,7 @@ def get_open_ai_config(
         "skip_system": skip_system,
         "system_role_name": system_role_name,
         "url": f"{base_url}",
+        "reasoning_effort": reasoning_effort,
     }
 
     # if reasoning model o1, o3 or o4, change temperature and reasoning effort
@@ -158,6 +159,8 @@ class Model(Enum):
     Gemma_3_4B = ("Gemma_3_4B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-4b-it", base_url="http://10.82.37.84:8000/v1"))
     Gemma_3_27B = ("Gemma_3_27B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-27b-it-qat-q4_0-gguf", base_url="http://10.82.37.86:8000/v1"))
     Gemma_3_12B = ("Gemma_3_12B", ModelProvider.OPENAI, lambda: get_open_ai_config("google/gemma-3-12b-it-qat-q4_0-gguf", base_url="http://10.82.37.86:8000/v1"))
+    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=65536, reasoning_effort="low"))
+    GPT_OSS_20B = ("GPT_OSS_20B", ModelProvider.OPENAI, lambda: get_open_ai_config("openai/gpt-oss-20b", max_tokens=-1, reasoning_effort="low", base_url="http://localhost:1234/v1"))
 
     OpenAi_o1_pro_0319 = ("OpenAi_o1_pro_0319", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o1-pro-2025-03-19"))
     OpenAi_o3_pro_0610 = ("OpenAi_o3_pro_0610", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("o3-pro-2025-06-10", max_tokens=100000))
@@ -183,7 +186,6 @@ class Model(Enum):
     Llama_4_Maverick = ("Llama_4_Maverick", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/llama4-maverick-instruct-basic", 131000))
     AmazonNovaPro = ("AmazonNovaPro", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-pro-v1:0"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
-    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=65536, reasoning_effort="low"))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):

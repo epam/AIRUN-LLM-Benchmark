@@ -87,6 +87,8 @@ def request_data(
     # Handle reasoning content if available
     if hasattr(message, "reasoning_content") and message.reasoning_content:
         thoughts = message.reasoning_content
+    elif hasattr(message, "reasoning") and message.reasoning:
+        thoughts = message.reasoning
 
     # Handle tool calls if present
     if message.tool_calls:
