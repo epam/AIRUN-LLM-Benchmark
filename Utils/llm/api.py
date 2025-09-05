@@ -21,7 +21,7 @@ class APIException(Exception):
 
 
 def ask_model(
-    messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet = None
+    messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet | None = None
 ) -> Dict[str, Any]:
     start_time = time.time()
     print(f"\tAttempt {attempt} at {datetime.now()}")
