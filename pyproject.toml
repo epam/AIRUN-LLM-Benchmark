@@ -18,7 +18,7 @@ dependencies = [
     "langchain-google-vertexai (>=2.0.25,<3.0.0)",
     "anthropic[vertex] (>=0.54.0,<0.55.0)",
     "google-genai (>=1.20.0,<2.0.0)",
-    "auto-llm-eval @ git+https://github.com/epam/AIRUN-Evaluation-Framework.git@main",
+    "auto-llm-eval @ git+https://github.com/epam/AIRUN-Evaluation-Framework.git@feat/replace-llm-grading",
     "openai (>=1.99.3,<2.0.0)",
     "black[jupyter] (>=25.1.0,<26.0.0)",
     "dotenv (>=0.9.9,<0.10.0)",

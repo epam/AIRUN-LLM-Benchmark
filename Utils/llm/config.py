@@ -29,7 +29,12 @@ def get_azure_config(model, max_tokens=None):
 
 
 def get_open_ai_config(
-    model, max_tokens=None, skip_system=False, system_role_name="system", base_url="https://api.openai.com/v1", reasoning_effort=None
+    model,
+    max_tokens=None,
+    skip_system=False,
+    system_role_name="system",
+    base_url="https://api.openai.com/v1",
+    reasoning_effort=None,
 ):
     config = {
         "model_id": model,
