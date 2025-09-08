@@ -1,17 +1,21 @@
 import os
 import re
-import yaml
 import pandas as pd
+import concurrent.futures
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Callable, List, Tuple, Any
 from dotenv import load_dotenv
 
-from epam.auto_llm_eval.evaluator import read_file, write_file, evaluate_metric, grade_metric, EvaluationResult
-from langchain_core.language_models.base import BaseLanguageModel
-from langchain_openai import ChatOpenAI
-from langchain_google_vertexai.model_garden import ChatAnthropicVertex
-
+from epam.auto_llm_eval.evaluator import (
+    read_file,
+    write_file,
+    evaluate_scenario,
+    grade_scenario,
+    Criteria,
+)
+from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.config import Model
+from Utils.llm.api import ask_model
 
 load_dotenv()
 
@@ -27,42 +31,61 @@ results_path = Path(results_repo_path).resolve()
 criteria_path = Path(results_repo_path) / "Criteria" / "JS"
 
 
-def get_evaluation_models() -> List[BaseLanguageModel]:
-    """Get the evaluator model."""
+class EvaluationModel:
+    execute_prompt: Callable[[str], str]
+    name: str
 
-    # Define Claude 3.7
-    sonnet = ChatAnthropicVertex(
-        model_name="claude-3-7-sonnet@20250219",
-        project=gcloud_project_id,
-        location="us-east5",
-        max_tokens=8192,
-        max_retries=6,
-        # model_kwargs={  # Enable Thinking Mode when langchain will support it
-        #     "thinking": {
-        #         "type": "enabled",
-        #         "budget_tokens": 4096
-        #     }
-        # }
-    )
-
-    # Define OpenAI o3-mini model
-    o3mini = ChatOpenAI(model="o3-mini")
-
-    return [sonnet, o3mini]
+    def __init__(self, name: str, execute_prompt: Callable[[str], str]):
+        self.name = name
+        self.execute_prompt = execute_prompt
 
 
-def get_grading_model() -> BaseLanguageModel:
-    """Get the grading model."""
+def get_evaluation_models() -> List[EvaluationModel]:
+    def extract_json_from_md(content: str) -> str:
+        json_text = content
+        json_text = json_text.strip("\n")
+        json_text = json_text.strip("`")
+        json_text = json_text.replace("json\n", "", 1)
 
-    # Define GPT-4-omni model
-    model = ChatOpenAI(
-        model="gpt-4o-2024-11-20",
-        logprobs=True,
-        top_logprobs=5,
-        temperature=0,  # request deterministic behavior
-    )
+        return json_text
 
-    return model
+    # GPT-5
+    def execute_gpt5(prompt: str) -> str:
+        response = ask_model(
+            messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
+            system_prompt="",
+            model=Model.GPT5_0807,
+        )
+
+        return extract_json_from_md(response["content"])
+
+    gpt5 = EvaluationModel(name="GPT-5", execute_prompt=execute_gpt5)
+
+    # Sonnet 4
+    def execute_sonnet4(prompt: str) -> str:
+        response = ask_model(
+            messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
+            system_prompt="",
+            model=Model.Sonnet_4_Thinking,
+        )
+
+        return extract_json_from_md(response["content"])
+
+    sonnet = EvaluationModel(name="Sonnet-4", execute_prompt=execute_sonnet4)
+
+    # Gemini 2.5 Pro
+    def execute_gemini(prompt: str) -> str:
+        response = ask_model(
+            messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
+            system_prompt="",
+            model=Model.Gemini_25_Pro_0605,
+        )
+
+        return extract_json_from_md(response["content"])
+
+    gemini = EvaluationModel(name="Gemini-2.5-Pro", execute_prompt=execute_gemini)
+
+    return [gpt5, sonnet, gemini]
 
 
 def save_grading_report(grading_path: Path, report: List[dict[str, Any]]):
@@ -114,13 +137,12 @@ def extract_content(file_path) -> str:
         return ""
 
 
-def evaluate_scenario(
+def evaluate_scenario_and_store_reports(
     base_path: Path,
     output: str,
     category_criteria_path: Path,
-    evaluation_model: BaseLanguageModel,
-    grading_model: BaseLanguageModel,
-) -> Tuple[EvaluationResult, EvaluationResult]:
+    evaluation_model: EvaluationModel,
+) -> Tuple[str, str]:
     """
     Evaluate a single scenario from a dataset.
 
@@ -139,24 +161,21 @@ def evaluate_scenario(
         accuracy and completeness evaluation results.
     """
 
-    metadata_content: str = read_file(category_criteria_path)
+    criteria_yaml: str = read_file(category_criteria_path)
+    criteria = Criteria.from_yaml(criteria_yaml)
+    scenario_name = criteria.metadata.category
 
-    metadata: Dict[str, Any] = yaml.safe_load(metadata_content)
-    meta: Dict[str, Any] = metadata.get("metadata", {})
-    meta["model"] = evaluation_model.model_name
-    scenario_name = meta.get("category")
-    evaluation_steps: Dict[str, List[str]] = metadata.get("evaluation_steps", {})
+    print(f"Evaluating scenario {scenario_name} with {evaluation_model.name}")
 
-    completeness_evaluation_steps: List[str] = evaluation_steps.get("completeness", [])
-    accuracy_evaluation_steps: List[str] = evaluation_steps.get("accuracy", [])
-
-    print(f"Evaluating scenario {scenario_name} with {evaluation_model.model_name}")
-
-    completeness_report = evaluate_metric(completeness_evaluation_steps, output, evaluation_model)
+    (accuracy_report, completeness_report) = evaluate_scenario(
+        criteria,
+        output,
+        evaluation_model.execute_prompt,
+    )
 
     try:
         write_file(
-            os.path.join(base_path, f"{scenario_name}_{evaluation_model.model_name}_completeness.md"),
+            os.path.join(base_path, f"{scenario_name}_{evaluation_model.name}_completeness.md"),
             completeness_report,
         )
     except FileNotFoundError:
@@ -164,11 +183,9 @@ def evaluate_scenario(
     except OSError as e:
         print(f"Failed to write completeness report for scenario {scenario_name}: {e}")
 
-    accuracy_report = evaluate_metric(accuracy_evaluation_steps, output, evaluation_model)
-
     try:
         write_file(
-            os.path.join(base_path, f"{scenario_name}_{evaluation_model.model_name}_accuracy.md"),
+            os.path.join(base_path, f"{scenario_name}_{evaluation_model.name}_accuracy.md"),
             accuracy_report,
         )
     except FileNotFoundError:
@@ -176,22 +193,15 @@ def evaluate_scenario(
     except OSError as e:
         print(f"Failed to write accuracy report for scenario {scenario_name}: {e}")
 
-    print(f"Grading scenario {scenario_name} with {grading_model.model_name}")
-    accuracy: EvaluationResult = grade_metric(accuracy_report, grading_model)
-    accuracy.set_metadata(meta)
-
-    completeness: EvaluationResult = grade_metric(completeness_report, grading_model)
-    completeness.set_metadata(meta)
-
-    return accuracy, completeness
+    return accuracy_report, completeness_report
 
 
-def main(model: Model, language: str = "JS"):
+def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False, summary_filename: str = "summary.csv"):
     """
     Main function to evaluate the scenarios.
 
     This function evaluates the scenarios for a given model and language.
-    It loads the evaluation and grading models, reads the summary file,
+    It loads the evaluation models, reads the summary file,
     and evaluates the scenarios based on the criteria.
 
     Args:
@@ -203,13 +213,8 @@ def main(model: Model, language: str = "JS"):
     """
 
     evaluation_models = get_evaluation_models()
-    grading_model = get_grading_model()
-
-    grading_report = []
-
     base_path = results_path / "Output" / model.model_id / language
-    grading_path = base_path / "grading.csv"
-    summary_path = base_path / "summary.csv"
+    summary_path = base_path / summary_filename
 
     if not summary_path.exists():
         print(f"File {summary_path} does not exist.")
@@ -226,7 +231,7 @@ def main(model: Model, language: str = "JS"):
 
         acc, comp = row.get("Accuracy", None), row.get("Completeness", None)
 
-        if pd.notna(acc) and pd.notna(comp):
+        if pd.notna(acc) and pd.notna(comp) and not force_reevaluate:
             print(f"Skipping {category_name} as it already has results.")
             continue
 
@@ -245,52 +250,58 @@ def main(model: Model, language: str = "JS"):
                     print(f"Scenario {category_name} has no output. Skipping evaluation.")
                     continue
 
-                for evaluation_model in evaluation_models:
-                    accuracy_cell_model_name = f"Accuracy_{evaluation_model.model_name}"
-                    completeness_cell_model_name = f"Completeness_{evaluation_model.model_name}"
+                print(f"Evaluating scenario {category_name}...")
+
+                def process_evaluation_model(
+                    evaluation_model,
+                ) -> Tuple[str, float, float]:  # model name, accuracy, completeness
+                    accuracy_cell_model_name = f"Accuracy_{evaluation_model.name}"
+                    completeness_cell_model_name = f"Completeness_{evaluation_model.name}"
 
                     acc_model, comp_model = row.get(accuracy_cell_model_name, None), row.get(
                         completeness_cell_model_name, None
                     )
 
-                    if pd.notna(acc_model) and pd.notna(comp_model):
+                    if pd.notna(acc_model) and pd.notna(comp_model) and not force_reevaluate:
                         print(
-                            f"Skipping evaluation for {category_name} by {evaluation_model.model_name} as it already has results."
+                            f"Skipping grading for {category_name} by {evaluation_model.name} as it already has results."
                         )
-                        continue
+                        return (evaluation_model.name, acc_model, comp_model)
 
-                    (accuracy, completeness) = evaluate_scenario(
-                        category_path, output, category_criteria_path, evaluation_model, grading_model
+                    (accuracy_report, completeness_report) = evaluate_scenario_and_store_reports(
+                        category_path, output, category_criteria_path, evaluation_model
+                    )
+                    (accuracy_grading, completeness_grading) = grade_scenario(accuracy_report, completeness_report)
+
+                    # Return results for updating summary_report
+                    return (
+                        evaluation_model.name,
+                        round(accuracy_grading.get_score(), 2),
+                        round(completeness_grading.get_score(), 2),
                     )
 
-                    accuracy_data = accuracy.to_data_frame("accuracy")
-                    grading_report.append(accuracy_data)
-
-                    completeness_data = completeness.to_data_frame("completeness")
-                    grading_report.append(completeness_data)
-
-                    # add the normalized results to the summary
-                    summary_report.at[index, accuracy_cell_model_name] = round(accuracy_data["weighted_score"] - 1, 2)
-                    summary_report.at[index, completeness_cell_model_name] = round(
-                        completeness_data["weighted_score"] - 1, 2
-                    )
+                with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                    futures = [
+                        executor.submit(process_evaluation_model, evaluation_model)
+                        for evaluation_model in evaluation_models
+                    ]
+                    for future in concurrent.futures.as_completed(futures):
+                        model_name, acc_score, comp_score = future.result()
+                        summary_report.at[index, f"Accuracy_{model_name}"] = acc_score
+                        summary_report.at[index, f"Completeness_{model_name}"] = comp_score
 
                 # calculate average accuracy and completeness by models evaluations
                 summary_report.at[index, "Accuracy"] = round(
-                    summary_report.loc[index, [f"Accuracy_{model.model_name}" for model in evaluation_models]].mean(), 2
+                    summary_report.loc[index, [f"Accuracy_{model.name}" for model in evaluation_models]].mean(), 2
                 )
 
                 summary_report.at[index, "Completeness"] = round(
-                    summary_report.loc[
-                        index, [f"Completeness_{model.model_name}" for model in evaluation_models]
-                    ].mean(),
+                    summary_report.loc[index, [f"Completeness_{model.name}" for model in evaluation_models]].mean(),
                     2,
                 )
 
                 summary_report.to_csv(summary_path, index=False)
 
-    save_grading_report(grading_path, grading_report)
-
 
 if __name__ == "__main__":
-    main(Model.Gemini_20_Pro_0205, "JS")
+    evaluate(Model.Gemini_25_Pro_0605, "JS")

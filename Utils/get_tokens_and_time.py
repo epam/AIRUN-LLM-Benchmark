@@ -73,7 +73,7 @@ def process_directory(directory_path, model, experiment):
     return data
 
 
-default_types = [
+default_categories = [
     "solution_migration",  # code_translation
     "component_generation",  # code_generation
     "test_generation",  # code_generation
@@ -81,22 +81,20 @@ default_types = [
     "code_analysis",  # code_documentation
     "code_explanation",  # code_documentation
     "solution_documentation",  # code_documentation
-    "multimodal",  # multimodal
-    # 'code_documentation',
-    # 'code_generation',
-    # 'code_translation'
 ]
 
 
-def main(models: List[Model] = None, langs=None, experiments=None):
-    if experiments is None:
-        experiments = default_types
+def main(
+    models: List[Model], langs: List[str], categories: List[str] | None = None, output_filename: str = "summary.csv"
+):
+    if categories is None:
+        categories = default_categories
     header = "Experiment,Type,Category,Language,Models,Dataset,Complexity,Size,Attempt,Input,Reasons,Output,Time,Accuracy,Completeness\n"
     for model in models:
         for lang in langs:
             data = header
             target_dir = results_path / "Output" / model.model_id / lang
-            for experiment in experiments:
+            for experiment in categories:
                 current_path = target_dir / experiment
                 if not os.path.isdir(current_path):
                     continue
@@ -106,11 +104,11 @@ def main(models: List[Model] = None, langs=None, experiments=None):
                     experiment_folder_path = current_path / experiment_folder
                     data += process_directory(experiment_folder_path, model, experiment)
 
-            output_path = target_dir / "summary.csv"
+            output_path = target_dir / output_filename
             with open(output_path, "w") as f:
                 f.write(data)
             print(f"Summary written successfully for {model} and lang {lang} to {output_path}")
 
 
 if __name__ == "__main__":
-    main([Model.Sonnet_37], ["JS"])
+    main([Model.Sonnet_4], ["JS"])
