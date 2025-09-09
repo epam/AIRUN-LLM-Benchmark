@@ -44,6 +44,7 @@ def request_data(
 
     verbosity_level = config.get("verbosity")
     verbosity = {"verbosity": verbosity_level} if verbosity_level else None
+    background = False
 
     try:
         client = OpenAI()
@@ -55,19 +56,21 @@ def request_data(
             max_output_tokens=config["max_tokens"],
             temperature=config.get("temperature", default_temperature),
             reasoning=Reasoning(effort=config["reasoning_effort"], summary="auto"),
-            background=False,
+            background=background,
         )
     except Exception as e:
         raise Exception(f"Failed to initialize OpenAI client or create response: {e}")
 
-    try:
-        while resp.status in {"queued", "in_progress"}:
-            print(f"\r\tResponse status: {resp.status} | Last update: {datetime.now()}", end="", flush=True)
-            sleep(10)
-            resp = client.responses.retrieve(resp.id)
-        print()
-    except Exception as e:
-        raise Exception(f"Failed to retrieve response: {e}")
+    if background:
+        try:
+            while resp.status in {"queued", "in_progress"}:
+                print(f"\r\tResponse status: {resp.status} | Last update: {datetime.now()}", end="", flush=True)
+                sleep(10)
+                resp = client.responses.retrieve(resp.id)
+
+            print()
+        except Exception as e:
+            raise Exception(f"Failed to retrieve response: {e}")
 
     response = resp.output
 
