@@ -12,9 +12,9 @@ Please follow these steps:
    - Implement proper Angular module structure
 
 2. Implement state management:
-   - Use @ngrx/store for state management
-   - Use @ngrx/effects for side effects
-   - Create appropriate actions, reducers, selectors, and effects
+   - Use Angular services with RxJS for state management
+   - Convert AngularJS scope-based state to RxJS observables
+   - Implement reactive state updates using BehaviorSubject/Subject
 
 3. Component architecture:
    - Split monolithic controller into separate components
@@ -36,12 +36,23 @@ Please follow these steps:
    - Maintain the same functionality for custom behaviors
    - Use appropriate lifecycle hooks
 
-7. Optimize the codebase:
-   - Apply Angular best practices
-   - Remove deprecated patterns
-   - Implement performance optimizations where applicable
+7. Project Structure and Build System:
+   - Initialize Angular CLI project structure
+   - Configure TypeScript with appropriate compiler options
+   - Set up proper build and development scripts
+   - Remove RequireJS configuration files
 
-8. Ensure code quality:
-   - No TODOs in the final code
-   - Follow Angular style guide
-   - Use TypeScript features appropriately
+8. Routing Migration:
+   - Replace hash-based routing with Angular Router
+   - Implement route guards if necessary
+   - Maintain the same URL patterns for filters
+
+9. Dependency Management:
+   - Update package.json with Angular 14.x dependencies
+   - Remove RequireJS and AngularJS dependencies
+   - Add necessary Angular packages (core, common, router, etc.)
+
+10. Ensure code quality:
+    - No TODOs in the final code
+    - Follow Angular style guide
+    - Use TypeScript features appropriately

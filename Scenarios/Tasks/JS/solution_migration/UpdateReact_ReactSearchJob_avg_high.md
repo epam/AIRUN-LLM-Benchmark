@@ -12,8 +12,8 @@ Please follow these steps:
    - Implement React 19 features where appropriate
 
 2. Implement state management using Redux Toolkit:
-   - Convert the existing state management to Redux Toolkit with createSlice
-   - Implement proper action creators and reducers
+   - Replace createStore with configureStore
+   - Convert reducers to createSlice pattern
    - Replace direct state mutations with immutable state updates
 
 3. Update TypeScript implementation:
@@ -36,6 +36,8 @@ Please follow these steps:
    - Create a package.json with all required dependencies
    - Configure Redux store with proper middleware
    - Set up Redux Provider in the application entry point
+   - Upgrade React Router from v5 to v6
+   - Update routing patterns and navigation methods
 
 7. Optimize for performance:
    - Implement proper memoization strategies

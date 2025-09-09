@@ -53,11 +53,27 @@ Please follow these steps:
    - Optimize re-renders with proper component structure
 
 9. Local Storage Handling:
-   - Maintain the same local storage functionality
+   - Maintain the same local storage functionality for draft management
    - Implement proper hooks for local storage access
-   - Handle storage events if needed
+   - Handle version comparison and restoration features
+   - Migrate localStorage-based draft detection and recovery logic
 
-10. Code Structure:
+10. File Upload Integration:
+    - Replace Angular's $upload with appropriate React file upload solution
+    - Implement file handling for featured image functionality
+    - Maintain the same upload workflow and error handling
+
+11. Event Communication:
+    - Replace $rootScope.$broadcast with appropriate React patterns
+    - Implement custom hooks or context for cross-component communication
+    - Maintain notification system functionality using React state management
+
+12. Promise Chain Migration:
+    - Convert complex AngularJS promise chains to modern async/await patterns
+    - Implement proper error handling for nested API operations
+    - Maintain the same operation sequencing for save/update workflows
+
+13. Code Structure:
     - Organize code into feature folders
     - Separate business logic from UI components
     - Create proper TypeScript interfaces for all data models

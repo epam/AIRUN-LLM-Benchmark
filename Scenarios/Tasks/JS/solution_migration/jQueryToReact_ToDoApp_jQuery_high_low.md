@@ -15,7 +15,8 @@ Please follow these steps:
    - Create React App as the project foundation
    - TypeScript for type safety
    - Redux Toolkit with createSlice for state management
-   - nanoid for generating unique IDs
+   - React Router for client-side routing (migrating from Director.js)
+   - nanoid for generating unique IDs (replacing custom UUID function)
 
 3. Project structure and architecture:
    - Split the application into separate components following React best practices
@@ -30,11 +31,12 @@ Please follow these steps:
    - Implement all required reducers, actions, and selectors
 
 5. Technical requirements:
-   - Maintain the same routing functionality
-   - Preserve all event handlers and their behaviors
-   - Implement proper form handling and validation
-   - Ensure all keyboard shortcuts work as in the original application
-   - Maintain local storage persistence if present in the original code
+   - Implement hash-based routing with React Router (/#/all, /#/active, /#/completed)
+   - Convert Handlebars templates to JSX components
+   - Migrate jQuery event delegation to React event handling
+   - Preserve all keyboard shortcuts (Enter key for creating/updating, Escape for canceling)
+   - Implement localStorage persistence for todos (note: original has stubbed implementation)
+   - Transform direct DOM manipulation to React state management patterns
 
 6. Code quality:
    - Optimize the code where possible
