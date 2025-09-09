@@ -1,10 +1,13 @@
 import os
 from pathlib import Path
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 from Utils.enrich_tasks import enrich_task_content
 from Utils.llm.api import ask_model
 from Utils.llm.config import Model
 from Utils.llm.ai_message import AIMessage, AIMessageContent, TextAIMessageContent, ImageAIMessageContent
+from typing import Optional
 
 
 def get_file_content(file_path):
@@ -28,24 +31,25 @@ def get_output_folder_name(answers_path, current_datetime, report_name):
 
 
 def generate_report(
-    answers_path: Path,
-    content: list[AIMessageContent],
-    data: str,
-    report_name: str,
-    attempt: int,
-    current_datetime: datetime,
+        answers_path: Path,
+        content: list[AIMessageContent],
+        data: str,
+        report_name: str,
+        attempt: int,
+        current_datetime: datetime,
 ):
     current_output_path = get_output_folder_name(answers_path, current_datetime, name_without_extension(report_name))
     if not os.path.exists(current_output_path):
         os.makedirs(current_output_path)
     output_file_path = (
-        os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
+            os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
     )
     with open(output_file_path, "w", encoding="utf-8") as output_file:
         output_file.write("\n".join([str_content.__str__() for str_content in content]) + "\n\n" + data)
 
 
-def get_answer_from_model(content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
+def get_answer_from_model(task_name: str, content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
+    print(f"[{task_name}] Starting attempt #{attempt}")
     data = ask_model(
         messages=[AIMessage(role="user", content=content)],
         system_prompt=system_prompt,
@@ -57,7 +61,7 @@ def get_answer_from_model(content: list[AIMessageContent], system_prompt: str, m
         return data["error"]
 
     thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ""
-    print(f"\tSuccess! Execution time: {data['execute_time']}")
+    print(f"[{task_name}] Completed attempt #{attempt} in {data['execute_time']} seconds")
 
     return (
         f"{thoughts}"
@@ -93,15 +97,27 @@ def get_task_images(images_category: Path) -> list[ImageAIMessageContent]:
     return images
 
 
+def get_model_answer_task(
+        message_content: list[AIMessageContent],
+        system_prompt: str,
+        model: Model,
+        task_name: str,
+        attempt: int,
+):
+    data = f"## Run {attempt}:\n"
+    data += get_answer_from_model(task_name, message_content, system_prompt, model, attempt)
+    return task_name, attempt, message_content, data
+
+
 def generate_answers_from_files(
-    task_category: Path,
-    datasets_category: Path,
-    output_dir: Path,
-    model: Model,
-    current_datetime: datetime,
-    attempts_count: int,
-    launch_list: list[str],
-    skip_list: list[str],
+        task_category: Path,
+        datasets_category: Path,
+        output_dir: Path,
+        model: Model,
+        current_datetime: datetime,
+        attempts_count: int,
+        launch_list: list[str],
+        skip_list: list[str],
 ):
     system_prompt = get_file_content(task_category / "system.txt")
     if system_prompt is None:
@@ -109,6 +125,8 @@ def generate_answers_from_files(
         system_prompt = ""
     tasks = get_tasks_by_path(task_category)
 
+    # Prepare all tasks and their message content
+    task_jobs = []
     for task_name in tasks:
         if launch_list and task_name not in launch_list:
             continue
@@ -126,13 +144,38 @@ def generate_answers_from_files(
             images_category = task_category / task_name.replace(".md", "_images")
             message_content.extend(get_task_images(images_category))
 
-            print(f"Attempt #{attempt}, get answer for {task_name}")
-            data = f"## Run {attempt}:\n"
-            data += get_answer_from_model(message_content, system_prompt, model)
+            task_jobs.append((message_content, task_name, attempt))
+
+    # Execute all get_answer_from_model calls in parallel
+    max_workers = min(len(task_jobs), 6)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for message_content, task_name, attempt in task_jobs:
+            future = executor.submit(
+                get_model_answer_task,
+                message_content,
+                system_prompt,
+                model,
+                task_name,
+                attempt,
+            )
+            futures.append(future)
+
+        # Collect results and generate reports
+        for future in concurrent.futures.as_completed(futures):
+            task_name, attempt, message_content, data = future.result()
             generate_report(output_dir, message_content, data, task_name, attempt, current_datetime)
 
 
-def main(model: Model, lang: str, attempts_count: int, launch_list: list[str], skip_list: list[str]):
+def main(
+    model: Model,
+    lang: str,
+    attempts_count: int,
+    launch_list: Optional[list[str]] = None,
+    skip_list: Optional[list[str]] = None,
+    categories_launch_list: Optional[list[str]] = None,
+    categories_skip_list: Optional[list[str]] = None,
+):
     print(f"Starting answers generation for {model}")
     current_datetime = datetime.now()
     base_path = Path(__file__).resolve().parent.parent
@@ -143,6 +186,10 @@ def main(model: Model, lang: str, attempts_count: int, launch_list: list[str], s
 
     for task_category in tasks_category.iterdir():
         if not task_category.is_dir():
+            continue
+        if categories_launch_list and task_category.name not in categories_launch_list:
+            continue
+        if categories_skip_list and task_category.name in categories_skip_list:
             continue
 
         output_dir: Path = results_path / "Output" / f"{model}" / lang / task_category.name
@@ -160,4 +207,4 @@ def main(model: Model, lang: str, attempts_count: int, launch_list: list[str], s
 
 
 if __name__ == "__main__":
-    main(Model.GPT4o_1120, "JS", 1, ["GenerateReactApp.md"], [])
+    main(Model.Gemini_25_Flash_0520, "JS", 1, categories_launch_list=['solution_template_generation'])

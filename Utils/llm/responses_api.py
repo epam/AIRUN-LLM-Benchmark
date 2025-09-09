@@ -55,12 +55,10 @@ def request_data(
             max_output_tokens=config["max_tokens"],
             temperature=config.get("temperature", default_temperature),
             reasoning=Reasoning(effort=config["reasoning_effort"], summary="auto"),
-            background=True,
+            background=False,
         )
     except Exception as e:
         raise Exception(f"Failed to initialize OpenAI client or create response: {e}")
-
-    print(f"Response ID: {resp.id}")
 
     try:
         while resp.status in {"queued", "in_progress"}:
