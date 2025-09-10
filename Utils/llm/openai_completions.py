@@ -117,7 +117,7 @@ def request_data(
                 )
 
     # Handle DeepSeekR1 specific reasoning format
-    if model in [Model.DeepSeekR1, Model.DeepSeekR1_0528] and content:
+    if model in [] and content:
         think_match = re.search(r"<think>([\s\S]*?)</think>", content, re.DOTALL)
         thoughts = think_match.group(1).strip() if think_match else None
         content = re.sub(r"<think>[\s\S]*?</think>", "", content).strip()

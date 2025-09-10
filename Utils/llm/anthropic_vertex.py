@@ -80,7 +80,7 @@ if __name__ == "__main__":
     data = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.Sonnet_4,
+        model=Model.Sonnet_4_Thinking,
         tools=None,
     )
 

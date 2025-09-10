@@ -367,9 +367,6 @@ def grade(model: Model, language: str = "JS", force_regrade: bool = False, summa
                 summary_report.to_csv(summary_path, index=False)
 
 
-# todo: implement printing text with a color in Windows terminal
-
-
 def print_colored(text, color):
     # ANSI escape codes for colors
     colors = {
