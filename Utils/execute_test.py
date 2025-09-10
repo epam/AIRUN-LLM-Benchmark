@@ -31,18 +31,18 @@ def get_output_folder_name(answers_path, current_datetime, report_name):
 
 
 def generate_report(
-        answers_path: Path,
-        content: list[AIMessageContent],
-        data: str,
-        report_name: str,
-        attempt: int,
-        current_datetime: datetime,
+    answers_path: Path,
+    content: list[AIMessageContent],
+    data: str,
+    report_name: str,
+    attempt: int,
+    current_datetime: datetime,
 ):
     current_output_path = get_output_folder_name(answers_path, current_datetime, name_without_extension(report_name))
     if not os.path.exists(current_output_path):
         os.makedirs(current_output_path)
     output_file_path = (
-            os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
+        os.path.join(str(current_output_path), name_without_extension(report_name)) + f"_report_{attempt}.md"
     )
     with open(output_file_path, "w", encoding="utf-8") as output_file:
         output_file.write("\n".join([str_content.__str__() for str_content in content]) + "\n\n" + data)
@@ -98,11 +98,11 @@ def get_task_images(images_category: Path) -> list[ImageAIMessageContent]:
 
 
 def get_model_answer_task(
-        message_content: list[AIMessageContent],
-        system_prompt: str,
-        model: Model,
-        task_name: str,
-        attempt: int,
+    message_content: list[AIMessageContent],
+    system_prompt: str,
+    model: Model,
+    task_name: str,
+    attempt: int,
 ):
     data = f"## Run {attempt}:\n"
     data += get_answer_from_model(task_name, message_content, system_prompt, model, attempt)
@@ -110,14 +110,14 @@ def get_model_answer_task(
 
 
 def generate_answers_from_files(
-        task_category: Path,
-        datasets_category: Path,
-        output_dir: Path,
-        model: Model,
-        current_datetime: datetime,
-        attempts_count: int,
-        launch_list: list[str],
-        skip_list: list[str],
+    task_category: Path,
+    datasets_category: Path,
+    output_dir: Path,
+    model: Model,
+    current_datetime: datetime,
+    attempts_count: int,
+    launch_list: list[str],
+    skip_list: list[str],
 ):
     system_prompt = get_file_content(task_category / "system.txt")
     if system_prompt is None:
@@ -146,25 +146,25 @@ def generate_answers_from_files(
 
             task_jobs.append((message_content, task_name, attempt))
 
-    # Execute all get_answer_from_model calls in parallel
-    max_workers = min(len(task_jobs), 6)
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = []
-        for message_content, task_name, attempt in task_jobs:
-            future = executor.submit(
-                get_model_answer_task,
-                message_content,
-                system_prompt,
-                model,
-                task_name,
-                attempt,
-            )
-            futures.append(future)
+    if len(task_jobs) > 0:
+        # Execute all get_answer_from_model calls in parallel
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            futures = []
+            for message_content, task_name, attempt in task_jobs:
+                future = executor.submit(
+                    get_model_answer_task,
+                    message_content,
+                    system_prompt,
+                    model,
+                    task_name,
+                    attempt,
+                )
+                futures.append(future)
 
-        # Collect results and generate reports
-        for future in concurrent.futures.as_completed(futures):
-            task_name, attempt, message_content, data = future.result()
-            generate_report(output_dir, message_content, data, task_name, attempt, current_datetime)
+            # Collect results and generate reports
+            for future in concurrent.futures.as_completed(futures):
+                task_name, attempt, message_content, data = future.result()
+                generate_report(output_dir, message_content, data, task_name, attempt, current_datetime)
 
 
 def main(
@@ -207,4 +207,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main(Model.Gemini_25_Flash_0520, "JS", 1, categories_launch_list=['solution_template_generation'])
+    main(Model.Gemini_25_Flash_0520, "JS", 1, categories_launch_list=["solution_template_generation"])
