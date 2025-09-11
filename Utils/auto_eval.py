@@ -89,7 +89,7 @@ def get_evaluation_models() -> List[EvaluationModel]:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
-            model=Model.Gemini_25_Pro_0605,
+            model=Model.Gemini_25_Pro,
             verbose=False,
         )
 

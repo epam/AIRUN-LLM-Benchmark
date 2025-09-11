@@ -139,8 +139,8 @@ class ModelProvider(Enum):
 class Model(Enum):
     # fmt: off
     # Gemini models
-    Gemini_25_Pro_0605 = ("Gemini_25_Pro_0605", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro-preview-06-05", max_tokens=65536))
-    Gemini_25_Flash_0520 = ("Gemini_25_Flash_0520", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-05-20", max_tokens=65536))
+    Gemini_25_Pro = ("Gemini_25_Pro", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro", max_tokens=65536))
+    Gemini_25_Flash = ("Gemini_25_Flash", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash", max_tokens=65536))
 
     # OpenAI models
     GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-2025-04-14", system_role_name="developer"))
