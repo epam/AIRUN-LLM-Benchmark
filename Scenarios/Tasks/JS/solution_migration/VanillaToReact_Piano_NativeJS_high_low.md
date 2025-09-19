@@ -17,8 +17,9 @@ Please follow these steps:
    - Ensure event handling follows React patterns
 
 3. Audio Implementation:
-   - Properly handle audio resources in the React environment
-   - Implement audio playback with appropriate React lifecycle considerations
+   - Create TypeScript interfaces for the audio mapping structure
+   - Implement audio loading with error handling for missing files
+   - Use placeholder audio or mock implementation if assets are unavailable
    - Maintain the existing audio mapping structure with TypeScript interfaces
 
 4. Event Handling:
@@ -36,7 +37,9 @@ Please follow these steps:
    - Handle browser compatibility for fullscreen API
 
 7. Styling Requirements:
-   - Preserve all CSS classes and styling behavior
+   - Implement CSS-in-JS or CSS modules for styling (CSS files not provided)
+   - Create appropriate folder structure for missing assets
+   - Handle missing CSS files gracefully with appropriate styling implementation
    - Implement conditional class application using React patterns
    - Maintain responsive design aspects
 
@@ -45,7 +48,12 @@ Please follow these steps:
    - Use React.memo or other techniques to prevent unnecessary re-renders
    - Ensure efficient event handling for piano key interactions
 
-9. Code Quality:
-   - Follow React best practices and patterns
-   - Ensure code is clean, readable, and maintainable
-   - No TODOs should be present in the final code
+9. Asset Management:
+   - Implement CSS-in-JS or CSS modules for styling (CSS files not provided)
+   - Create appropriate folder structure for missing assets
+   - Handle missing audio files gracefully with appropriate error handling
+
+10. Code Quality:
+    - Follow React best practices and patterns
+    - Ensure code is clean, readable, and maintainable
+    - No TODOs should be present in the final code

@@ -235,7 +235,7 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "auto-llm-eval"
-version = "1.0.0"
+version = "1.0.1"
 description = "Auto LLM Evaluation Tool"
 optional = false
 python-versions = ">=3.12"
@@ -247,7 +247,7 @@ develop = false
 type = "git"
 url = "https://github.com/epam/AIRUN-Evaluation-Framework.git"
 reference = "main"
-resolved_reference = "16c8264adc72b3d73600cd1d39269066a7b8483f"
+resolved_reference = "9ab55987771ccfa848644b40c5c20c4f3c9c951c"
 
 [[package]]
 name = "babel"

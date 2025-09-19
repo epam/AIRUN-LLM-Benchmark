@@ -12,9 +12,9 @@ Please follow these steps:
    - Ensure all component lifecycle methods are properly translated to Angular equivalents
 
 2. Implement state management:
-   - Use @ngrx/store for application state management
-   - Implement @ngrx/effects where side effects are needed
-   - Convert the existing state model to appropriate actions, reducers, and selectors
+   - Use Angular services with RxJS for state management
+   - Convert the observer pattern (subscribe/inform) to RxJS observables
+   - Implement reactive state updates using BehaviorSubject/Subject
 
 3. Apply Angular architecture best practices:
    - Split large components into smaller, focused components
@@ -24,7 +24,9 @@ Please follow these steps:
 4. Convert React component structure:
    - Transform JSX templates to Angular HTML templates
    - Replace React event handlers with Angular event bindings
-   - Convert React refs to Angular @ViewChild decorators
+   - Convert React refs (this.refs) to Angular @ViewChild decorators
+   - Replace ReactDOM.findDOMNode() calls with Angular ViewChild queries
+   - Transform React lifecycle methods to Angular equivalents
 
 5. Implement proper typing:
    - Maintain TypeScript interfaces and types
@@ -38,12 +40,10 @@ Please follow these steps:
 
 7. Optimize the application:
    - Apply Angular change detection strategies where appropriate
-   - Implement lazy loading for feature modules
    - Ensure efficient rendering patterns
 
 8. Ensure proper routing:
-   - Convert any React routing to Angular Router
-   - Implement route guards and resolvers if needed
+   - Convert external Router library to Angular Router
    - Maintain the same URL structure and navigation patterns
 
 9. Code quality requirements:

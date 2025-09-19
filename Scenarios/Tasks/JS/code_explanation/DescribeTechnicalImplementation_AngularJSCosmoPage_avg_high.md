@@ -10,20 +10,21 @@ Please follow these steps:
    - Focus on technical accuracy and completeness
    - Use clear, concise language suitable for developers
 
-2. Document component overview:
-   - Provide a brief introduction explaining the component's purpose
-   - Summarize key functionality and architectural role
-   - Explain how it fits within the broader application
+2. Document module overview:
+   - Provide a brief introduction explaining the module's purpose
+   - Summarize key functionality and architectural role within the AngularJS application
+   - Explain how factories, controllers, and templates work together
 
-3. Detail all component features:
+3. Detail all module features:
    - List and describe each major feature
-   - Explain the technical implementation of each feature
-   - Document any dependencies or requirements
+   - Explain the technical implementation of each feature using AngularJS patterns
+   - Document factory dependencies, service injection, and module dependencies
 
-4. Document interface specifications:
-   - Create a table listing all props/parameters/inputs
-   - For each prop, include: name, data type, description, and required/optional status
-   - Document any return values or output formats
+4. Document service interfaces and scope variables:
+   - Create a table listing all injected dependencies and their purposes
+   - Document scope variables, their data types, and binding patterns
+   - Include factory methods, controller functions, and their parameters
+   - Document API endpoints and RESTful service configurations
 
 5. Provide usage documentation:
    - Include sample code demonstrating proper implementation

@@ -21,10 +21,17 @@ class APIException(Exception):
 
 
 def ask_model(
-    messages: List[AIMessage], system_prompt: str, model: Model, attempt: int = 1, tools: AIToolSet | None = None
+    messages: List[AIMessage],
+    system_prompt: str,
+    model: Model,
+    attempt: int = 1,
+    tools: AIToolSet | None = None,
+    verbose: bool = True,
 ) -> Dict[str, Any]:
     start_time = time.time()
-    print(f"\tAttempt {attempt} at {datetime.now()}")
+    if verbose:
+        print(f"\tAttempt {attempt} at {datetime.now()}")
+
     try:
         data = None
 
@@ -51,29 +58,35 @@ def ask_model(
             "execute_time": execute_time,
         }
     except APIException as e:
-        print(f"Error: {e.status_code}")
-        print(f"Error: {e.content}")
+        if verbose:
+            print(f"Error: {e.status_code}")
+            print(f"Error: {e.content}")
         if e.status_code == 429:
-            print("Will try in 1 minute...")
+            if verbose:
+                print("Will try in 1 minute...")
             time.sleep(60)
-            return ask_model(messages, system_prompt, model, attempt + 1, tools)
+            return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
         else:
             if attempt > 2:
                 return {"error": f"### Error: {e.content}\n"}
             else:
-                print("\tTrying again...")
+                if verbose:
+                    print("\tTrying again...")
                 time.sleep(10)
-                return ask_model(messages, system_prompt, model, attempt + 1, tools)
+                return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
     except requests.exceptions.Timeout:
         if attempt > 2:
             return {"error": f"### Error: Timeout error\n"}
-        print("\tRequest timed out. Trying again...")
-        return ask_model(messages, system_prompt, model, attempt + 1, tools)
+        if verbose:
+            print("\tRequest timed out. Trying again...")
+        return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
     except Exception as e:
-        print(f"\tError: {str(e)}")
+        if verbose:
+            print(f"\tError: {str(e)}")
         if attempt > 2:
             return {"error": f"### Error: can not get the content\n"}
         else:
-            print("\tTrying again...")
+            if verbose:
+                print("\tTrying again...")
             time.sleep(5)
-            return ask_model(messages, system_prompt, model, attempt + 1, tools)
+            return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
