@@ -141,6 +141,7 @@ class Model(Enum):
     # Gemini models
     Gemini_25_Pro = ("Gemini_25_Pro", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro", max_tokens=65536))
     Gemini_25_Flash = ("Gemini_25_Flash", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash", max_tokens=65536))
+    Gemini_25_Flash_0925 = ("Gemini_25_Flash_0925", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash-preview-09-2025", max_tokens=65536))
 
     # OpenAI models
     GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-2025-04-14", system_role_name="developer"))
@@ -150,17 +151,20 @@ class Model(Enum):
     GPT_OSS_20B = ("GPT_OSS_20B", ModelProvider.OPENAI, lambda: get_open_ai_config("openai/gpt-oss-20b", max_tokens=-1, reasoning_effort="low", base_url="http://localhost:1234/v1"))
 
     Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", max_tokens=100000))
-    GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5", effort="low", verbosity="high", max_tokens=128000))
+    GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
+    GPT5_Codex = ("GPT5_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-codex", effort="low", verbosity="medium", max_tokens=128000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
     Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514", True))
+    Sonnet_45 = ("Claude_Sonnet_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929"))
     Opus_41 = ("Claude_Opus_41", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", False, 32000))
     Opus_41_Thinking = ("Claude_Opus_41_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", True, 32000))
 
     # Other models
     Grok4_0709 = ("Grok4_0709", ModelProvider.XAI, lambda: get_xai_config("grok-4-0709")) # reasoning effort is not supported for Grok4
     Grok_Code_0825 = ("Grok_Code_0825", ModelProvider.XAI, lambda: get_xai_config("grok-code-fast-1-0825"))
+    Grok4FastReasoning = ("Grok4FastReasoning", ModelProvider.XAI, lambda: get_xai_config("grok-4-fast-reasoning-latest"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
     # fmt: on
 
