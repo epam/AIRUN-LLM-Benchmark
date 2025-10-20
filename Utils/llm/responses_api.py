@@ -44,7 +44,7 @@ def request_data(
 
     verbosity_level = config.get("verbosity")
     verbosity = {"verbosity": verbosity_level} if verbosity_level else None
-    background = False
+    background = config.get("background", False)
 
     try:
         client = OpenAI()

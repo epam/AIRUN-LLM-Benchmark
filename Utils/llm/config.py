@@ -54,13 +54,14 @@ def get_open_ai_config(
     return config
 
 
-def get_open_ai_responses_config(model, effort="high", verbosity=None, max_tokens=None):
+def get_open_ai_responses_config(model, effort="high", verbosity=None, max_tokens=None, background=False):
     config = {
         "max_tokens": max_tokens,
         "model_id": model,
         "temperature": 1,
         "reasoning_effort": effort,
         "verbosity": verbosity,
+        "background": background,
     }
 
     return config
@@ -152,6 +153,7 @@ class Model(Enum):
 
     Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", max_tokens=100000))
     GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
+    GPT5_Pro_1006 = ("GPT5_Pro_1006", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-pro-2025-10-06", verbosity="high", max_tokens=272000, background=True))
     GPT5_Codex = ("GPT5_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-codex", effort="low", verbosity="medium", max_tokens=128000))
 
     # Claude models
@@ -160,6 +162,7 @@ class Model(Enum):
     Sonnet_45 = ("Claude_Sonnet_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929"))
     Opus_41 = ("Claude_Opus_41", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", False, 32000))
     Opus_41_Thinking = ("Claude_Opus_41_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", True, 32000))
+    Haiku_45 = ("Claude_Haiku_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-haiku-4-5@20251001"))
 
     # Other models
     Grok4_0709 = ("Grok4_0709", ModelProvider.XAI, lambda: get_xai_config("grok-4-0709")) # reasoning effort is not supported for Grok4
