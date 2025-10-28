@@ -155,6 +155,8 @@ class Model(Enum):
     GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
     GPT5_Pro_1006 = ("GPT5_Pro_1006", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-pro-2025-10-06", verbosity="high", max_tokens=272000, background=True))
     GPT5_Codex = ("GPT5_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-codex", effort="low", verbosity="medium", max_tokens=128000))
+    GPT5_Nano_high = ("GPT5_Nano_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-nano-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
+    GPT5_Mini_high = ("GPT5_Mini_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-mini-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
