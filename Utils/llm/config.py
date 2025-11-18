@@ -157,6 +157,8 @@ class Model(Enum):
     GPT5_Codex = ("GPT5_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-codex", effort="low", verbosity="medium", max_tokens=128000))
     GPT5_Nano_high = ("GPT5_Nano_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-nano-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
     GPT5_Mini_high = ("GPT5_Mini_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-mini-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
+    GPT51_1113 = ("GPT51_1113", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-2025-11-13", effort="none", verbosity="high", max_tokens=128000))
+    GPT51_1113_high = ("GPT51_1113_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-2025-11-13", effort="high", verbosity="high", max_tokens=128000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
@@ -171,6 +173,8 @@ class Model(Enum):
     Grok_Code_0825 = ("Grok_Code_0825", ModelProvider.XAI, lambda: get_xai_config("grok-code-fast-1-0825"))
     Grok4FastReasoning = ("Grok4FastReasoning", ModelProvider.XAI, lambda: get_xai_config("grok-4-fast-reasoning-latest"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
+
+    MiniMaxM2 = ("MiniMaxM2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2", max_tokens=4000))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):
