@@ -12,7 +12,6 @@ from anthropic.types import (
 )
 from google.genai import types as genai_types
 from openai.types.responses import (
-    ResponseInputContentParam,
     ResponseInputTextParam,
     ResponseInputImageParam,
     ResponseFunctionToolCallParam,
@@ -197,7 +196,11 @@ class GeminiConverter(MessageConverter):
                         ]
                     )
                 elif isinstance(content, ToolCallAIMessageContent):
-                    parts.append(genai_types.Part.from_function_call(name=content.name, args=content.arguments))
+                    part = genai_types.Part.from_function_call(name=content.name, args=content.arguments)
+                    # Add thought_signature if present
+                    if content.signature:
+                        part.thought_signature = content.signature
+                    parts.append(part)
                 elif isinstance(content, ToolResponseAIMessageContent):
                     parts.append(
                         genai_types.Part.from_function_response(name=content.name, response={"result": content.result})

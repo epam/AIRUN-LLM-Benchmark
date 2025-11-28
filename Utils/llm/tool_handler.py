@@ -56,7 +56,7 @@ class ReadFileHandler(ToolHandler):
                 return AIMessageContentFactory.create_tool_response(tool_name, file_content, tool_id)
         except FileNotFoundError:
             error_content = f"Error: File at {file_path} not found or file_path is incorrect."
-            return AIMessageContentFactory.create_text(error_content)
+            return AIMessageContentFactory.create_tool_response(tool_name, error_content, tool_id)
 
 
 class WriteFileHandler(ToolHandler):

@@ -8,6 +8,7 @@ from Utils.llm.config import google_ai_api_key, Model, default_temperature
 from Utils.llm.ai_message import AIMessage
 from Utils.llm.message_converter import get_converter, ConverterProvider
 
+recommended_temperature = 1
 
 def request_data(
     system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
@@ -40,8 +41,8 @@ def request_data(
             tools=tools.to_gemini_format() if tools else None,
             system_instruction=system_prompt,
             max_output_tokens=config["max_tokens"],
-            temperature=default_temperature,
-            thinking_config=types.ThinkingConfig(include_thoughts=True),
+            temperature=recommended_temperature,
+            thinking_config=types.ThinkingConfig(include_thoughts=True, thinking_level=config["thinking_level"])
         ),
     )
 
@@ -53,13 +54,15 @@ def request_data(
         if part.thought:
             thinking_content = part.text
         elif part.function_call:
-            tool_calls.append(
-                {
-                    "name": part.function_call.name,
-                    "arguments": part.function_call.args,
-                    "id": part.function_call.id,
-                }
-            )
+            tool_call_data = {
+                "name": part.function_call.name,
+                "arguments": part.function_call.args,
+                "id": part.function_call.id,
+            }
+            # Extract thought_signature if present
+            if hasattr(part, 'thought_signature') and part.thought_signature:
+                tool_call_data["signature"] = part.thought_signature
+            tool_calls.append(tool_call_data)
         elif part.text:
             text_content = part.text
 
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     data = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.Gemini_25_Flash_0520,
+        model=Model.Gemini_3_Pro_Preview,
         tools=None,
     )
 
