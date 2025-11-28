@@ -55,11 +55,11 @@ def request_data(
             input=developer_message + input_messages,
             max_output_tokens=config["max_tokens"],
             temperature=config.get("temperature", default_temperature),
-            reasoning=Reasoning(effort=config["reasoning_effort"], summary="auto"),
+            reasoning=Reasoning(effort=config.get("reasoning_effort", None), summary="auto"),
             background=background,
         )
     except Exception as e:
-        raise Exception(f"Failed to initialize OpenAI client or create response: {e}")
+        raise Exception(f"Failed to initialize Responses API client or create response: {e}")
 
     if background:
         try:
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     data = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.GPT5_0807,
+        model=Model.GPT51_1113,
         tools=None,
     )
 
