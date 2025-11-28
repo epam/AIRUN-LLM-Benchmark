@@ -104,7 +104,7 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
 
         answer = ask_model(messages, SYSTEM_PROMPT, model, tools=tool_set)
         print("RESPONSE:")
-        print(json.dumps(answer, indent=4))
+        print(json.dumps(answer, indent=4, default=lambda item: f"<{type(item).__name__}>"))
 
         tokens = answer["tokens"]
         input_tokens += tokens["input_tokens"]
@@ -125,9 +125,10 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
                 tool_name = tool_call["name"]
                 tool_args = tool_call["arguments"]
                 tool_id = tool_call["id"]
+                tool_signature = tool_call.get("signature")
 
                 # Add tool call to the message
-                tool_call_content = AIMessageContentFactory.create_tool_call(tool_name, tool_args, tool_id)
+                tool_call_content = AIMessageContentFactory.create_tool_call(tool_name, tool_args, tool_id, tool_signature)
                 messages[-1].content.append(tool_call_content)
 
                 # Handle end_task specially
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     """
 
     main(
-        model=Model.GPT41_0414,
+        model=Model.Gemini_3_Pro_Preview,
         objective=OBJECTIVE,
         instructions=INSTRUCTIONS,
         dataset_path="JS/ToDoApp_AngularJS",

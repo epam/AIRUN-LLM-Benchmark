@@ -23,9 +23,9 @@ class AIMessageContentFactory:
         return TextAIMessageContent(text)
 
     @staticmethod
-    def create_tool_call(name: str, arguments: dict, tool_id: str) -> "ToolCallAIMessageContent":
+    def create_tool_call(name: str, arguments: dict, tool_id: str, signature: Union[bytes, None] = None) -> "ToolCallAIMessageContent":
         """Create a tool call message content"""
-        return ToolCallAIMessageContent(name, arguments, tool_id)
+        return ToolCallAIMessageContent(name, arguments, tool_id, signature)
 
     @staticmethod
     def create_tool_response(name: str, result: str, tool_id: str) -> "ToolResponseAIMessageContent":
@@ -89,15 +89,21 @@ class ToolCallAIMessageContent(AIMessageContent):
     name: str
     arguments: dict
     id: str
+    signature: Union[bytes, None]
 
-    def __init__(self, name: str, arguments: dict, id: str):
+    def __init__(self, name: str, arguments: dict, id: str, signature: Union[bytes, None] = None):
         super().__init__()
         self.name = name
         self.arguments = arguments
         self.id = id
+        self.signature = signature
 
     def __str__(self):
-        return json.dumps({"name": self.name, "arguments": self.arguments, "id": self.id})
+        result = {"name": self.name, "arguments": self.arguments, "id": self.id}
+        if self.signature:
+            # bytes are not JSON serializable, so represent them as a placeholder
+            result["signature"] = "<bytes>"
+        return json.dumps(result)
 
 
 class ToolResponseAIMessageContent(AIMessageContent):
