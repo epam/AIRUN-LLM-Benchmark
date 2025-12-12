@@ -153,4 +153,5 @@ if __name__ == "__main__":
     print("Tokens:")
     print(f"Input: {data['tokens']['input_tokens']}")
     print(f"Output: {data['tokens']['output_tokens']}")
-    print(f"Reasoning: {data['tokens']['reasoning_tokens']}")
+    if "reasoning_tokens" in data["tokens"]:
+        print(f"Reasoning: {data['tokens']['reasoning_tokens']}")

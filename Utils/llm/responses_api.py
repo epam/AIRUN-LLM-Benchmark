@@ -123,7 +123,7 @@ if __name__ == "__main__":
     data = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.GPT51_1113,
+        model=Model.GPT52_1211_high,
         tools=None,
     )
 

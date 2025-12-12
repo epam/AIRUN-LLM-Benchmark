@@ -166,6 +166,8 @@ class Model(Enum):
     GPT51_1113_high = ("GPT51_1113_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-2025-11-13", effort="high", verbosity="high", max_tokens=128000))
     GPT51_Codex = ("GPT51_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex", effort="high", max_tokens=128000))
     GPT51_Codex_mini = ("GPT51_Codex_mini", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex-mini", effort="high", max_tokens=128000))
+    GPT52_1211 = ("GPT52_1211", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="none", verbosity="high", max_tokens=128000))
+    GPT52_1211_high = ("GPT52_1211_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="high", verbosity="high", max_tokens=128000))
 
     # Claude models
     Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
@@ -185,6 +187,8 @@ class Model(Enum):
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
 
     MiniMaxM2 = ("MiniMaxM2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2", max_tokens=4000))
+    DeepSeek_v32 = ("DeepSeek_v32", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-v3p2", max_tokens=60000))
+    Kimi_K2 = ("Kimi_K2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/kimi-k2-thinking", max_tokens=60000))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):
