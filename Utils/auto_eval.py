@@ -57,50 +57,50 @@ def get_evaluation_models() -> List[EvaluationModel]:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
-            model=Model.GPT5_0807,
+            model=Model.GPT52_1211_high,
             verbose=False,
         )
 
         if response.get("error", None):
-            raise ValueError(f"Error from GPT-5: {response['error']}")
+            raise ValueError(f"Error from GPT-5.2: {response['error']}")
 
         return extract_json_from_md(response["content"])
 
-    gpt5 = EvaluationModel(name="GPT-5", execute_prompt=execute_gpt5)
+    gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt5)
 
     # Sonnet 4
     def execute_sonnet4(prompt: str) -> str:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
-            model=Model.Sonnet_4_Thinking,
+            model=Model.Sonnet_45,
             verbose=False,
         )
 
         if response.get("error", None):
-            raise ValueError(f"Error from Sonnet-4: {response['error']}")
+            raise ValueError(f"Error from Sonnet-4.5: {response['error']}")
 
         return extract_json_from_md(response["content"])
 
-    sonnet = EvaluationModel(name="Sonnet-4", execute_prompt=execute_sonnet4)
+    sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet4)
 
     # Gemini 2.5 Pro
     def execute_gemini(prompt: str) -> str:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
-            model=Model.Gemini_25_Pro,
+            model=Model.Gemini_3_Pro_Preview,
             verbose=False,
         )
 
         if response.get("error", None):
-            raise ValueError(f"Error from Gemini-2.5-Pro: {response['error']}")
+            raise ValueError(f"Error from Gemini-3-Pro: {response['error']}")
 
         return extract_json_from_md(response["content"])
 
-    gemini = EvaluationModel(name="Gemini-2.5-Pro", execute_prompt=execute_gemini)
+    gemini = EvaluationModel(name="Gemini-3-Pro", execute_prompt=execute_gemini)
 
-    return [gpt5, sonnet, gemini]
+    return [gpt, sonnet, gemini]
 
 
 def construct_category_name(category, dataset, complexity, size):
