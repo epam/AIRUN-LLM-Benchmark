@@ -16,6 +16,7 @@ from openai.types.responses import (
     ResponseInputImageParam,
     ResponseFunctionToolCallParam,
     EasyInputMessageParam,
+    ResponseOutputTextParam,
 )
 from openai.types.responses.response_input_param import FunctionCallOutput
 
@@ -97,7 +98,10 @@ class OpenAIResponsesConverter(MessageConverter):
 
             for content in message.content:
                 if isinstance(content, TextAIMessageContent):
-                    content_buffer.append(ResponseInputTextParam(type="input_text", text=content.text))
+                    if role == "assistant":
+                        content_buffer.append(ResponseOutputTextParam(type="output_text", text=content.text, annotations=[]))
+                    else:
+                        content_buffer.append(ResponseInputTextParam(type="input_text", text=content.text))
                 elif isinstance(content, ImageAIMessageContent):
                     content_buffer.extend(
                         [
