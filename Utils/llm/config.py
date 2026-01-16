@@ -111,7 +111,7 @@ def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None
     if enabled_thinking:
         thinking = {
             "type": "enabled",
-            "budget_tokens": 2048,
+            "budget_tokens": 15000,
         }
 
     return {
@@ -145,48 +145,35 @@ class ModelProvider(Enum):
 class Model(Enum):
     # fmt: off
     # Gemini models
-    Gemini_25_Pro = ("Gemini_25_Pro", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-pro", max_tokens=65536))
-    Gemini_25_Flash = ("Gemini_25_Flash", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-2.5-flash", max_tokens=65536))
-    Gemini_3_Pro_Preview = ("Gemini_3_Pro_Preview", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-3-pro-preview", max_tokens=60000, thinking_level=ThinkingLevel.HIGH))
+    Gemini_3_Pro_Preview = ("Gemini_3_Pro_Preview", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-3-pro-preview", max_tokens=65536, thinking_level=ThinkingLevel.HIGH))
+    Gemini_3_Flash_Preview = ("Gemini_3_Flash_Preview", ModelProvider.AISTUDIO, lambda: get_gemini_ai_studio_config("gemini-3-flash-preview", max_tokens=65536, thinking_level=ThinkingLevel.HIGH))
 
     # OpenAI models
-    GPT41_0414 = ("GPT41_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-2025-04-14", system_role_name="developer"))
-    GPT41mini_0414 = ("GPT41mini_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-mini-2025-04-14", system_role_name="developer"))
-    GPT41nano_0414 = ("GPT41nano_0414", ModelProvider.OPENAI, lambda: get_open_ai_config("gpt-4.1-nano-2025-04-14"))
-    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=65536, reasoning_effort="low"))
+    GPT_OSS_120B = ("GPT_OSS_120B", ModelProvider.OPENAI, lambda: get_cerebras_config("gpt-oss-120b", max_tokens=32000, reasoning_effort="low"))
     GPT_OSS_20B = ("GPT_OSS_20B", ModelProvider.OPENAI, lambda: get_open_ai_config("openai/gpt-oss-20b", max_tokens=-1, reasoning_effort="low", base_url="http://localhost:1234/v1"))
 
-    Codex_Mini_Latest = ("Codex_Mini_Latest", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("codex-mini-latest", max_tokens=100000))
-    GPT5_0807 = ("GPT5_0807", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
-    GPT5_Pro_1006 = ("GPT5_Pro_1006", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-pro-2025-10-06", verbosity="high", max_tokens=272000, background=True))
-    GPT5_Codex = ("GPT5_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-codex", effort="low", verbosity="medium", max_tokens=128000))
-    GPT5_Nano_high = ("GPT5_Nano_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-nano-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
+    GPT5_Nano_high = ("GPT5_Nano_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-nano-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
     GPT5_Mini_high = ("GPT5_Mini_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-mini-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
-    GPT51_1113 = ("GPT51_1113", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-2025-11-13", effort="none", verbosity="high", max_tokens=128000))
-    GPT51_1113_high = ("GPT51_1113_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-2025-11-13", effort="high", verbosity="high", max_tokens=128000))
     GPT51_Codex = ("GPT51_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex", effort="high", max_tokens=128000))
     GPT51_Codex_mini = ("GPT51_Codex_mini", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex-mini", effort="high", max_tokens=128000))
     GPT52_1211 = ("GPT52_1211", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="none", verbosity="high", max_tokens=128000))
     GPT52_1211_high = ("GPT52_1211_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="high", verbosity="high", max_tokens=128000))
 
     # Claude models
-    Sonnet_4 = ("Claude_Sonnet_4", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514"))
-    Sonnet_4_Thinking = ("Claude_Sonnet_4_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4@20250514", True))
     Sonnet_45 = ("Claude_Sonnet_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929"))
-    Opus_41 = ("Claude_Opus_41", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", False, 32000))
-    Opus_41_Thinking = ("Claude_Opus_41_Thinking", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-1@20250805", True, 32000))
-    Opus_45 = ("Claude_Opus_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-5@20251101", False, 32000))
+    Sonnet_45_high = ("Claude_Sonnet_45_high", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929", True))
+    Opus_45 = ("Claude_Opus_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-5@20251101"))
+    Opus_45_high = ("Claude_Opus_45_high", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-5@20251101", True))
     Haiku_45 = ("Claude_Haiku_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-haiku-4-5@20251001"))
 
     # Other models
     Grok4_0709 = ("Grok4_0709", ModelProvider.XAI, lambda: get_xai_config("grok-4-0709")) # reasoning effort is not supported for Grok4
     Grok_Code_0825 = ("Grok_Code_0825", ModelProvider.XAI, lambda: get_xai_config("grok-code-fast-1-0825"))
-    Grok4FastReasoning = ("Grok4FastReasoning", ModelProvider.XAI, lambda: get_xai_config("grok-4-fast-reasoning-latest"))
     Grok41_Fast = ("Grok41_Fast", ModelProvider.XAI, lambda: get_xai_config("grok-4-1-fast-non-reasoning"))
     Grok41_FastReasoning = ("Grok41_FastReasoning", ModelProvider.XAI, lambda: get_xai_config("grok-4-1-fast-reasoning"))
     AmazonNovaPremier = ("AmazonNovaPremier", ModelProvider.AMAZON, lambda: get_amazon_nova_model_config("us.amazon.nova-premier-v1:0"))
 
-    MiniMaxM2 = ("MiniMaxM2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2", max_tokens=4000))
+    MiniMax_M21 = ("MiniMax_M21", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2p1", max_tokens=16000))
     DeepSeek_v32 = ("DeepSeek_v32", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-v3p2", max_tokens=60000))
     Kimi_K2 = ("Kimi_K2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/kimi-k2-thinking", max_tokens=60000))
     # fmt: on
