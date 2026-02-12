@@ -30,6 +30,27 @@ def get_output_folder_name(answers_path, current_datetime, report_name):
     return os.path.join(answers_path, "result_" + formatted_datetime, report_name)
 
 
+def report_exists(output_dir: Path, report_name: str, attempt: int) -> bool:
+    """Check if a report already exists for the given task and attempt."""
+    # Check all result_* folders in the output directory
+    if not output_dir.exists():
+        return False
+
+    for result_folder in output_dir.glob("result_*"):
+        if not result_folder.is_dir():
+            continue
+
+        task_folder = result_folder / name_without_extension(report_name)
+        if not task_folder.exists():
+            continue
+
+        report_file = task_folder / f"{name_without_extension(report_name)}_report_{attempt}.md"
+        if report_file.exists():
+            return True
+
+    return False
+
+
 def generate_report(
     answers_path: Path,
     content: list[AIMessageContent],
@@ -118,6 +139,7 @@ def generate_answers_from_files(
     attempts_count: int,
     launch_list: list[str],
     skip_list: list[str],
+    skip_existing: bool = True,
 ):
     system_prompt = get_file_content(task_category / "system.txt")
     if system_prompt is None:
@@ -134,6 +156,11 @@ def generate_answers_from_files(
             continue
 
         for attempt in range(1, attempts_count + 1):
+            # Check if report already exists
+            if skip_existing and report_exists(output_dir, task_name, attempt):
+                print(f"[{task_name}] Report for attempt #{attempt} already exists, skipping...")
+                continue
+
             task_content = get_file_content(task_category / task_name)
             if task_content is None:
                 print(f"Skipping task {task_name} due to read error.")
@@ -175,6 +202,7 @@ def main(
     skip_list: Optional[list[str]] = None,
     categories_launch_list: Optional[list[str]] = None,
     categories_skip_list: Optional[list[str]] = None,
+    skip_existing: bool = True,
 ):
     print(f"Starting answers generation for {model}")
     current_datetime = datetime.now()
@@ -203,8 +231,9 @@ def main(
             attempts_count,
             launch_list,
             skip_list,
+            skip_existing,
         )
 
 
 if __name__ == "__main__":
-    main(Model.Gemini_25_Flash_0520, "JS", 1, categories_launch_list=["solution_template_generation"])
+    main(Model.GPT52_1211_high, "JS", 1, launch_list=[], categories_skip_list=['multimodal'], skip_existing=True)
