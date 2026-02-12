@@ -2,7 +2,6 @@ import os
 import re
 import threading
 import pandas as pd
-import concurrent.futures
 from pathlib import Path
 from typing import Callable, List, Tuple, Any
 from dotenv import load_dotenv
@@ -14,7 +13,7 @@ from epam.auto_llm_eval.evaluator import (
     evaluate_output,
     grade_report,
     Criteria,
-    CriteriaEvalStep,
+    CriterionEvalStep,
 )
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.config import Model
@@ -52,8 +51,8 @@ def get_evaluation_models() -> List[EvaluationModel]:
 
         return json_text
 
-    # GPT-5
-    def execute_gpt5(prompt: str) -> str:
+    # GPT-5.2
+    def execute_gpt(prompt: str) -> str:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
@@ -66,10 +65,10 @@ def get_evaluation_models() -> List[EvaluationModel]:
 
         return extract_json_from_md(response["content"])
 
-    gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt5)
+    gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt)
 
-    # Sonnet 4
-    def execute_sonnet4(prompt: str) -> str:
+    # Sonnet 4.5
+    def execute_sonnet(prompt: str) -> str:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
@@ -82,9 +81,9 @@ def get_evaluation_models() -> List[EvaluationModel]:
 
         return extract_json_from_md(response["content"])
 
-    sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet4)
+    sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet)
 
-    # Gemini 2.5 Pro
+    # Gemini 3.0 Pro
     def execute_gemini(prompt: str) -> str:
         response = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
@@ -198,7 +197,7 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
                 print_lock = threading.Lock()
 
                 def process_evaluation_model(
-                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: List[CriteriaEvalStep]
+                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: List[CriterionEvalStep]
                 ):
                     if report_path.exists() and not force_reevaluate:
                         with print_lock:
@@ -400,4 +399,4 @@ def print_regular(text):
 
 
 if __name__ == "__main__":
-    evaluate(Model.Gemini_25_Pro_0605, "JS")
+    evaluate(Model.GPT52_1211, "JS")
