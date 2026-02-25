@@ -105,22 +105,31 @@ def get_gemini_ai_studio_config(model, max_tokens=None, thinking_level: Thinking
 
 
 # Docs: https://docs.anthropic.com/en/api/claude-on-vertex-ai#making-requests
-def get_anthropic_vertexai_config(model, enabled_thinking=False, max_tokens=None):
+def get_anthropic_vertexai_config(model, adaptive_thinking=False, max_tokens=None):
+    """
+    Configure Anthropic Vertex AI model with thinking options.
+
+    Args:
+        model: Model ID
+        adaptive_thinking: Use adaptive thinking mode (recommended for Opus 4.6)
+        max_tokens: Max tokens for response
+
+    Notes:
+        - adaptive_thinking=True enables the new adaptive thinking mode for Opus 4.6
+        - Adaptive thinking uses "high" effort by default (can be modified via output_config parameter if needed)
+    """
     thinking = {"type": "disabled"}
 
-    if enabled_thinking:
-        thinking = {
-            "type": "enabled",
-            "budget_tokens": 15000,
-        }
+    if adaptive_thinking:
+        thinking = {"type": "adaptive"}
 
     return {
-        "region": "us-east5",
+        "region": "global",
         "project_id": gcloud_project_id,
         "model_id": model,
         "thinking": thinking,
         "max_tokens": max_tokens or 64000,
-        "temperature": 1 if enabled_thinking else default_temperature,
+        "temperature": 1 if adaptive_thinking else default_temperature,
     }
 
 
@@ -155,16 +164,17 @@ class Model(Enum):
     GPT5_Nano_high = ("GPT5_Nano_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-nano-2025-08-07", effort="low", verbosity="high", max_tokens=128000))
     GPT5_Mini_high = ("GPT5_Mini_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5-mini-2025-08-07", effort="high", verbosity="high", max_tokens=128000))
     GPT51_Codex = ("GPT51_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex", effort="high", max_tokens=128000))
+    GPT52_Codex = ("GPT52_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-codex", effort="medium", max_tokens=128000))
+    GPT52_Codex_high = ("GPT52_Codex_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-codex", effort="high", max_tokens=128000))
     GPT51_Codex_mini = ("GPT51_Codex_mini", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex-mini", effort="high", max_tokens=128000))
     GPT52_1211 = ("GPT52_1211", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="none", verbosity="high", max_tokens=128000))
     GPT52_1211_high = ("GPT52_1211_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="high", verbosity="high", max_tokens=128000))
 
     # Claude models
     Sonnet_45 = ("Claude_Sonnet_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929"))
-    Sonnet_45_high = ("Claude_Sonnet_45_high", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929", True))
-    Opus_45 = ("Claude_Opus_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-5@20251101"))
-    Opus_45_high = ("Claude_Opus_45_high", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-5@20251101", True))
-    Haiku_45 = ("Claude_Haiku_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-haiku-4-5@20251001"))
+    Sonnet_46 = ("Claude_Sonnet_46", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-6", adaptive_thinking=True, max_tokens=64000))
+    Opus_46 = ("Claude_Opus_46", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-opus-4-6", adaptive_thinking=True, max_tokens=128000))
+    # Haiku_45 = ("Claude_Haiku_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-haiku-4-5@20251001"))
 
     # Other models
     Grok4_0709 = ("Grok4_0709", ModelProvider.XAI, lambda: get_xai_config("grok-4-0709")) # reasoning effort is not supported for Grok4
@@ -176,6 +186,9 @@ class Model(Enum):
     MiniMax_M21 = ("MiniMax_M21", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2p1", max_tokens=16000))
     DeepSeek_v32 = ("DeepSeek_v32", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/deepseek-v3p2", max_tokens=60000))
     Kimi_K2 = ("Kimi_K2", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/kimi-k2-thinking", max_tokens=60000))
+    GLM_5 = ("GLM_5", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/glm-5", max_tokens=25000))
+    Kimi_K2p5 = ("Kimi_K2p5", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/kimi-k2p5", max_tokens=32000))
+    MiniMax_M2p5 = ("MiniMax_M2p5", ModelProvider.FIREWORKS, lambda: get_fireworks_config("accounts/fireworks/models/minimax-m2p5", max_tokens=25000))
     # fmt: on
 
     def __init__(self, model_id: str, provider: ModelProvider, config_func: callable):

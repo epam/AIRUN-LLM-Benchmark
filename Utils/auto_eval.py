@@ -18,6 +18,7 @@ from epam.auto_llm_eval.evaluator import (
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.config import Model
 from Utils.llm.api import ask_model
+from Utils.llm.response_model import LLMResponse
 
 load_dotenv()
 
@@ -53,49 +54,49 @@ def get_evaluation_models() -> List[EvaluationModel]:
 
     # GPT-5.2
     def execute_gpt(prompt: str) -> str:
-        response = ask_model(
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.GPT52_1211_high,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from GPT-5.2: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from GPT-5.2: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
     gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt)
 
     # Sonnet 4.5
     def execute_sonnet(prompt: str) -> str:
-        response = ask_model(
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.Sonnet_45,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from Sonnet-4.5: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from Sonnet-4.5: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
     sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet)
 
     # Gemini 3.0 Pro
     def execute_gemini(prompt: str) -> str:
-        response = ask_model(
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.Gemini_3_Pro_Preview,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from Gemini-3-Pro: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from Gemini-3-Pro: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
     gemini = EvaluationModel(name="Gemini-3-Pro", execute_prompt=execute_gemini)
 
@@ -399,4 +400,4 @@ def print_regular(text):
 
 
 if __name__ == "__main__":
-    evaluate(Model.GPT52_1211, "JS")
+    evaluate(Model.Sonnet_46, "JS")

@@ -9,6 +9,8 @@ from anthropic.types import (
     Base64ImageSourceParam,
     ToolUseBlockParam,
     ToolResultBlockParam,
+    ThinkingBlockParam,
+    RedactedThinkingBlockParam,
 )
 from google.genai import types as genai_types
 from openai.types.responses import (
@@ -17,6 +19,7 @@ from openai.types.responses import (
     ResponseFunctionToolCallParam,
     EasyInputMessageParam,
     ResponseOutputTextParam,
+    ResponseReasoningItemParam,
 )
 from openai.types.responses.response_input_param import FunctionCallOutput
 
@@ -26,6 +29,9 @@ from Utils.llm.ai_message import (
     ImageAIMessageContent,
     ToolCallAIMessageContent,
     ToolResponseAIMessageContent,
+    ThinkingAIMessageContent,
+    RedactedThinkingAIMessageContent,
+    ReasoningAIMessageContent,
 )
 
 
@@ -97,7 +103,19 @@ class OpenAIResponsesConverter(MessageConverter):
             role = "user" if message.role == "user" else "assistant"
 
             for content in message.content:
-                if isinstance(content, TextAIMessageContent):
+                if isinstance(content, ReasoningAIMessageContent):
+                    # Flush buffer before reasoning item
+                    if content_buffer:
+                        api_messages.append(EasyInputMessageParam(role=role, content=content_buffer))
+                        content_buffer = []
+                    reasoning_param = ResponseReasoningItemParam(
+                        type="reasoning",
+                        id=content.reasoning_id,
+                        summary=content.summary,
+                        encrypted_content=content.encrypted_content,
+                    )
+                    api_messages.append(reasoning_param)
+                elif isinstance(content, TextAIMessageContent):
                     if role == "assistant":
                         content_buffer.append(ResponseOutputTextParam(type="output_text", text=content.text, annotations=[]))
                     else:
@@ -118,14 +136,15 @@ class OpenAIResponsesConverter(MessageConverter):
                         content_buffer = []
 
                     # Add tool call as separate item
-                    api_messages.append(
-                        ResponseFunctionToolCallParam(
-                            type="function_call",
-                            call_id=content.id,
-                            name=content.name,
-                            arguments=json.dumps(content.arguments),
-                        )
+                    tool_call_param = ResponseFunctionToolCallParam(
+                        type="function_call",
+                        call_id=content.id,
+                        name=content.name,
+                        arguments=json.dumps(content.arguments),
                     )
+                    if content.item_id:
+                        tool_call_param["id"] = content.item_id
+                    api_messages.append(tool_call_param)
                 elif isinstance(content, ToolResponseAIMessageContent):
                     # Flush any buffered content before tool response
                     if content_buffer:
@@ -173,6 +192,15 @@ class AnthropicConverter(MessageConverter):
                     content.append(ToolUseBlockParam(type="tool_use", name=item.name, input=item.arguments, id=item.id))
                 elif isinstance(item, ToolResponseAIMessageContent):
                     content.append(ToolResultBlockParam(type="tool_result", content=item.result, tool_use_id=item.id))
+                elif isinstance(item, ThinkingAIMessageContent):
+                    # Preserve thinking blocks with signature for multi-turn conversations
+                    thinking_param = ThinkingBlockParam(type="thinking", thinking=item.thinking)
+                    if item.signature:
+                        thinking_param["signature"] = item.signature
+                    content.append(thinking_param)
+                elif isinstance(item, RedactedThinkingAIMessageContent):
+                    # Preserve redacted thinking blocks for multi-turn conversations
+                    content.append(RedactedThinkingBlockParam(type="redacted_thinking", data=item.data))
 
             api_messages.append({"role": message.role, "content": content})
 
@@ -190,7 +218,13 @@ class GeminiConverter(MessageConverter):
             parts = []
 
             for content in message.content:
-                if isinstance(content, TextAIMessageContent):
+                if isinstance(content, ThinkingAIMessageContent):
+                    # Gemini thinking part - must be returned in multi-turn
+                    thought_part = genai_types.Part(text=content.thinking, thought=True)
+                    if content.signature:
+                        thought_part.thought_signature = content.signature
+                    parts.append(thought_part)
+                elif isinstance(content, TextAIMessageContent):
                     parts.append({"text": content.text})
                 elif isinstance(content, ImageAIMessageContent):
                     parts.extend(

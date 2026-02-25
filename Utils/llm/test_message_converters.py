@@ -194,7 +194,7 @@ class TestOpenAIResponsesConverter:
         first_item = result[0]
         assert first_item["role"] == "assistant"
         assert len(first_item["content"]) == 1
-        assert first_item["content"][0]["type"] == "input_text"
+        assert first_item["content"][0]["type"] == "output_text"
         assert first_item["content"][0]["text"] == "I'll help you with that."
 
         # Second item: tool call
@@ -207,7 +207,7 @@ class TestOpenAIResponsesConverter:
         third_item = result[2]
         assert third_item["role"] == "assistant"
         assert len(third_item["content"]) == 1
-        assert third_item["content"][0]["type"] == "input_text"
+        assert third_item["content"][0]["type"] == "output_text"
         assert third_item["content"][0]["text"] == "Let me analyze the results."
 
 

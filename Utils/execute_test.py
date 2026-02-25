@@ -7,6 +7,7 @@ from Utils.enrich_tasks import enrich_task_content
 from Utils.llm.api import ask_model
 from Utils.llm.config import Model
 from Utils.llm.ai_message import AIMessage, AIMessageContent, TextAIMessageContent, ImageAIMessageContent
+from Utils.llm.response_model import LLMResponse
 from typing import Optional
 
 
@@ -71,24 +72,27 @@ def generate_report(
 
 def get_answer_from_model(task_name: str, content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
     print(f"[{task_name}] Starting attempt #{attempt}")
-    data = ask_model(
+    response: LLMResponse = ask_model(
         messages=[AIMessage(role="user", content=content)],
         system_prompt=system_prompt,
         model=model,
         attempt=attempt,
     )
 
-    if "error" in data:
-        return data["error"]
+    if response.error:
+        return response.error
 
-    thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ""
-    print(f"[{task_name}] Completed attempt #{attempt} in {data['execute_time']} seconds")
+    thoughts = f'### Thoughts:\n{response.thoughts}\n\n' if response.thoughts else ""
+    tokens = {"input_tokens": response.input_tokens, "output_tokens": response.output_tokens}
+    if response.reasoning_tokens:
+        tokens["reasoning_tokens"] = response.reasoning_tokens
+    print(f"[{task_name}] Completed attempt #{attempt} in {response.execute_time} seconds")
 
     return (
         f"{thoughts}"
-        f'### Answer:\n{data["content"]}\n\n'
-        f'### Tokens: {str(data["tokens"])}\n'
-        f'### Execution time: {data["execute_time"]}\n'
+        f'### Answer:\n{response.content}\n\n'
+        f'### Tokens: {str(tokens)}\n'
+        f'### Execution time: {response.execute_time}\n'
     )
 
 
@@ -236,4 +240,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main(Model.GPT52_1211_high, "JS", 1, launch_list=[], categories_skip_list=['multimodal'], skip_existing=True)
+    main(Model.Sonnet_46, "JS", 1, launch_list=[], categories_skip_list=['multimodal'], skip_existing=True)

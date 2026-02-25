@@ -111,4 +111,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main([Model.Sonnet_4], ["JS"])
+    main([Model.Sonnet_46], ["JS"])

@@ -9,6 +9,7 @@ from Utils.llm.api import ask_model
 from Utils.llm.config import ModelProvider, Model
 from Utils.llm.ai_tool import AITool, AIToolParameter, AIToolSet
 from Utils.llm.tool_handler import ToolHandlerFactory
+from Utils.llm.response_model import LLMResponse
 
 RESULTS_BASE_PATH = os.getenv("RESULTS_REPO_PATH")
 
@@ -99,52 +100,60 @@ def run_experiment(task, model, dataset_path, output_path, start_time):
             break
 
         if len(messages) > 0:
+            print(f"\n{"=" * 100}")
             print("REQUEST:")
             print(messages[-1])
+            print()
 
-        answer = ask_model(messages, SYSTEM_PROMPT, model, tools=tool_set)
-        print("RESPONSE:")
-        print(json.dumps(answer, indent=4, default=lambda item: f"<{type(item).__name__}>"))
+        response: LLMResponse = ask_model(messages, SYSTEM_PROMPT, model, tools=tool_set)
+        print(f"\n{"=" * 100}")
+        print("\nRESPONSE:")
+        response_dict = {
+            "content": response.content and response.content.strip() or None,
+            "thinking": response.thoughts or None,
+            "tool_calls": [],
+            "tokens": {
+                "input": response.input_tokens,
+                "output": response.output_tokens,
+                "reasoning": response.reasoning_tokens
+            }
+        }
 
-        tokens = answer["tokens"]
-        input_tokens += tokens["input_tokens"]
-        output_tokens += tokens["output_tokens"]
-        reasoning_tokens += tokens.get("reasoning_tokens", 0)
+        if response.tool_calls:
+            tools_formatted = []
+            for tc in response.tool_calls:
+                args_values = '\', \''.join(str(v) for v in tc.arguments.values()) if tc.arguments else ''
+                tools_formatted.append(f"{tc.name}('{args_values[:50]}')") # to get view: read_file('index.html')
+            response_dict["tools"] = tools_formatted
 
-        content = answer["content"]
+        print(json.dumps(response_dict, indent=2, ensure_ascii=False))
 
-        # Use factory method to create assistant message
+        input_tokens += response.input_tokens
+        output_tokens += response.output_tokens
+        reasoning_tokens += response.reasoning_tokens
+
         use_model_role = model.provider == ModelProvider.AISTUDIO
-        assistant_message = AIMessage.create_assistant_message(content or [], use_model_role)
+        assistant_message = response.to_assistant_message(use_model_role)
+
         messages.append(assistant_message)
 
         tools_content = []
-        # Handle tool calls using the strategy pattern
-        if "tool_calls" in answer and answer["tool_calls"]:
-            for tool_call in answer["tool_calls"]:
-                tool_name = tool_call["name"]
-                tool_args = tool_call["arguments"]
-                tool_id = tool_call["id"]
-                tool_signature = tool_call.get("signature")
-
-                # Add tool call to the message
-                tool_call_content = AIMessageContentFactory.create_tool_call(tool_name, tool_args, tool_id, tool_signature)
-                messages[-1].content.append(tool_call_content)
-
+        # Handle tool calls
+        if response.tool_calls:
+            for tool_call in response.tool_calls:
                 # Handle end_task specially
-                if tool_name == "end_task":
+                if tool_call.name == "end_task":
                     print("Ending task.")
                     task_in_progress = False
                     break
 
                 # Use the tool handler factory to get appropriate handler
                 try:
-                    handler = ToolHandlerFactory.create_handler(tool_name, dataset_path, output_path)
-                    response_messages = handler.handle(tool_name, tool_args, tool_id)
+                    handler = ToolHandlerFactory.create_handler(tool_call.name, dataset_path, output_path)
+                    response_messages = handler.handle(tool_call.name, tool_call.arguments, tool_call.id)
                     tools_content.append(response_messages)
-                except ValueError as e:
-                    # Handle unknown tools
-                    error_message = f"Unknown tool: {tool_name}. Please use only supported tools: read_file, write_file, file_structure, list_files, end_task"
+                except ValueError:
+                    error_message = f"Unknown tool: {tool_call.name}. Please use only supported tools: read_file, write_file, file_structure, list_files, end_task"
                     error_response = AIMessageContentFactory.create_text(error_message)
                     tools_content.append(error_response)
         else:
