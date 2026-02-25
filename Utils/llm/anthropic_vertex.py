@@ -1,39 +1,21 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from anthropic import AnthropicVertex
 
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import Model
-from Utils.llm.ai_message import AIMessage
+from Utils.llm.ai_message import AIMessage, AIMessageContentFactory
 from Utils.llm.message_converter import get_converter, ConverterProvider
+from Utils.llm.response_model import LLMResponse
 
 
 def request_data(
     system_prompt: str, messages: List[AIMessage], model: Model, tools: Optional[AIToolSet] = None
-) -> Dict[str, Any]:
-    """
-    Request data from Anthropic Vertex AI API.
-
-    Args:
-        system_prompt: System prompt for the model
-        messages: List of messages with role and content
-        model: Model configuration
-        tools: Set of AI tools to be used in the request
-
-    Returns:
-        Dictionary containing response content, thoughts, and token usage
-
-    Raises:
-        Exception: If API request fails or configuration is invalid
-    """
+) -> LLMResponse:
     try:
         config = model()
         client = AnthropicVertex(region=config["region"], project_id=config["project_id"])
     except Exception as e:
         raise Exception(f"Failed to initialize Anthropic Vertex client: {e}")
-
-    text_content: Optional[str] = None
-    thinking_content: Optional[str] = None
-    tool_calls: List[Any] = []
 
     converter = get_converter(ConverterProvider.ANTHROPIC)
     api_messages = converter.convert(messages)
@@ -41,51 +23,59 @@ def request_data(
     with client.messages.stream(
         max_tokens=config["max_tokens"],
         temperature=config["temperature"],
-        system=system_prompt,
+        system="system_prompt",
         messages=api_messages,
         thinking=config["thinking"],
         model=config["model_id"],
+        output_config=config["output_config"],
         tools=tools.to_anthropic_format() if tools else [],
     ) as stream:
         message = stream.get_final_message()
 
-        # Extract content from message
-        for item in message.content:
-            if item.type == "text":
-                text_content = item.text
-            elif item.type == "thinking":
-                thinking_content = item.thinking
-            elif item.type == "tool_use":
-                tool_calls.append(
-                    {
-                        "name": item.name,
-                        "arguments": item.input,
-                        "id": item.id,
-                    }
-                )
+    text_content: Optional[str] = None
+    thoughts_parts: List[str] = []
+    tool_calls = []
+    assistant_content = []
 
-    return {
-        "content": text_content,
-        "thoughts": thinking_content,
-        "tool_calls": tool_calls,
-        "tokens": {
-            "input_tokens": message.usage.input_tokens,
-            "output_tokens": message.usage.output_tokens,
-        },
-    }
+    for item in message.content:
+        if item.type == "thinking":
+            thoughts_parts.append(item.thinking)
+            assistant_content.append(
+                AIMessageContentFactory.create_thinking(
+                    thinking=item.thinking, signature=getattr(item, "signature", None)
+                )
+            )
+        elif item.type == "redacted_thinking":
+            thoughts_parts.append(f"[REDACTED THINKING - {len(item.data)} bytes]")
+            assistant_content.append(AIMessageContentFactory.create_redacted_thinking(data=item.data))
+        elif item.type == "tool_use":
+            tc = AIMessageContentFactory.create_tool_call(item.name, item.input, item.id)
+            tool_calls.append(tc)
+            assistant_content.append(tc)
+        elif item.type == "text":
+            text_content = item.text
+            assistant_content.append(AIMessageContentFactory.create_text(item.text))
+
+    return LLMResponse(
+        content=text_content,
+        thoughts="\n\n".join(thoughts_parts) if thoughts_parts else None,
+        tool_calls=tool_calls,
+        assistant_content=assistant_content,
+        input_tokens=message.usage.input_tokens,
+        output_tokens=message.usage.output_tokens,
+    )
 
 
 if __name__ == "__main__":
-    # Test the API function
-    data = request_data(
+    resp = request_data(
         system_prompt="You should answer in french.",
         messages=[AIMessage.create_user_message("Send me a recipe for banana bread.")],
-        model=Model.Sonnet_4_Thinking,
+        model=Model.Sonnet_46,
         tools=None,
     )
 
-    print("Thoughts:\n", data["thoughts"])
-    print("Content:\n", data["content"])
+    print("Thoughts:\n", resp.thoughts)
+    print("Content:\n", resp.content)
     print("Tokens:")
-    print(f"Input: {data['tokens']['input_tokens']}")
-    print(f"Output: {data['tokens']['output_tokens']}")
+    print(f"Input: {resp.input_tokens}")
+    print(f"Output: {resp.output_tokens}")

@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import Literal, List, Union, Sequence
+from typing import Literal, List, Dict, Union, Sequence
 from abc import ABC, abstractmethod
 
 MediaType = Literal["image/jpeg", "image/png", "image/gif"]
@@ -23,9 +23,9 @@ class AIMessageContentFactory:
         return TextAIMessageContent(text)
 
     @staticmethod
-    def create_tool_call(name: str, arguments: dict, tool_id: str, signature: Union[bytes, None] = None) -> "ToolCallAIMessageContent":
+    def create_tool_call(name: str, arguments: dict, tool_id: str, signature: Union[bytes, None] = None, item_id: Union[str, None] = None) -> "ToolCallAIMessageContent":
         """Create a tool call message content"""
-        return ToolCallAIMessageContent(name, arguments, tool_id, signature)
+        return ToolCallAIMessageContent(name, arguments, tool_id, signature, item_id)
 
     @staticmethod
     def create_tool_response(name: str, result: str, tool_id: str) -> "ToolResponseAIMessageContent":
@@ -36,6 +36,21 @@ class AIMessageContentFactory:
     def create_image(file_name: str, binary_content: bytes) -> "ImageAIMessageContent":
         """Create an image message content"""
         return ImageAIMessageContent(file_name, binary_content)
+
+    @staticmethod
+    def create_thinking(thinking: str, signature: Union[str, None] = None) -> "ThinkingAIMessageContent":
+        """Create a thinking message content"""
+        return ThinkingAIMessageContent(thinking, signature)
+
+    @staticmethod
+    def create_redacted_thinking(data: str) -> "RedactedThinkingAIMessageContent":
+        """Create a redacted thinking message content"""
+        return RedactedThinkingAIMessageContent(data)
+
+    @staticmethod
+    def create_reasoning(reasoning_id: str, summary: List[Dict[str, str]], encrypted_content: str) -> "ReasoningAIMessageContent":
+        """Create a reasoning message content (OpenAI Responses API)."""
+        return ReasoningAIMessageContent(reasoning_id, summary, encrypted_content)
 
 
 class TextAIMessageContent(AIMessageContent):
@@ -90,13 +105,15 @@ class ToolCallAIMessageContent(AIMessageContent):
     arguments: dict
     id: str
     signature: Union[bytes, None]
+    item_id: Union[str, None]  # OpenAI Responses API function_call id (fc_...)
 
-    def __init__(self, name: str, arguments: dict, id: str, signature: Union[bytes, None] = None):
+    def __init__(self, name: str, arguments: dict, id: str, signature: Union[bytes, None] = None, item_id: Union[str, None] = None):
         super().__init__()
         self.name = name
         self.arguments = arguments
         self.id = id
         self.signature = signature
+        self.item_id = item_id
 
     def __str__(self):
         result = {"name": self.name, "arguments": self.arguments, "id": self.id}
@@ -119,6 +136,56 @@ class ToolResponseAIMessageContent(AIMessageContent):
 
     def __str__(self):
         return json.dumps({"name": self.name, "result": self.result, "id": self.id})
+
+
+class ThinkingAIMessageContent(AIMessageContent):
+    """Thinking block from Claude models (regular thinking)"""
+
+    thinking: str
+    signature: Union[str, None]
+
+    def __init__(self, thinking: str, signature: Union[str, None] = None):
+        super().__init__()
+        self.thinking = thinking
+        self.signature = signature
+
+    def __str__(self):
+        return f"[THINKING]: {self.thinking}"
+
+
+class RedactedThinkingAIMessageContent(AIMessageContent):
+    """Redacted thinking block from Claude models (encrypted for safety)"""
+
+    data: str
+
+    def __init__(self, data: str):
+        super().__init__()
+        self.data = data
+
+    def __str__(self):
+        return f"[REDACTED THINKING - {len(self.data)} bytes]"
+
+
+class ReasoningAIMessageContent(AIMessageContent):
+    """Reasoning item from OpenAI Responses API.
+
+    Stores only the fields needed for multi-turn: id, summary, encrypted_content.
+    See: https://platform.openai.com/docs/guides/reasoning
+    """
+
+    reasoning_id: str
+    summary: List[Dict[str, str]]
+    encrypted_content: str
+
+    def __init__(self, reasoning_id: str, summary: List[Dict[str, str]], encrypted_content: str):
+        super().__init__()
+        self.reasoning_id = reasoning_id
+        self.summary = summary
+        self.encrypted_content = encrypted_content
+
+    def __str__(self):
+        texts = [s.get("text", "") for s in self.summary]
+        return f"[REASONING]: {' '.join(texts)}"
 
 
 class AIMessage:

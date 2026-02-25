@@ -7,6 +7,7 @@ from Utils.enrich_tasks import enrich_task_content
 from Utils.llm.api import ask_model
 from Utils.llm.config import Model
 from Utils.llm.ai_message import AIMessage, AIMessageContent, TextAIMessageContent, ImageAIMessageContent
+from Utils.llm.response_model import LLMResponse
 from typing import Optional
 
 
@@ -30,6 +31,27 @@ def get_output_folder_name(answers_path, current_datetime, report_name):
     return os.path.join(answers_path, "result_" + formatted_datetime, report_name)
 
 
+def report_exists(output_dir: Path, report_name: str, attempt: int) -> bool:
+    """Check if a report already exists for the given task and attempt."""
+    # Check all result_* folders in the output directory
+    if not output_dir.exists():
+        return False
+
+    for result_folder in output_dir.glob("result_*"):
+        if not result_folder.is_dir():
+            continue
+
+        task_folder = result_folder / name_without_extension(report_name)
+        if not task_folder.exists():
+            continue
+
+        report_file = task_folder / f"{name_without_extension(report_name)}_report_{attempt}.md"
+        if report_file.exists():
+            return True
+
+    return False
+
+
 def generate_report(
     answers_path: Path,
     content: list[AIMessageContent],
@@ -50,24 +72,27 @@ def generate_report(
 
 def get_answer_from_model(task_name: str, content: list[AIMessageContent], system_prompt: str, model, attempt: int = 1):
     print(f"[{task_name}] Starting attempt #{attempt}")
-    data = ask_model(
+    response: LLMResponse = ask_model(
         messages=[AIMessage(role="user", content=content)],
         system_prompt=system_prompt,
         model=model,
         attempt=attempt,
     )
 
-    if "error" in data:
-        return data["error"]
+    if response.error:
+        return response.error
 
-    thoughts = f'### Thoughts:\n{data["thoughts"]}\n\n' if data["thoughts"] else ""
-    print(f"[{task_name}] Completed attempt #{attempt} in {data['execute_time']} seconds")
+    thoughts = f'### Thoughts:\n{response.thoughts}\n\n' if response.thoughts else ""
+    tokens = {"input_tokens": response.input_tokens, "output_tokens": response.output_tokens}
+    if response.reasoning_tokens:
+        tokens["reasoning_tokens"] = response.reasoning_tokens
+    print(f"[{task_name}] Completed attempt #{attempt} in {response.execute_time} seconds")
 
     return (
         f"{thoughts}"
-        f'### Answer:\n{data["content"]}\n\n'
-        f'### Tokens: {str(data["tokens"])}\n'
-        f'### Execution time: {data["execute_time"]}\n'
+        f'### Answer:\n{response.content}\n\n'
+        f'### Tokens: {str(tokens)}\n'
+        f'### Execution time: {response.execute_time}\n'
     )
 
 
@@ -118,6 +143,7 @@ def generate_answers_from_files(
     attempts_count: int,
     launch_list: list[str],
     skip_list: list[str],
+    skip_existing: bool = True,
 ):
     system_prompt = get_file_content(task_category / "system.txt")
     if system_prompt is None:
@@ -134,6 +160,11 @@ def generate_answers_from_files(
             continue
 
         for attempt in range(1, attempts_count + 1):
+            # Check if report already exists
+            if skip_existing and report_exists(output_dir, task_name, attempt):
+                print(f"[{task_name}] Report for attempt #{attempt} already exists, skipping...")
+                continue
+
             task_content = get_file_content(task_category / task_name)
             if task_content is None:
                 print(f"Skipping task {task_name} due to read error.")
@@ -175,6 +206,7 @@ def main(
     skip_list: Optional[list[str]] = None,
     categories_launch_list: Optional[list[str]] = None,
     categories_skip_list: Optional[list[str]] = None,
+    skip_existing: bool = True,
 ):
     print(f"Starting answers generation for {model}")
     current_datetime = datetime.now()
@@ -203,8 +235,9 @@ def main(
             attempts_count,
             launch_list,
             skip_list,
+            skip_existing,
         )
 
 
 if __name__ == "__main__":
-    main(Model.Gemini_25_Flash_0520, "JS", 1, categories_launch_list=["solution_template_generation"])
+    main(Model.Sonnet_46, "JS", 1, launch_list=[], categories_skip_list=['multimodal'], skip_existing=True)

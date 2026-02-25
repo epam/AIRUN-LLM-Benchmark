@@ -2,7 +2,6 @@ import os
 import re
 import threading
 import pandas as pd
-import concurrent.futures
 from pathlib import Path
 from typing import Callable, List, Tuple, Any
 from dotenv import load_dotenv
@@ -14,11 +13,12 @@ from epam.auto_llm_eval.evaluator import (
     evaluate_output,
     grade_report,
     Criteria,
-    CriteriaEvalStep,
+    CriterionEvalStep,
 )
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.config import Model
 from Utils.llm.api import ask_model
+from Utils.llm.response_model import LLMResponse
 
 load_dotenv()
 
@@ -52,51 +52,51 @@ def get_evaluation_models() -> List[EvaluationModel]:
 
         return json_text
 
-    # GPT-5
-    def execute_gpt5(prompt: str) -> str:
-        response = ask_model(
+    # GPT-5.2
+    def execute_gpt(prompt: str) -> str:
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.GPT52_1211_high,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from GPT-5.2: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from GPT-5.2: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
-    gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt5)
+    gpt = EvaluationModel(name="GPT-5.2", execute_prompt=execute_gpt)
 
-    # Sonnet 4
-    def execute_sonnet4(prompt: str) -> str:
-        response = ask_model(
+    # Sonnet 4.5
+    def execute_sonnet(prompt: str) -> str:
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.Sonnet_45,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from Sonnet-4.5: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from Sonnet-4.5: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
-    sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet4)
+    sonnet = EvaluationModel(name="Sonnet-4.5", execute_prompt=execute_sonnet)
 
-    # Gemini 2.5 Pro
+    # Gemini 3.0 Pro
     def execute_gemini(prompt: str) -> str:
-        response = ask_model(
+        response: LLMResponse = ask_model(
             messages=[AIMessage(role="user", content=[TextAIMessageContent(text=prompt)])],
             system_prompt="",
             model=Model.Gemini_3_Pro_Preview,
             verbose=False,
         )
 
-        if response.get("error", None):
-            raise ValueError(f"Error from Gemini-3-Pro: {response['error']}")
+        if response.error:
+            raise ValueError(f"Error from Gemini-3-Pro: {response.error}")
 
-        return extract_json_from_md(response["content"])
+        return extract_json_from_md(response.content)
 
     gemini = EvaluationModel(name="Gemini-3-Pro", execute_prompt=execute_gemini)
 
@@ -198,7 +198,7 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
                 print_lock = threading.Lock()
 
                 def process_evaluation_model(
-                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: List[CriteriaEvalStep]
+                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: List[CriterionEvalStep]
                 ):
                     if report_path.exists() and not force_reevaluate:
                         with print_lock:
@@ -400,4 +400,4 @@ def print_regular(text):
 
 
 if __name__ == "__main__":
-    evaluate(Model.Gemini_25_Pro_0605, "JS")
+    evaluate(Model.Sonnet_46, "JS")

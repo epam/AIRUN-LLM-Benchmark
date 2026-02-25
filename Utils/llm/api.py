@@ -1,7 +1,7 @@
 import time
 import requests
 from datetime import datetime
-from typing import Any, List, Dict
+from typing import List
 
 from Utils.llm.ai_tool import AIToolSet
 from Utils.llm.config import Model, ModelProvider
@@ -11,6 +11,7 @@ from Utils.llm.gemini_ai_studio import request_data as request_gemini_aistudio_d
 from Utils.llm.responses_api import request_data as request_openai_responses_data
 from Utils.llm.openai_completions import request_data as request_openai_completions_data
 from Utils.llm.ai_message import AIMessage
+from Utils.llm.response_model import LLMResponse
 
 
 class APIException(Exception):
@@ -27,7 +28,7 @@ def ask_model(
     attempt: int = 1,
     tools: AIToolSet | None = None,
     verbose: bool = True,
-) -> Dict[str, Any]:
+) -> LLMResponse:
     start_time = time.time()
     if verbose:
         print(f"\tAttempt {attempt} at {datetime.now()}")
@@ -49,14 +50,9 @@ def ask_model(
             case _:
                 raise Exception(f"Unknown model provider: {model.provider}")
 
-        execute_time = time.time() - start_time
-        return {
-            "thoughts": data.get("thoughts", None),
-            "content": data["content"],
-            "tokens": data["tokens"],
-            "tool_calls": data.get("tool_calls", []),
-            "execute_time": execute_time,
-        }
+        data.execute_time = time.time() - start_time
+        return data
+
     except APIException as e:
         if verbose:
             print(f"Error: {e.status_code}")
@@ -68,7 +64,10 @@ def ask_model(
             return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
         else:
             if attempt > 2:
-                return {"error": f"### Error: {e.content}\n"}
+                return LLMResponse(
+                    content=None, input_tokens=0, output_tokens=0,
+                    error=f"### Error: {e.content}\n",
+                )
             else:
                 if verbose:
                     print("\tTrying again...")
@@ -76,7 +75,10 @@ def ask_model(
                 return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
     except requests.exceptions.Timeout:
         if attempt > 2:
-            return {"error": f"### Error: Timeout error\n"}
+            return LLMResponse(
+                content=None, input_tokens=0, output_tokens=0,
+                error="### Error: Timeout error\n",
+            )
         if verbose:
             print("\tRequest timed out. Trying again...")
         return ask_model(messages, system_prompt, model, attempt + 1, tools, verbose=verbose)
@@ -84,7 +86,10 @@ def ask_model(
         if verbose:
             print(f"\tError: {str(e)}")
         if attempt > 2:
-            return {"error": f"### Error: can not get the content\n"}
+            return LLMResponse(
+                content=None, input_tokens=0, output_tokens=0,
+                error="### Error: can not get the content\n",
+            )
         else:
             if verbose:
                 print("\tTrying again...")
