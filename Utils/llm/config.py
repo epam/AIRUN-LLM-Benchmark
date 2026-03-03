@@ -169,6 +169,7 @@ class Model(Enum):
     GPT51_Codex_mini = ("GPT51_Codex_mini", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.1-codex-mini", effort="high", max_tokens=128000))
     GPT52_1211 = ("GPT52_1211", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="none", verbosity="high", max_tokens=128000))
     GPT52_1211_high = ("GPT52_1211_high", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.2-2025-12-11", effort="high", verbosity="high", max_tokens=128000))
+    GPT53_Codex = ("GPT53_Codex", ModelProvider.OPENAI_RESPONSES, lambda: get_open_ai_responses_config("gpt-5.3-codex", effort="medium", max_tokens=128000))
 
     # Claude models
     Sonnet_45 = ("Claude_Sonnet_45", ModelProvider.VERTEXAI_ANTHROPIC, lambda: get_anthropic_vertexai_config("claude-sonnet-4-5@20250929"))

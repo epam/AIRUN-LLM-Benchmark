@@ -3,17 +3,18 @@ import re
 import threading
 import pandas as pd
 from pathlib import Path
-from typing import Callable, List, Tuple, Any
+from typing import Callable, List
 from dotenv import load_dotenv
 from datetime import datetime
 
 from epam.auto_llm_eval.evaluator import (
+    evaluate_output,
     read_file,
     write_file,
-    evaluate_output,
-    grade_report,
     Criteria,
     CriterionEvalStep,
+    EvaluationResult,
+    GradeResult,
 )
 from Utils.llm.ai_message import AIMessage, TextAIMessageContent
 from Utils.llm.config import Model
@@ -131,15 +132,11 @@ def extract_content(file_path) -> str:
         return ""
 
 
-def get_completeness_filename(scenario_name: str, model_name: str) -> str:
-    return f"{scenario_name}_{model_name}_completeness.json"
+def get_eval_bucket_filename(scenario_name: str, model_name: str, eval_bucket_name: str) -> str:
+    return f"{scenario_name}_{model_name}_{eval_bucket_name}.json"
 
 
-def get_accuracy_filename(scenario_name: str, model_name: str) -> str:
-    return f"{scenario_name}_{model_name}_accuracy.json"
-
-
-def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False, summary_filename: str = "summary.csv"):
+def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False, summary_filename: str = "summary.csv") -> tuple[str, ...]:
     """
     Main function to evaluate the scenarios.
 
@@ -152,7 +149,7 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
         language (str): The programming language of scenarios.
 
     Returns:
-        None
+        tuple[str, ...] - criterion types
     """
 
     evaluation_models = get_evaluation_models()
@@ -161,8 +158,9 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
 
     if not summary_path.exists():
         print_error(f"ERROR: File {summary_path} does not exist.")
-        return
+        return ()
 
+    criterion_types = set()
     summary_report = pd.read_csv(summary_path)
     for index, row in summary_report.iterrows():
         experiment_type = row["Type"]
@@ -198,7 +196,7 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
                 print_lock = threading.Lock()
 
                 def process_evaluation_model(
-                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: List[CriterionEvalStep]
+                    evaluation_model: EvaluationModel, report_path: Path, eval_steps: tuple[CriterionEvalStep, ...]
                 ):
                     if report_path.exists() and not force_reevaluate:
                         with print_lock:
@@ -220,38 +218,29 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
                             print_error(f"ERROR: unable to create or update {report_path.name}: {e}")
 
                 threads = []
-                # Accuracy evaluation threads
-                for evaluation_model in evaluation_models:
-                    thread = threading.Thread(
-                        target=process_evaluation_model,
-                        args=(
-                            evaluation_model,
-                            category_path / get_accuracy_filename(category_name, evaluation_model.name),
-                            criteria.evaluation_steps.accuracy,
-                        ),
-                    )
-                    threads.append(thread)
-                    thread.start()
 
-                # Completeness evaluation threads
                 for evaluation_model in evaluation_models:
-                    thread = threading.Thread(
-                        target=process_evaluation_model,
-                        args=(
-                            evaluation_model,
-                            category_path / get_completeness_filename(category_name, evaluation_model.name),
-                            criteria.evaluation_steps.completeness,
-                        ),
-                    )
-                    threads.append(thread)
-                    thread.start()
+                    for evaluation_steps_bucket in criteria.evaluation_steps_buckets():
+                        criterion_types.add(evaluation_steps_bucket.name)
+                        thread = threading.Thread(
+                            target=process_evaluation_model,
+                            args=(
+                                evaluation_model,
+                                category_path / get_eval_bucket_filename(category_name, evaluation_model.name, evaluation_steps_bucket.name),
+                                evaluation_steps_bucket.evaluation_steps,
+                            ),
+                        )
+                        threads.append(thread)
+                        thread.start()
 
                 # Wait for all threads to complete
                 for thread in threads:
                     thread.join()
 
+    return tuple(criterion_types)
 
-def grade(model: Model, language: str = "JS", force_regrade: bool = False, summary_filename: str = "summary.csv"):
+
+def grade(model: Model, language: str = "JS", force_regrade: bool = False, summary_filename: str = "summary.csv", criterion_types: tuple[str, ...] = ("Accuracy", "Completeness")):
     """
     Main function to grade the scenarios.
 
@@ -276,6 +265,11 @@ def grade(model: Model, language: str = "JS", force_regrade: bool = False, summa
         return
 
     summary_report = pd.read_csv(summary_path)
+    # add columns for criterion type average values if they don't exist
+    for criterion_type in criterion_types:
+        if criterion_type not in summary_report.columns:
+            summary_report[criterion_type] = None
+
     for index, row in summary_report.iterrows():
         experiment_type = row["Type"]
         category = row["Category"]
@@ -284,9 +278,7 @@ def grade(model: Model, language: str = "JS", force_regrade: bool = False, summa
         size = row["Size"] if row["Size"] != "none" else ""
         category_name = construct_category_name(category, dataset, complexity, size)
 
-        acc, comp = row.get("Accuracy", None), row.get("Completeness", None)
-
-        if pd.notna(acc) and pd.notna(comp) and not force_regrade:
+        if all(pd.notna(row.get(type_, None)) for type_ in criterion_types) and not force_regrade:
             print_skip(f"Skipping {category_name} as it already has results.")
             continue
 
@@ -296,73 +288,41 @@ def grade(model: Model, language: str = "JS", force_regrade: bool = False, summa
                 errors = 0
 
                 for evaluation_model in evaluation_models:
-                    accuracy_cell_model_name = f"Accuracy_{evaluation_model.name}"
-                    acc_value = row.get(accuracy_cell_model_name, None)
-                    if pd.notna(acc_value) and not force_regrade:
-                        print_skip(
-                            f"Skipping accuracy grading for {category_name} by {evaluation_model.name} as it already has results."
-                        )
-                    else:
-                        accuracy_report_path = category_path / get_accuracy_filename(
-                            category_name, evaluation_model.name
-                        )
-                        if not accuracy_report_path.exists():
-                            print_error(
-                                f"ERROR: Accuracy report not found for {category_name} by {evaluation_model.name}."
+                    for criterion_type in criterion_types:
+                        cell_model_name = f"{criterion_type}_{evaluation_model.name}"
+                        value = row.get(cell_model_name, None)
+                        if pd.notna(value) and not force_regrade:
+                            print_skip(
+                                f"Skipping {criterion_type} grading for {category_name} by {evaluation_model.name} as it already has results."
                             )
-                            errors += 1
                         else:
-                            try:
-                                accuracy_report = read_file(accuracy_report_path)
-                                accuracy_grading = grade_report(accuracy_report)
-                                summary_report.at[index, accuracy_cell_model_name] = round(
-                                    accuracy_grading.get_score(), 2
-                                )
-                            except Exception as e:
+                            report_path = category_path / get_eval_bucket_filename(
+                                category_name, evaluation_model.name, criterion_type
+                            )
+                            if not report_path.exists():
                                 print_error(
-                                    f"ERROR: Failed to process accuracy report for {category_name} by {evaluation_model.name}: {e}"
+                                    f"ERROR: {criterion_type} report not found for {category_name} by {evaluation_model.name}."
                                 )
                                 errors += 1
-
-                    completeness_cell_model_name = f"Completeness_{evaluation_model.name}"
-                    comp_value = row.get(completeness_cell_model_name, None)
-                    if pd.notna(comp_value) and not force_regrade:
-                        print_skip(
-                            f"Skipping completeness grading for {category_name} by {evaluation_model.name} as it already has results."
-                        )
-                    else:
-                        completeness_report_path = category_path / get_completeness_filename(
-                            category_name, evaluation_model.name
-                        )
-                        if not completeness_report_path.exists():
-                            print_error(
-                                f"ERROR: Completeness report not found for {category_name} by {evaluation_model.name}."
-                            )
-                            errors += 1
-                        else:
-                            try:
-                                completeness_report = read_file(completeness_report_path)
-                                completeness_grading = grade_report(completeness_report)
-                                summary_report.at[index, completeness_cell_model_name] = round(
-                                    completeness_grading.get_score(), 2
-                                )
-                            except Exception as e:
-                                print_error(
-                                    f"ERROR: Failed to process completeness report for {category_name} by {evaluation_model.name}: {e}"
-                                )
-                                errors += 1
+                            else:
+                                try:
+                                    report = read_file(report_path)
+                                    eval_result = EvaluationResult(criterion_type, report)
+                                    grading = GradeResult.from_evaluation_result(eval_result)
+                                    summary_report.at[index, cell_model_name] = round(grading.get_score(), 2)
+                                except Exception as e:
+                                    print_error(
+                                        f"ERROR: Failed to process {criterion_type} report for {category_name} by {evaluation_model.name}: {e}"
+                                    )
+                                    errors += 1
 
                 if errors == 0:
-                    # calculate average accuracy and completeness by models evaluations
-                    summary_report.at[index, "Accuracy"] = round(
-                        summary_report.loc[index, [f"Accuracy_{model.name}" for model in evaluation_models]].mean(), 2
-                    )
-
-                    summary_report.at[index, "Completeness"] = round(
-                        summary_report.loc[index, [f"Completeness_{model.name}" for model in evaluation_models]].mean(),
-                        2,
-                    )
-                    print_success(f"Average accuracy and completeness calculated for {category_name}.")
+                    # calculate average values by models evaluations
+                    for criterion_type in criterion_types:
+                        summary_report.at[index, criterion_type] = round(
+                            summary_report.loc[index, [f"{criterion_type}_{model.name}" for model in evaluation_models]].mean(), 2
+                        )
+                    print_success(f"Average {criterion_type} values calculated for {category_name}.")
 
                 summary_report.to_csv(summary_path, index=False)
 

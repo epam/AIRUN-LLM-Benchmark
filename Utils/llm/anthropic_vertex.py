@@ -23,11 +23,10 @@ def request_data(
     with client.messages.stream(
         max_tokens=config["max_tokens"],
         temperature=config["temperature"],
-        system="system_prompt",
+        system=system_prompt,
         messages=api_messages,
         thinking=config["thinking"],
         model=config["model_id"],
-        output_config=config["output_config"],
         tools=tools.to_anthropic_format() if tools else [],
     ) as stream:
         message = stream.get_final_message()
