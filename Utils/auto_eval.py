@@ -240,7 +240,7 @@ def evaluate(model: Model, language: str = "JS", force_reevaluate: bool = False,
     return tuple(criterion_types)
 
 
-def grade(model: Model, language: str = "JS", force_regrade: bool = False, summary_filename: str = "summary.csv", criterion_types: tuple[str, ...] = ("Accuracy", "Completeness")):
+def grade(model: Model, language: str = "JS", force_regrade: bool = False, summary_filename: str = "summary.csv", criterion_types: tuple[str, ...] = ("accuracy", "completeness")):
     """
     Main function to grade the scenarios.
 
