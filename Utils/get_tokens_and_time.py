@@ -89,7 +89,7 @@ def main(
 ):
     if categories is None:
         categories = default_categories
-    header = "Experiment,Type,Category,Language,Models,Dataset,Complexity,Size,Attempt,Input,Reasons,Output,Time,Accuracy,Completeness\n"
+    header = "Experiment,Type,Category,Language,Models,Dataset,Complexity,Size,Attempt,Input,Reasons,Output,Time\n"
     for model in models:
         for lang in langs:
             data = header
